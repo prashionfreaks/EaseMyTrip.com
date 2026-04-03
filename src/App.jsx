@@ -12,6 +12,7 @@ import Contingency from './pages/Contingency';
 import CalendarPage from './pages/CalendarPage';
 import ChatPage from './pages/ChatPage';
 import AuthPage from './pages/AuthPage';
+import LandingPage from './pages/LandingPage';
 import { Menu, Compass } from 'lucide-react';
 import './App.css';
 
@@ -113,7 +114,7 @@ export default function App() {
   }
 
   if (!isDemo && !user) {
-    return <AuthPage />;
+    return <LandingPage />;
   }
 
   return (
