@@ -19,7 +19,7 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { setActiveTripId, trips, joinTripViaInvite } = useTrips();
-  const { user, loading, isDemo } = useAuth();
+  const { user, loading, isDemo, isRecovery } = useAuth();
 
   // Handle invite code in URL
   useEffect(() => {
@@ -112,7 +112,7 @@ export default function App() {
     );
   }
 
-  if (!isDemo && !user) {
+  if (!isDemo && (!user || isRecovery)) {
     return <AuthPage />;
   }
 

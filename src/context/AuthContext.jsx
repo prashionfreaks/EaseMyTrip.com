@@ -13,6 +13,7 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isRecovery, setIsRecovery] = useState(false);
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
@@ -26,8 +27,10 @@ export function AuthProvider({ children }) {
       setLoading(false);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
+      if (event === 'PASSWORD_RECOVERY') setIsRecovery(true);
+      if (event === 'USER_UPDATED') setIsRecovery(false);
     });
 
     return () => subscription.unsubscribe();
@@ -41,6 +44,26 @@ export function AuthProvider({ children }) {
   async function signUp(email, password, fullName) {
     if (!isSupabaseConfigured) return { error: { message: 'Supabase not configured. App is running in demo mode.' } };
     return supabase.auth.signUp({ email, password, options: { data: { full_name: fullName } } });
+  }
+
+  async function signInWithGoogle() {
+    if (!isSupabaseConfigured) return { error: { message: 'Supabase not configured.' } };
+    return supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin },
+    });
+  }
+
+  async function resetPassword(email) {
+    if (!isSupabaseConfigured) return { error: { message: 'Supabase not configured.' } };
+    return supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin,
+    });
+  }
+
+  async function updatePassword(newPassword) {
+    if (!isSupabaseConfigured) return { error: { message: 'Supabase not configured.' } };
+    return supabase.auth.updateUser({ password: newPassword });
   }
 
   async function signOut() {
@@ -64,10 +87,14 @@ export function AuthProvider({ children }) {
       user,
       loading,
       isDemo: !isSupabaseConfigured,
+      isRecovery,
       displayName,
       initials,
       signIn,
       signUp,
+      signInWithGoogle,
+      resetPassword,
+      updatePassword,
       signOut,
     }}>
       {children}
