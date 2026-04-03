@@ -26,6 +26,11 @@ create table if not exists public.profiles (
   created_at  timestamptz default now()
 );
 alter table public.profiles enable row level security;
+
+drop policy if exists "Public profiles are viewable by authenticated users" on public.profiles;
+drop policy if exists "Users can update own profile" on public.profiles;
+drop policy if exists "Users can insert own profile" on public.profiles;
+
 create policy "Public profiles are viewable by authenticated users"
   on public.profiles for select using (auth.uid() is not null);
 create policy "Users can update own profile"
@@ -52,8 +57,6 @@ create trigger on_auth_user_created
   for each row execute procedure public.handle_new_user();
 
 -- ─── Trips ──────────────────────────────────────
--- Full trip state stored in `data` jsonb column.
--- Metadata columns (name, destination, status) are denormalized for querying.
 create table if not exists public.trips (
   id           uuid default gen_random_uuid() primary key,
   name         text not null,
@@ -66,6 +69,11 @@ create table if not exists public.trips (
   updated_at   timestamptz default now()
 );
 alter table public.trips enable row level security;
+
+drop policy if exists "Trip members can view trips" on public.trips;
+drop policy if exists "Trip organizers can update trips" on public.trips;
+drop policy if exists "Authenticated users can insert trips" on public.trips;
+drop policy if exists "Trip organizers can delete trips" on public.trips;
 
 create policy "Trip members can view trips"
   on public.trips for select using (
@@ -100,6 +108,11 @@ create table if not exists public.trip_members (
   unique (trip_id, user_id)
 );
 alter table public.trip_members enable row level security;
+
+drop policy if exists "Members can view trip_members for their trips" on public.trip_members;
+drop policy if exists "Organizers can insert trip_members" on public.trip_members;
+drop policy if exists "Organizers can delete trip_members" on public.trip_members;
+
 create policy "Members can view trip_members for their trips"
   on public.trip_members for select using (
     exists (select 1 from public.trip_members tm where tm.trip_id = trip_members.trip_id and tm.user_id = auth.uid())
@@ -127,6 +140,10 @@ create table if not exists public.trip_invites (
   created_at   timestamptz default now()
 );
 alter table public.trip_invites enable row level security;
+
+drop policy if exists "Trip members can view invites" on public.trip_invites;
+drop policy if exists "Trip organizers can create invites" on public.trip_invites;
+
 create policy "Trip members can view invites"
   on public.trip_invites for select using (
     exists (select 1 from public.trip_members where trip_id = trip_invites.trip_id and user_id = auth.uid())
@@ -137,6 +154,5 @@ create policy "Trip organizers can create invites"
   );
 
 -- ─── Enable Realtime ─────────────────────────────
--- Run this in SQL editor or Supabase dashboard > Database > Replication
 alter publication supabase_realtime add table public.trips;
 alter publication supabase_realtime add table public.trip_members;
