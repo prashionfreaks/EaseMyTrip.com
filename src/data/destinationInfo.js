@@ -624,6 +624,69 @@ export const DESTINATION_INFO = {
     cuisine: ['Koshari', 'Ful Medames', 'Molokhia', 'Hawawshi', 'Om Ali (Bread Pudding)', 'Baklava', 'Sugarcane Juice', 'Karkade (Hibiscus Tea)'],
   },
 
+  srilanka: {
+    tagline: 'The Pearl of the Indian Ocean — ancient temples, misty tea hills, and pristine beaches',
+    famousFor: ['Tea Plantations', 'Ancient Ruins', 'Elephants', 'Whale Watching', 'Sigiriya Rock', 'Ayurveda', 'Spice Gardens', 'Surf Beaches'],
+    attractions: [
+      { name: 'Sigiriya (Lion\'s Rock)', desc: 'A 5th-century rock fortress rising 200m from the jungle — once a royal palace with sky gardens, mirror walls, and stunning frescoes. A UNESCO World Heritage site.' },
+      { name: 'Temple of the Sacred Tooth Relic', desc: 'Sri Lanka\'s holiest Buddhist shrine in Kandy, housing a relic of the Buddha\'s tooth. The annual Esala Perahera festival draws hundreds of elephants through the streets.' },
+      { name: 'Ella & Nine Arch Bridge', desc: 'A stunning colonial-era stone viaduct in the misty highlands, framed by tea plantations — one of Asia\'s most photographed train journeys passes over it.' },
+      { name: 'Yala National Park', desc: 'One of the world\'s best leopard-spotting destinations, also home to elephants, sloth bears, crocodiles, and 200+ bird species in a dramatic landscape of scrub and lagoon.' },
+      { name: 'Galle Fort', desc: 'A 16th-century Portuguese and Dutch colonial fortified city on the southern coast — cobblestone streets, Dutch churches, boutique hotels, and sea-facing ramparts.' },
+    ],
+    history: [
+      'Sri Lanka has been continuously inhabited for at least 125,000 years — the ancient Sinhalese kingdom of Anuradhapura ruled from the 4th century BC, rivalling the great empires of Asia.',
+      'Buddhism arrived from India in the 3rd century BC, brought by Mahinda, son of Emperor Ashoka — Sri Lanka has been a centre of Theravada Buddhism ever since.',
+      'The island was successively colonised by the Portuguese (1505), Dutch (1658), and British (1815), who developed the tea industry that still defines the highlands today.',
+      'Sri Lanka gained independence in 1948 and endured a devastating 26-year civil war that ended in 2009, since followed by remarkable recovery and tourism growth.',
+    ],
+    bestTime: { period: 'Dec–Mar (West & South) / May–Sep (East)', reason: 'Sri Lanka has two monsoon seasons affecting opposite coasts — the west and south are best in winter; the east coast shines in summer.' },
+    quickFacts: { language: 'Sinhala & Tamil', currency: 'Sri Lankan Rupee (Rs)', capital: 'Sri Jayawardenepura Kotte', knownAs: 'Pearl of the Indian Ocean', timezone: 'SLST (UTC+5:30)' },
+    cuisine: ['Rice & Curry', 'Hoppers (Appa)', 'Kottu Roti', 'String Hoppers', 'Fish Ambul Thiyal', 'Pol Sambol', 'Ceylon Tea', 'King Coconut'],
+  },
+
+  finland: {
+    tagline: 'The Land of a Thousand Lakes — Northern Lights, saunas, and the home of Santa Claus',
+    famousFor: ['Northern Lights', 'Midnight Sun', 'Saunas', 'Santa Claus Village', 'Reindeer', 'Lakeland', 'Helsinki Design', 'Husky Safaris'],
+    attractions: [
+      { name: 'Aurora Borealis (Lapland)', desc: 'Finnish Lapland offers some of the world\'s best Northern Lights viewing — on average 200 nights of auroras per year above Rovaniemi and Saariselkä.' },
+      { name: 'Santa Claus Village, Rovaniemi', desc: 'The official hometown of Santa Claus, right on the Arctic Circle — husky sledding, reindeer safaris, and glass igloos for sleeping under the stars.' },
+      { name: 'Helsinki Market Square & Cathedral', desc: 'The neoclassical white Helsinki Cathedral presides over the harbour market square where locals and visitors browse fresh produce, handicrafts, and Finnish design.' },
+      { name: 'Archipelago National Park', desc: 'Over 2,000 islands and islets in the Baltic Sea, accessible by ferry — pristine nature, seal colonies, and traditional fishing villages frozen in time.' },
+      { name: 'Nuuksio National Park', desc: 'Ancient forests, clear lakes, and wildlife just 35km from Helsinki — Finland\'s most accessible wilderness, perfect for foraging, swimming, and wildlife spotting.' },
+    ],
+    history: [
+      'Finland was part of Sweden for 600 years (1249–1809), then an autonomous Grand Duchy of Russia until declaring independence on 6 December 1917 — a date still celebrated as Finnish Independence Day.',
+      'Finland\'s 1940 Winter War against the Soviet Union — where a tiny nation held off a vastly larger army — became one of history\'s most remarkable military stories.',
+      'Finland invented the concept of the modern sauna over 2,000 years ago. There are 3.3 million saunas for a population of 5.5 million people.',
+      'Finland consistently ranks first or second in the World Happiness Report, and has the world\'s best education system according to PISA rankings.',
+    ],
+    bestTime: { period: 'Jun–Aug (Midnight Sun) & Dec–Mar (Northern Lights)', reason: 'Summer offers endless daylight and warm lakes for swimming. Winter (especially February–March) gives the best aurora viewing, snow activities, and Christmas magic.' },
+    quickFacts: { language: 'Finnish & Swedish', currency: 'Euro (€)', capital: 'Helsinki', knownAs: 'Land of a Thousand Lakes', timezone: 'EET (UTC+2)' },
+    cuisine: ['Salmon Soup', 'Reindeer Stew', 'Karjalanpiirakka (Rye Pasties)', 'Mämmi (Easter Dessert)', 'Leipäjuusto (Bread Cheese)', 'Cloudberry Jam', 'Salmiakki (Salty Liquorice)'],
+  },
+
+  costarica: {
+    tagline: 'Pura Vida — the happiest country on earth, where rainforest meets two oceans',
+    famousFor: ['Biodiversity', 'Rainforests', 'Volcanoes', 'Sloths & Toucans', 'Surfing', 'Eco-Tourism', 'Pura Vida Lifestyle', 'Cloud Forests'],
+    attractions: [
+      { name: 'Arenal Volcano', desc: 'One of the world\'s most active volcanoes — a near-perfect cone rising 1,670m, surrounded by hot springs, zip lines, and cloud forest national park.' },
+      { name: 'Manuel Antonio National Park', desc: 'Tiny but mighty — Costa Rica\'s most visited park packs white-sand beaches, squirrel monkeys, sloths, and scarlet macaws into a compact Pacific peninsula.' },
+      { name: 'Monteverde Cloud Forest', desc: 'Suspended between the Pacific and Caribbean at 1,500m, this misty forest reserve hosts 2,500 plant species, 400 bird species, and the elusive resplendent quetzal.' },
+      { name: 'Tortuguero National Park', desc: 'Accessible only by boat or small plane, this Caribbean jungle channels are home to four sea turtle species that nest on its beaches, including the great leatherback.' },
+      { name: 'Corcovado National Park', desc: 'Called "the most biologically intense place on Earth" by National Geographic — 13 ecosystems, jaguars, tapirs, harpy eagles, and all four Costa Rican monkey species.' },
+    ],
+    history: [
+      'Costa Rica was home to indigenous peoples for thousands of years before Columbus landed on his fourth and final voyage in 1502, calling it "Rich Coast" (Costa Rica).',
+      'Unlike most of Latin America, Costa Rica abolished its military in 1948 — redirecting defence spending to education and healthcare, making it one of the region\'s most stable democracies.',
+      'Costa Rica protects over 25% of its land in national parks and reserves, despite being 0.03% of Earth\'s surface it contains 5% of the world\'s biodiversity.',
+      'The country generates over 99% of its electricity from renewable sources — hydroelectric, geothermal, wind, and solar — a global leader in clean energy.',
+    ],
+    bestTime: { period: 'Dec–April', reason: 'Dry season on the Pacific coast with sunny skies. The Caribbean coast has different patterns — little rain June–July and September–October. Surfers prefer May–November for bigger swells.' },
+    quickFacts: { language: 'Spanish', currency: 'Costa Rican Colón (₡)', capital: 'San José', knownAs: 'Rich Coast / Pura Vida Nation', timezone: 'CST (UTC−6)' },
+    cuisine: ['Gallo Pinto (Rice & Beans)', 'Casado', 'Ceviche', 'Olla de Carne', 'Tamales', 'Tres Leches Cake', 'Guaro (Sugar Cane Spirit)', 'Fresh Tropical Fruits'],
+  },
+
   bhutan: {
     tagline: 'The Last Shangri-La — the world\'s only carbon-negative country measures wealth in happiness',
     famousFor: ['Gross National Happiness', 'Tiger\'s Nest Monastery', 'Dzong Fortresses', 'Pristine Himalayan Nature', 'Archery', 'Buddhist Culture', 'Pristine Environment'],
@@ -661,6 +724,9 @@ const ALIASES = {
   'benares': 'varanasi', 'kashi': 'varanasi', 'banaras': 'varanasi',
   'viennna': 'austria', 'vienna': 'austria',
   'baku': 'azerbaijan',
+  'colombo': 'srilanka', 'kandy': 'srilanka', 'galle': 'srilanka', 'ceylon': 'srilanka',
+  'helsinki': 'finland', 'lapland': 'finland', 'rovaniemi': 'finland',
+  'san jose': 'costarica', 'arenal': 'costarica', 'monteverde': 'costarica', 'costa rica': 'costarica',
   'sydney': 'australia', 'melbourne': 'australia', 'queensland': 'australia', 'brisbane': 'australia',
   'cairo': 'egypt', 'luxor': 'egypt', 'aswan': 'egypt', 'giza': 'egypt',
   'thimphu': 'bhutan', 'paro': 'bhutan',
