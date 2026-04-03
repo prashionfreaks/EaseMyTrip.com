@@ -12,6 +12,8 @@ export default function InviteModal({ onClose }) {
   const [copied, setCopied] = useState(false);
   const [tab, setTab] = useState('invite');
   const [emailError, setEmailError] = useState('');
+  const [emailSending, setEmailSending] = useState(false);
+  const [emailSent, setEmailSent] = useState('');
   const [dbInviteCode, setDbInviteCode] = useState('');
 
   // In Supabase mode: create a trip_invites record so the link can be accepted by new users
@@ -51,8 +53,9 @@ export default function InviteModal({ onClose }) {
     setTimeout(() => setCopied(false), 2500);
   }
 
-  function addMember() {
+  async function addMember() {
     setEmailError('');
+    setEmailSent('');
     if (!email.trim()) { setEmailError('Enter an email address.'); return; }
     if (!email.includes('@') || !email.includes('.')) { setEmailError('Enter a valid email address.'); return; }
 
@@ -64,6 +67,7 @@ export default function InviteModal({ onClose }) {
     const rawName = email.split('@')[0].replace(/[._-]/g, ' ');
     const name = rawName.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
     const colorIdx = activeTrip.members.length % MEMBER_COLORS.length;
+    const trimmedEmail = email.trim().toLowerCase();
 
     updateTrip(activeTrip.id, trip => ({
       ...trip,
@@ -72,7 +76,7 @@ export default function InviteModal({ onClose }) {
         {
           id: 'u' + Date.now(),
           name,
-          email: email.trim().toLowerCase(),
+          email: trimmedEmail,
           avatar: null,
           color: MEMBER_COLORS[colorIdx],
           role: 'member',
@@ -81,6 +85,23 @@ export default function InviteModal({ onClose }) {
       ],
     }));
     setEmail('');
+
+    // Send invite email via Edge Function
+    if (isSupabaseConfigured && inviteCode) {
+      setEmailSending(true);
+      supabase.functions.invoke('send-invite-email', {
+        body: {
+          email: trimmedEmail,
+          tripName: activeTrip.name,
+          inviterName: currentUser?.name || 'Someone',
+          inviteLink,
+        },
+      }).then(({ error }) => {
+        setEmailSending(false);
+        if (error) setEmailError('Member added, but email failed to send.');
+        else setEmailSent(trimmedEmail);
+      });
+    }
   }
 
   function removeMember(memberId) {
@@ -160,15 +181,20 @@ export default function InviteModal({ onClose }) {
                 onKeyDown={e => e.key === 'Enter' && addMember()}
                 style={{ flex: 1 }}
               />
-              <button className="btn btn-primary" onClick={addMember} style={{ whiteSpace: 'nowrap' }}>
-                <UserPlus size={14} /> Add
+              <button className="btn btn-primary" onClick={addMember} disabled={emailSending} style={{ whiteSpace: 'nowrap' }}>
+                <UserPlus size={14} /> {emailSending ? 'Sending…' : 'Add & Invite'}
               </button>
             </div>
             {emailError && (
               <p style={{ fontSize: 12, color: '#dc2626', marginTop: 5 }}>{emailError}</p>
             )}
+            {emailSent && (
+              <p style={{ fontSize: 12, color: '#16a34a', marginTop: 5 }}>
+                ✓ Invite email sent to {emailSent}
+              </p>
+            )}
             <p style={{ fontSize: 12, color: '#9ca3af', marginTop: 6 }}>
-              They'll be added as a member. Share the invite link so they can access the trip.
+              They'll receive an email with a link to join the trip.
             </p>
           </div>
 
