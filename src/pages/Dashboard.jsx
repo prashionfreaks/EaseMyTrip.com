@@ -54,13 +54,13 @@ const statusConfig = {
 };
 
 export default function Dashboard({ onNavigate }) {
-  const { trips: allTrips, setActiveTripId, activeTrip, addTrip, removeTrip } = useTrips();
-  const trips = allTrips.filter(t => t.members.some(m => m.id === 'u1'));
+  const { trips: allTrips, setActiveTripId, activeTrip, addTrip, removeTrip, currentUser } = useTrips();
+  const trips = allTrips.filter(t => t.members.some(m => m.id === currentUser?.id));
   const [showCreate, setShowCreate] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [newTrip, setNewTrip] = useState({ name: '', destination: '' });
-  const dueCount = useMemo(() => countOutstandingDues(trips), [trips]); // trips is already filtered to u1's trips
+  const [newTrip, setNewTrip] = useState({ name: '', destination: '', startDate: '', endDate: '', budget: '', currency: 'INR' });
+  const dueCount = useMemo(() => countOutstandingDues(trips), [trips]);
 
   function handleCreate() {
     if (!newTrip.name.trim() || !newTrip.destination.trim()) return;
@@ -68,14 +68,14 @@ export default function Dashboard({ onNavigate }) {
       name: newTrip.name.trim(),
       destination: newTrip.destination.trim(),
       coverImage: 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=600&h=400&fit=crop',
-      startDate: '2026-06-01',
-      endDate: '2026-06-10',
+      startDate: newTrip.startDate || '2026-06-01',
+      endDate: newTrip.endDate || '2026-06-10',
       status: 'planning',
-      members: [{ id: 'u1', name: 'Prachi', avatar: null, color: '#2563eb', role: 'organizer' }],
-      budget: { total: 5000, spent: 0, currency: 'USD' },
+      members: [{ ...currentUser, role: 'organizer' }],
+      budget: { total: newTrip.budget ? parseFloat(newTrip.budget) : 0, spent: 0, currency: newTrip.currency || 'INR' },
       polls: [], itinerary: [], expenses: [], routes: [], activity: [], contingencies: [], messages: [],
     });
-    setNewTrip({ name: '', destination: '' });
+    setNewTrip({ name: '', destination: '', startDate: '', endDate: '', budget: '', currency: 'INR' });
     setShowCreate(false);
   }
 
@@ -275,6 +275,40 @@ export default function Dashboard({ onNavigate }) {
             <label className="form-label">Destination *</label>
             <input className="form-input" placeholder="e.g. Tokyo, Kyoto & Osaka" value={newTrip.destination}
               onChange={e => setNewTrip(p => ({ ...p, destination: e.target.value }))} />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div className="form-group">
+              <label className="form-label">Start Date</label>
+              <input className="form-input" type="date" value={newTrip.startDate}
+                onChange={e => setNewTrip(p => ({ ...p, startDate: e.target.value }))} />
+            </div>
+            <div className="form-group">
+              <label className="form-label">End Date</label>
+              <input className="form-input" type="date" value={newTrip.endDate}
+                min={newTrip.startDate}
+                onChange={e => setNewTrip(p => ({ ...p, endDate: e.target.value }))} />
+            </div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 12 }}>
+            <div className="form-group">
+              <label className="form-label">Total Budget</label>
+              <input className="form-input" type="number" min="0" placeholder="e.g. 50000"
+                value={newTrip.budget}
+                onChange={e => setNewTrip(p => ({ ...p, budget: e.target.value }))} />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Currency</label>
+              <select className="form-input" value={newTrip.currency}
+                onChange={e => setNewTrip(p => ({ ...p, currency: e.target.value }))}>
+                <option value="INR">INR ₹</option>
+                <option value="USD">USD $</option>
+                <option value="EUR">EUR €</option>
+                <option value="GBP">GBP £</option>
+                <option value="JPY">JPY ¥</option>
+                <option value="SGD">SGD S$</option>
+                <option value="AED">AED د.إ</option>
+              </select>
+            </div>
           </div>
         </Modal>
       )}
