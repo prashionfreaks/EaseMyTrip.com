@@ -74,7 +74,7 @@ export default function Sidebar({ currentPage, onNavigate, isOpen, onClose }) {
 
         {/* User footer */}
         <div className="sidebar-user" style={{ flexDirection: 'column', gap: 0, padding: '12px 16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', marginBottom: !isDemo ? 10 : 0 }}>
             <div className="user-avatar" style={{
               background: 'linear-gradient(135deg, #2563eb, #7c3aed)',
               width: 34, height: 34, fontSize: 14,
@@ -91,24 +91,24 @@ export default function Sidebar({ currentPage, onNavigate, isOpen, onClose }) {
                   : 'No trip selected'}
               </div>
             </div>
-            {!isDemo && (
-              <button
-                onClick={signOut}
-                title="Sign out"
-                style={{
-                  padding: '5px', borderRadius: 6, border: 'none',
-                  background: 'transparent', color: '#3d5a7a',
-                  cursor: 'pointer', display: 'flex', alignItems: 'center',
-                  transition: 'all 0.15s',
-                  flexShrink: 0,
-                }}
-                onMouseOver={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.color = '#f87171'; }}
-                onMouseOut={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#3d5a7a'; }}
-              >
-                <LogOut size={15} />
-              </button>
-            )}
           </div>
+          {!isDemo && (
+            <button
+              onClick={signOut}
+              style={{
+                width: '100%', padding: '8px 12px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+                borderRadius: 8, border: '1px solid rgba(248,113,113,0.3)',
+                background: 'rgba(248,113,113,0.08)', color: '#f87171',
+                cursor: 'pointer', fontSize: 13, fontWeight: 600,
+                transition: 'all 0.15s',
+              }}
+              onMouseOver={e => { e.currentTarget.style.background = 'rgba(248,113,113,0.18)'; e.currentTarget.style.borderColor = 'rgba(248,113,113,0.5)'; }}
+              onMouseOut={e => { e.currentTarget.style.background = 'rgba(248,113,113,0.08)'; e.currentTarget.style.borderColor = 'rgba(248,113,113,0.3)'; }}
+            >
+              <LogOut size={14} /> Sign Out
+            </button>
+          )}
         </div>
       </aside>
     </>
