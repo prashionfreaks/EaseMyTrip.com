@@ -11,7 +11,7 @@ import {
 import { getDestinationCurrency } from '../lib/itinerary';
 import { format, differenceInDays, parseISO } from 'date-fns';
 
-function countOutstandingDues(trips) {
+function countOutstandingDues(trips, currentUserId) {
   let count = 0;
   trips.forEach(trip => {
     if (!trip.expenses?.length || !trip.members?.length) return;
@@ -36,7 +36,7 @@ function countOutstandingDues(trips) {
       const transfer = Math.min(debtors[i].amount, creditors[j].amount);
       if (transfer > 0.01) {
         const key = `${debtors[i].uid}→${creditors[j].uid}`;
-        if (!paid.has(key) && (debtors[i].uid === 'u1' || creditors[j].uid === 'u1')) count++;
+        if (!paid.has(key) && (debtors[i].uid === currentUserId || creditors[j].uid === currentUserId)) count++;
       }
       debtors[i].amount -= transfer;
       creditors[j].amount -= transfer;
@@ -60,7 +60,7 @@ export default function Dashboard({ onNavigate }) {
   const [showInvite, setShowInvite] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [newTrip, setNewTrip] = useState({ name: '', destination: '', startDate: '', endDate: '', budget: '', currency: 'INR' });
-  const dueCount = useMemo(() => countOutstandingDues(trips), [trips]);
+  const dueCount = useMemo(() => countOutstandingDues(trips, currentUser?.id), [trips, currentUser?.id]);
 
   function handleCreate() {
     if (!newTrip.name.trim() || !newTrip.destination.trim()) return;

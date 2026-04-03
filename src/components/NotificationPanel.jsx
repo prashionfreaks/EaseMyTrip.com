@@ -43,14 +43,15 @@ function getMember(trip, uid) {
 }
 
 export default function NotificationPanel({ onClose }) {
-  const { trips, markSettlementPaid } = useTrips();
+  const { trips, markSettlementPaid, currentUser } = useTrips();
   const [copiedKey, setCopiedKey] = useState(null);
-  const CURRENT_USER = 'u1';
 
   // Compute all outstanding dues across every trip for the current user
   const { owedByMe, owedToMe } = useMemo(() => {
     const owedByMe = [];  // current user owes someone
     const owedToMe = [];  // someone owes current user
+    const uid = currentUser?.id;
+    if (!uid) return { owedByMe, owedToMe };
 
     trips.forEach(trip => {
       if (!trip.expenses?.length || !trip.members?.length) return;
@@ -61,16 +62,16 @@ export default function NotificationPanel({ onClose }) {
         const key = `${s.from}→${s.to}`;
         if (paid.has(key)) return;
 
-        if (s.from === CURRENT_USER) {
+        if (s.from === uid) {
           owedByMe.push({ ...s, trip });
-        } else if (s.to === CURRENT_USER) {
+        } else if (s.to === uid) {
           owedToMe.push({ ...s, trip });
         }
       });
     });
 
     return { owedByMe, owedToMe };
-  }, [trips]);
+  }, [trips, currentUser]);
 
   const total = owedByMe.length + owedToMe.length;
   const totalOwed = owedByMe.reduce((sum, d) => sum + d.amount, 0);

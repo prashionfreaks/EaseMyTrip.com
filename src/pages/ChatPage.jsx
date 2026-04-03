@@ -3,8 +3,6 @@ import { useTrips } from '../context/TripContext';
 import { Send, MessageCircle, Users } from 'lucide-react';
 import { format, parseISO, isToday, isYesterday, differenceInMinutes } from 'date-fns';
 
-const CURRENT_USER = 'u1';
-
 function dateSeparatorLabel(dateStr) {
   const d = parseISO(dateStr);
   if (isToday(d)) return 'Today';
@@ -13,14 +11,14 @@ function dateSeparatorLabel(dateStr) {
 }
 
 export default function ChatPage() {
-  const { activeTrip, sendMessage, markChatRead } = useTrips();
+  const { activeTrip, sendMessage, markChatRead, currentUser } = useTrips();
   const [text, setText] = useState('');
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
 
   // Mark chat as read when opened / trip changes
   useEffect(() => {
-    if (activeTrip) markChatRead(activeTrip.id, CURRENT_USER);
+    if (activeTrip) markChatRead(activeTrip.id, currentUser.id);
   }, [activeTrip?.id]); // eslint-disable-line
 
   // Scroll to bottom whenever messages change
@@ -32,7 +30,7 @@ export default function ChatPage() {
     const trimmed = text.trim();
     if (!trimmed || !activeTrip) return;
     sendMessage(activeTrip.id, {
-      userId: CURRENT_USER,
+      userId: currentUser.id,
       text: trimmed,
       timestamp: new Date().toISOString(),
     });
@@ -176,7 +174,7 @@ export default function ChatPage() {
               }
 
               const { msg, grouped } = item;
-              const self = msg.userId === CURRENT_USER;
+              const self = msg.userId === currentUser.id;
               const member = getMember(msg.userId);
 
               return (

@@ -242,7 +242,7 @@ export default function InviteModal({ onClose }) {
                 Organizers
               </p>
               {organizers.map(m => (
-                <MemberRow key={m.id} member={m} onSetRole={setRole} onRemove={removeMember} isOwner={m.id === 'u1'} />
+                <MemberRow key={m.id} member={m} onSetRole={setRole} onRemove={removeMember} isOwner={m.id === currentUser?.id} />
               ))}
             </div>
           )}
@@ -254,7 +254,7 @@ export default function InviteModal({ onClose }) {
                 Members
               </p>
               {members.map(m => (
-                <MemberRow key={m.id} member={m} onSetRole={setRole} onRemove={removeMember} isOwner={m.id === 'u1'} />
+                <MemberRow key={m.id} member={m} onSetRole={setRole} onRemove={removeMember} isOwner={m.id === currentUser?.id} />
               ))}
             </div>
           ) : (

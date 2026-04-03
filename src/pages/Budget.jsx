@@ -24,7 +24,7 @@ export default function Budget() {
   const [showAdd, setShowAdd] = useState(false);
   const [view, setView] = useState('overview');
   const [newExpense, setNewExpense] = useState({
-    title: '', amount: '', category: 'transport', paidBy: 'u1',
+    title: '', amount: '', category: 'transport', paidBy: currentUser?.id || '',
     splitAmong: [], date: new Date().toISOString().split('T')[0],
   });
 
@@ -109,7 +109,7 @@ export default function Budget() {
       amount: Number(newExpense.amount),
       splitAmong,
     });
-    setNewExpense({ title: '', amount: '', category: 'transport', paidBy: 'u1', splitAmong: [], date: new Date().toISOString().split('T')[0] });
+    setNewExpense({ title: '', amount: '', category: 'transport', paidBy: currentUser?.id || '', splitAmong: [], date: new Date().toISOString().split('T')[0] });
     setShowAdd(false);
   }
 

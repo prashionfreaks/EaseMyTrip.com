@@ -10,7 +10,7 @@ const navItems = [
 ];
 
 export default function Sidebar({ currentPage, onNavigate, isOpen, onClose }) {
-  const { activeTrip, trips } = useTrips();
+  const { activeTrip, trips, currentUser } = useTrips();
   const { displayName, initials, signOut, isDemo } = useAuth();
 
   return (
@@ -87,7 +87,7 @@ export default function Sidebar({ currentPage, onNavigate, isOpen, onClose }) {
               </div>
               <div className="user-role">
                 {activeTrip
-                  ? (activeTrip.members.find(m => m.id === 'u1')?.role === 'organizer' ? 'Trip Organizer' : 'Member')
+                  ? (activeTrip.members.find(m => m.id === currentUser?.id)?.role === 'organizer' ? 'Trip Organizer' : 'Member')
                   : 'No trip selected'}
               </div>
             </div>

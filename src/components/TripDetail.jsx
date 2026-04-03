@@ -37,17 +37,17 @@ const TABS = [
 ];
 
 export default function TripDetail({ onInvite, defaultTab = 'chat' }) {
-  const { activeTrip, setActiveTripId } = useTrips();
+  const { activeTrip, setActiveTripId, currentUser } = useTrips();
   const [activeTab, setActiveTab] = useState(defaultTab);
 
   const unreadMessages = useMemo(() => {
-    if (!activeTrip) return 0;
-    const since = activeTrip.chatLastReadAt?.['u1'];
+    if (!activeTrip || !currentUser) return 0;
+    const since = activeTrip.chatLastReadAt?.[currentUser.id];
     return (activeTrip.messages || []).filter(msg => {
-      if (msg.userId === 'u1') return false;
+      if (msg.userId === currentUser.id) return false;
       return !since || new Date(msg.timestamp) > new Date(since);
     }).length;
-  }, [activeTrip]);
+  }, [activeTrip, currentUser]);
 
   const activePolls = activeTrip?.polls.filter(p => p.status === 'active').length || 0;
 
