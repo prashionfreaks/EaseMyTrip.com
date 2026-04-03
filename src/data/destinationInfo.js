@@ -561,6 +561,89 @@ export const DESTINATION_INFO = {
     quickFacts: { language: 'German', currency: 'Euro (€)', capital: 'Vienna', knownAs: 'Land of Music', timezone: 'CET (UTC+1)' },
     cuisine: ['Wiener Schnitzel', 'Sachertorte', 'Tafelspitz', 'Kaiserschmarrn', 'Apfelstrudel', 'Melange (Viennese coffee)', 'Leberkäse'],
   },
+  azerbaijan: {
+    tagline: 'The Land of Fire — where East meets West at the crossroads of ancient civilisations',
+    famousFor: ['Eternal Flames', 'Old City Baku', 'Caspian Sea', 'Mud Volcanoes', 'Silk Road Heritage', 'Pomegranates', 'Carpet Weaving'],
+    attractions: [
+      { name: 'Baku Old City (İçərişəhər)', desc: 'A UNESCO World Heritage walled city with 12th-century ramparts, the Maiden Tower, and the Palace of the Shirvanshahs — the heart of ancient Baku.' },
+      { name: 'Yanar Dağ (Burning Mountain)', desc: 'A natural gas fire that has burned continuously on a hillside since ancient times, inspiring the Zoroastrian reverence for Azerbaijan as the "Land of Fire".' },
+      { name: 'Flame Towers', desc: 'Baku\'s modern skyline icon — three skyscrapers clad in LEDs that ripple with flame animations visible from across the city at night.' },
+      { name: 'Gobustan National Park', desc: 'Over 6,000 rock engravings dating back 40,000 years alongside 400 mud volcanoes — a surreal lunar landscape UNESCO World Heritage site.' },
+      { name: 'Sheki Khan\'s Palace', desc: 'An 18th-century summer palace covered floor-to-ceiling in intricate stained glass (şebeke) and frescoes, built without a single nail.' },
+    ],
+    history: [
+      'Azerbaijan sits on one of the world\'s oldest oil fields — oil has been extracted here since the 3rd century BC, and Baku\'s oil boom in the 1870s made it the world\'s oil capital.',
+      'The country was the first Muslim-majority democratic republic in the world, founded briefly in 1918 before Soviet annexation in 1920.',
+      'Azerbaijan was part of the Silk Road for over a millennium, serving as a bridge between Europe, Persia, Central Asia, and China.',
+      'The ancient Zoroastrian fire temples here drew pilgrims across the ancient world — natural gas seeps caused flames to emerge spontaneously from the ground.',
+    ],
+    bestTime: { period: 'April–June & Sep–November', reason: 'Spring brings wildflowers to the Caucasus mountains; autumn is warm and clear. Summers are hot in Baku but cool in the highlands.' },
+    quickFacts: { language: 'Azerbaijani', currency: 'Azerbaijani Manat (₼)', capital: 'Baku', knownAs: 'Land of Fire', timezone: 'AZT (UTC+4)' },
+    cuisine: ['Plov (Saffron Rice)', 'Dolma', 'Kebab', 'Dushbara (Dumplings)', 'Pomegranate Dishes', 'Baklava', 'Black Tea with Jam'],
+  },
+
+  australia: {
+    tagline: 'The wide brown land — ancient wilderness, world-class cities, and the Great Barrier Reef',
+    famousFor: ['Great Barrier Reef', 'Sydney Opera House', 'Uluru', 'Kangaroos & Koalas', 'Outback', 'Surfing', 'Aboriginal Culture', 'Cricket'],
+    attractions: [
+      { name: 'Great Barrier Reef', desc: 'The world\'s largest coral reef system — 2,300km of living structure visible from space, home to 1,500 species of fish and 4,000 types of mollusc.' },
+      { name: 'Sydney Opera House', desc: 'Jørn Utzon\'s 1973 masterpiece — one of the most recognisable buildings on earth, hosting over 1,500 performances a year on Sydney Harbour.' },
+      { name: 'Uluru (Ayers Rock)', desc: 'A sacred sandstone monolith rising 348m from the flat desert — changes colour from ochre to deep crimson at sunrise and sunset. Owned by the Anangu people.' },
+      { name: 'The Twelve Apostles', desc: 'Dramatic limestone stacks rising from the Southern Ocean along the Great Ocean Road in Victoria — one of Australia\'s most photographed landscapes.' },
+      { name: 'Daintree Rainforest', desc: 'The world\'s oldest tropical rainforest at 180 million years old, where ancient ferns meet the Coral Sea in Far North Queensland.' },
+    ],
+    history: [
+      'Aboriginal Australians have lived on the continent for at least 65,000 years — the oldest continuous culture on Earth — with over 500 distinct language groups.',
+      'Britain established the first European settlement at Sydney Cove in 1788 as a penal colony, initially transporting 162,000 convicts over 80 years.',
+      'The Gold Rush of 1851 transformed Australia from a penal backwater into a prosperous nation, tripling the population in a decade.',
+      'Australia federated as a nation on 1 January 1901, becoming one of the first countries in the world to grant women the right to vote (1902).',
+    ],
+    bestTime: { period: 'Sep–Nov & Mar–May', reason: 'Spring and autumn avoid extreme summer heat in the south and the tropical wet season in the north. Queensland\'s Great Barrier Reef is best June–October.' },
+    quickFacts: { language: 'English', currency: 'Australian Dollar (A$)', capital: 'Canberra', knownAs: 'Land Down Under', timezone: 'Multiple (AEST UTC+10 to AWST UTC+8)' },
+    cuisine: ['Vegemite on Toast', 'Barramundi', 'Meat Pie', 'Tim Tams', 'Pavlova', 'Lamington', 'Flat White Coffee', 'BBQ Shrimp'],
+  },
+
+  egypt: {
+    tagline: 'Mother of the World — 5,000 years of civilisation along the eternal Nile',
+    famousFor: ['Pyramids of Giza', 'Sphinx', 'Nile River', 'Pharaohs', 'Hieroglyphics', 'Luxor Temples', 'Red Sea Diving', 'Mummies'],
+    attractions: [
+      { name: 'Great Pyramid of Giza', desc: 'Built around 2560 BC for Pharaoh Khufu — the only surviving wonder of the ancient world, standing 138m tall and constructed from 2.3 million stone blocks.' },
+      { name: 'The Sphinx', desc: 'A 73-metre limestone statue with the body of a lion and the face of a pharaoh, carved around 2500 BC and still guarding the Giza plateau after 4,500 years.' },
+      { name: 'Valley of the Kings', desc: 'The royal necropolis on Luxor\'s west bank where 63 tombs of New Kingdom pharaohs were carved into the limestone cliffs, including Tutankhamun\'s.' },
+      { name: 'Karnak Temple Complex', desc: 'The world\'s largest religious complex — a 2km processional avenue of sphinxes leads to colossal hypostyle halls with 134 massive columns, built over 2,000 years.' },
+      { name: 'Abu Simbel', desc: 'Two massive rock temples built by Ramesses II around 1264 BC, relocated in the 1960s in an extraordinary UNESCO engineering project to save them from Lake Nasser.' },
+    ],
+    history: [
+      'Ancient Egyptian civilisation lasted over 3,000 years — longer than the time between the fall of Rome and today — unified under pharaohs from 3100 BC.',
+      'The ancient Egyptians invented writing (hieroglyphics around 3200 BC), the 365-day calendar, and made foundational advances in medicine and mathematics.',
+      'Cleopatra VII, the last active pharaoh, was not Egyptian by blood — she was Macedonian Greek, the descendant of one of Alexander the Great\'s generals.',
+      'Egypt was under Greek, Roman, Arab, Ottoman, and British rule across the centuries before gaining independence in 1952 under Gamal Abdel Nasser.',
+    ],
+    bestTime: { period: 'October–April', reason: 'Winter months are pleasantly warm (20–25°C) for sightseeing. Summer temperatures can exceed 45°C in Luxor and Aswan. The Red Sea coast is good year-round.' },
+    quickFacts: { language: 'Arabic', currency: 'Egyptian Pound (E£)', capital: 'Cairo', knownAs: 'Gift of the Nile', timezone: 'EET (UTC+2)' },
+    cuisine: ['Koshari', 'Ful Medames', 'Molokhia', 'Hawawshi', 'Om Ali (Bread Pudding)', 'Baklava', 'Sugarcane Juice', 'Karkade (Hibiscus Tea)'],
+  },
+
+  bhutan: {
+    tagline: 'The Last Shangri-La — the world\'s only carbon-negative country measures wealth in happiness',
+    famousFor: ['Gross National Happiness', 'Tiger\'s Nest Monastery', 'Dzong Fortresses', 'Pristine Himalayan Nature', 'Archery', 'Buddhist Culture', 'Pristine Environment'],
+    attractions: [
+      { name: 'Tiger\'s Nest Monastery (Paro Taktsang)', desc: 'Bhutan\'s most iconic landmark — a sacred Buddhist monastery clinging to a sheer cliff 900m above the Paro Valley, reachable only by foot or mule.' },
+      { name: 'Punakha Dzong', desc: 'A fortress-monastery at the confluence of two rivers, considered Bhutan\'s most beautiful dzong, with whitewashed walls, golden roofs, and remarkable frescoes.' },
+      { name: 'Dochula Pass', desc: 'A 3,100m mountain pass blanketed in prayer flags and 108 memorial chortens, offering panoramic Himalayan views including Bhutan\'s highest peaks on clear days.' },
+      { name: 'Haa Valley', desc: 'A remote, pristine valley only opened to tourists in 2002, dotted with ancient lhakhangs (temples) and yak herders against a backdrop of soaring peaks.' },
+      { name: 'Bumthang Cultural Valley', desc: 'Bhutan\'s spiritual heartland — a cluster of four valleys containing some of the kingdom\'s oldest temples, including Jambay Lhakhang (7th century AD).' },
+    ],
+    history: [
+      'Bhutan was unified in 1616 by the Tibetan Buddhist master Zhabdrung Ngawang Namgyal, who built the distinctive dzong fortress-monastery system across the country.',
+      'Bhutan is one of the few countries in South Asia never colonised by a European power, maintaining its sovereignty by playing British and Tibetan interests against each other.',
+      'The country transitioned from an absolute monarchy to a constitutional monarchy in 2008, with the 5th King Jigme Khesar Namgyel Wangchuck voluntarily introducing democracy.',
+      'Bhutan introduced the concept of Gross National Happiness (GNH) in 1972, prioritising wellbeing, cultural preservation, and environmental sustainability over GDP.',
+    ],
+    bestTime: { period: 'March–May & Sep–November', reason: 'Spring brings rhododendrons in bloom and clear mountain views; autumn is crisp and ideal for trekking after the monsoon. Winter is cold but festivals are spectacular.' },
+    quickFacts: { language: 'Dzongkha', currency: 'Bhutanese Ngultrum (Nu)', capital: 'Thimphu', knownAs: 'Land of the Thunder Dragon', timezone: 'BTT (UTC+6)' },
+    cuisine: ['Ema Datshi (Chilli Cheese)', 'Phaksha Paa (Pork with Chillies)', 'Red Rice', 'Jasha Maru (Spiced Chicken)', 'Hoentay (Dumplings)', 'Ara (Butter Tea)', 'Suja (Butter Tea)'],
+  },
 };
 
 // Destination key aliases for fuzzy matching
@@ -577,6 +660,10 @@ const ALIASES = {
   'bombay': 'mumbai',
   'benares': 'varanasi', 'kashi': 'varanasi', 'banaras': 'varanasi',
   'viennna': 'austria', 'vienna': 'austria',
+  'baku': 'azerbaijan',
+  'sydney': 'australia', 'melbourne': 'australia', 'queensland': 'australia', 'brisbane': 'australia',
+  'cairo': 'egypt', 'luxor': 'egypt', 'aswan': 'egypt', 'giza': 'egypt',
+  'thimphu': 'bhutan', 'paro': 'bhutan',
   'zurich': 'switzerland', 'bern': 'switzerland', 'interlaken': 'switzerland',
   'alleppey': 'kerala', 'munnar': 'kerala', 'kochi': 'kerala', 'thiruvananthapuram': 'kerala',
   'coorg': 'kerala',
