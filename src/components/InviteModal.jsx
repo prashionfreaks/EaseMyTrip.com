@@ -1,23 +1,41 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTrips } from '../context/TripContext';
 import Modal from './Modal';
-import { Copy, Mail, Users, Check, X, Link2, UserPlus, Crown, User } from 'lucide-react';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { Copy, Mail, Users, Check, X, Link2, UserPlus, Crown } from 'lucide-react';
 
 const MEMBER_COLORS = ['#2563eb', '#7c3aed', '#16a34a', '#d97706', '#dc2626', '#0891b2', '#ea580c', '#be185d'];
 
 export default function InviteModal({ onClose }) {
-  const { activeTrip, updateTrip } = useTrips();
+  const { activeTrip, updateTrip, currentUser } = useTrips();
   const [email, setEmail] = useState('');
   const [copied, setCopied] = useState(false);
   const [tab, setTab] = useState('invite');
   const [emailError, setEmailError] = useState('');
+  const [dbInviteCode, setDbInviteCode] = useState('');
+
+  // In Supabase mode: create a trip_invites record so the link can be accepted by new users
+  useEffect(() => {
+    if (!isSupabaseConfigured || !activeTrip || !currentUser) return;
+    supabase
+      .from('trip_invites')
+      .insert({ trip_id: activeTrip.id, invited_by: currentUser.id })
+      .select('invite_code')
+      .single()
+      .then(({ data }) => { if (data) setDbInviteCode(data.invite_code); });
+  }, [activeTrip?.id, currentUser?.id]);
 
   if (!activeTrip) return null;
 
-  const inviteCode = btoa(activeTrip.id + '-tripsync').replace(/[^a-zA-Z0-9]/g, '').substring(0, 16);
-  const inviteLink = `${window.location.origin}${window.location.pathname}?invite=${inviteCode}`;
+  // Demo mode: derive code from trip id (no DB)
+  const fallbackCode = btoa(activeTrip.id + '-tripsync').replace(/[^a-zA-Z0-9]/g, '').substring(0, 16);
+  const inviteCode = isSupabaseConfigured ? dbInviteCode : fallbackCode;
+  const inviteLink = inviteCode
+    ? `${window.location.origin}${window.location.pathname}?invite=${inviteCode}`
+    : 'Generating link…';
 
   async function copyLink() {
+    if (!inviteCode) return;
     try {
       await navigator.clipboard.writeText(inviteLink);
     } catch {

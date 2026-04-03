@@ -18,25 +18,52 @@ import './App.css';
 export default function App() {
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { setActiveTripId, trips } = useTrips();
+  const { setActiveTripId, trips, joinTripViaInvite } = useTrips();
   const { user, loading, isDemo } = useAuth();
 
-  // Handle invite code in URL on mount
+  // Handle invite code in URL
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const inviteCode = params.get('invite');
-    if (inviteCode) {
-      const matchingTrip = trips.find(trip => {
-        const code = btoa(trip.id + '-tripsync').replace(/[^a-zA-Z0-9]/g, '').substring(0, 16);
-        return code === inviteCode;
-      });
-      if (matchingTrip) {
-        setActiveTripId(matchingTrip.id);
-        setCurrentPage('dashboard');
-        window.history.replaceState({}, '', window.location.pathname);
-      }
+    if (!inviteCode) return;
+
+    if (!user) {
+      // Not logged in yet — save for after login
+      sessionStorage.setItem('pendingInvite', inviteCode);
+      return;
     }
-  }, [trips, setActiveTripId]);
+
+    // Supabase mode: use the DB function to join
+    if (joinTripViaInvite) {
+      window.history.replaceState({}, '', window.location.pathname);
+      joinTripViaInvite(inviteCode).then(tripId => {
+        if (tripId) { setActiveTripId(tripId); setCurrentPage('dashboard'); }
+      });
+      return;
+    }
+
+    // Demo mode: match by derived code
+    const matchingTrip = trips.find(trip => {
+      const code = btoa(trip.id + '-tripsync').replace(/[^a-zA-Z0-9]/g, '').substring(0, 16);
+      return code === inviteCode;
+    });
+    if (matchingTrip) {
+      setActiveTripId(matchingTrip.id);
+      setCurrentPage('dashboard');
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, [user, trips, setActiveTripId, joinTripViaInvite]);
+
+  // After login, process any pending invite
+  useEffect(() => {
+    if (!user || !joinTripViaInvite) return;
+    const pending = sessionStorage.getItem('pendingInvite');
+    if (!pending) return;
+    sessionStorage.removeItem('pendingInvite');
+    joinTripViaInvite(pending).then(tripId => {
+      if (tripId) { setActiveTripId(tripId); setCurrentPage('dashboard'); }
+    });
+  }, [user, joinTripViaInvite, setActiveTripId]);
 
   function navigate(page, tripId) {
     setCurrentPage(page);

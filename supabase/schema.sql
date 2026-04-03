@@ -164,7 +164,77 @@ drop trigger if exists trips_updated_at on public.trips;
 create trigger trips_updated_at before update on public.trips
   for each row execute procedure public.update_updated_at();
 
--- ─── Step 8: Enable Realtime ─────────────────────────────────────────────────
+-- ─── Step 8: accept_invite function (security definer bypasses RLS) ──────────
+-- Allows a new user to join a trip via invite link even though they aren't
+-- yet a trip_member (and therefore can't update the trips row directly).
+
+create or replace function public.accept_invite(p_invite_code text)
+returns uuid as $$
+declare
+  v_trip_id   uuid;
+  v_user_id   uuid;
+  v_user_name text;
+  v_email     text;
+  v_color     text;
+  v_member    jsonb;
+begin
+  v_user_id := auth.uid();
+  if v_user_id is null then raise exception 'Not authenticated'; end if;
+
+  -- Validate invite
+  select trip_id into v_trip_id
+  from public.trip_invites
+  where invite_code = p_invite_code
+    and status = 'pending'
+    and expires_at > now();
+
+  if v_trip_id is null then raise exception 'Invalid or expired invite'; end if;
+
+  -- Resolve user info
+  select
+    coalesce(raw_user_meta_data->>'full_name', split_part(email, '@', 1)),
+    email,
+    (array['#2563eb','#7c3aed','#0891b2','#059669','#d97706','#dc2626','#db2777'])[floor(random()*7)+1]
+  into v_user_name, v_email, v_color
+  from auth.users where id = v_user_id;
+
+  -- Add to trip_members (ignore if already a member)
+  insert into public.trip_members (trip_id, user_id, role, color)
+  values (v_trip_id, v_user_id, 'member', v_color)
+  on conflict (trip_id, user_id) do nothing;
+
+  -- Append to data.members jsonb (only if not already present)
+  v_member := jsonb_build_object(
+    'id',    v_user_id::text,
+    'name',  v_user_name,
+    'email', v_email,
+    'color', v_color,
+    'role',  'member'
+  );
+  update public.trips
+  set data = jsonb_set(
+    data, '{members}',
+    coalesce(data->'members', '[]'::jsonb) || v_member
+  )
+  where id = v_trip_id
+    and not exists (
+      select 1 from jsonb_array_elements(coalesce(data->'members','[]'::jsonb)) m
+      where m->>'id' = v_user_id::text
+    );
+
+  -- Mark invite accepted
+  update public.trip_invites set status = 'accepted' where invite_code = p_invite_code;
+
+  return v_trip_id;
+end;
+$$ language plpgsql security definer;
+
+-- Allow any authenticated user to look up an invite by code (needed to accept it)
+drop policy if exists "Authenticated users can look up invites by code" on public.trip_invites;
+create policy "Authenticated users can look up invites by code"
+  on public.trip_invites for select using (auth.uid() is not null);
+
+-- ─── Step 9: Enable Realtime ─────────────────────────────────────────────────
 
 alter publication supabase_realtime add table public.trips;
 alter publication supabase_realtime add table public.trip_members;

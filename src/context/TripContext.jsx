@@ -263,12 +263,25 @@ export function TripProvider({ children }) {
     updateTrip(tripId, trip => ({ ...trip, photos: (trip.photos || []).filter(p => p.id !== photoId) }));
   }, [updateTrip]);
 
+  const joinTripViaInvite = useCallback(async (inviteCode) => {
+    if (!isSupabaseConfigured || !dbUser) return null;
+    try {
+      const { data: tripId, error } = await supabase.rpc('accept_invite', { p_invite_code: inviteCode });
+      if (error) { console.error('accept_invite error:', error); return null; }
+      await fetchTrips(dbUser.id);
+      return tripId;
+    } catch (err) {
+      console.error('joinTripViaInvite error:', err);
+      return null;
+    }
+  }, [dbUser, fetchTrips]);
+
   return (
     <TripContext.Provider value={{
       trips, activeTrip, activeTripId, currentUser, tripsLoaded,
       setActiveTripId, updateTrip, addTrip, removeTrip,
       vote, addPoll, addExpense, addItineraryItem, addContingency, markSettlementPaid,
-      sendMessage, markChatRead, addPhoto, deletePhoto,
+      sendMessage, markChatRead, addPhoto, deletePhoto, joinTripViaInvite,
     }}>
       {children}
     </TripContext.Provider>
