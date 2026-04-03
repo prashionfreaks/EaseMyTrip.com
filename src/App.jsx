@@ -113,7 +113,7 @@ export default function App() {
     );
   }
 
-  if (!isDemo && !user) {
+  if (!user) {
     return <LandingPage />;
   }
 
