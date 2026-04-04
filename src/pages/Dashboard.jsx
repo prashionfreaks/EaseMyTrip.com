@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { getDestinationCurrency } from '../lib/itinerary';
 import PlacesAutocomplete from '../components/PlacesAutocomplete';
+import { getDestinationImage } from '../lib/destinationImages';
 import { format, differenceInDays, parseISO } from 'date-fns';
 
 function countOutstandingDues(trips, currentUserId) {
@@ -80,7 +81,7 @@ export default function Dashboard({ onNavigate }) {
     await addTrip({
       name: newTrip.name.trim(),
       destination: newTrip.destination.trim(),
-      coverImage: 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=600&h=400&fit=crop',
+      coverImage: getDestinationImage(newTrip.destination.trim()),
       startDate: newTrip.startDate || '2026-06-01',
       endDate: newTrip.endDate || '2026-06-10',
       status: 'planning',
@@ -539,7 +540,7 @@ function TripCard({ trip, isActive, onSelect, onDelete, isDeleting }) {
       {/* Cover */}
       <div style={{ position: 'relative', overflow: 'hidden' }}>
         <img
-          src={trip.coverImage}
+          src={trip.coverImage?.includes('photo-1488646953014') ? getDestinationImage(trip.destination) : (trip.coverImage || getDestinationImage(trip.destination))}
           alt=""
           style={{ width: '100%', height: 130, objectFit: 'cover', display: 'block', transition: 'transform 0.4s ease' }}
         />
