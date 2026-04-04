@@ -165,25 +165,25 @@ export function TripProvider({ children }) {
       paidSettlements: [],
     };
 
-    try {
-      const rpcPromise = supabase.rpc('create_trip', {
-        p_name: tripData.name,
-        p_destination: tripData.destination,
-        p_data: fullTripData,
-        p_color: colorFromId(dbUser.id),
-      });
-      const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Request timed out')), 15000));
-      const { data: tripId, error } = await Promise.race([rpcPromise, timeout]);
+    const tripId = crypto.randomUUID();
 
-      if (error) { console.error('addTrip error:', error); alert('Failed to create trip: ' + error.message); return; }
+    // Insert trip (no .select() to avoid SELECT RLS issue)
+    const { error: tripErr } = await supabase
+      .from('trips')
+      .insert({ id: tripId, name: tripData.name, destination: tripData.destination, status: 'planning', data: fullTripData, created_by: dbUser.id });
 
-      const newTrip = { ...fullTripData, id: tripId };
-      setTrips(prev => [newTrip, ...prev]);
-      setActiveTripId(tripId);
-    } catch (err) {
-      console.error('addTrip exception:', err);
-      alert('Failed to create trip. Please check your connection and try again.');
-    }
+    if (tripErr) { console.error('addTrip insert error:', tripErr); alert('Failed to create trip: ' + tripErr.message); return; }
+
+    // Insert trip member
+    const { error: memberErr } = await supabase
+      .from('trip_members')
+      .insert({ trip_id: tripId, user_id: dbUser.id, role: 'organizer', color: colorFromId(dbUser.id) });
+
+    if (memberErr) console.error('addTrip member error:', memberErr);
+
+    const newTrip = { ...fullTripData, id: tripId };
+    setTrips(prev => [newTrip, ...prev]);
+    setActiveTripId(tripId);
   }, [dbUser]);
 
   const removeTrip = useCallback(async (tripId) => {
