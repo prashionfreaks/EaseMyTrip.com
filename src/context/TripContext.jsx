@@ -315,28 +315,11 @@ export function TripProvider({ children }) {
     updateTrip(tripId, trip => ({ ...trip, photos: (trip.photos || []).filter(p => p.id !== photoId) }));
   }, [updateTrip]);
 
-  const joinTripViaInvite = useCallback(async (inviteCode) => {
-    console.log('[joinInvite] called, code:', inviteCode, 'dbUser:', dbUser?.id);
-    if (!isSupabaseConfigured || !dbUser) { console.warn('[joinInvite] no supabase or dbUser'); return null; }
+  const joinTripViaInvite = useCallback(async (tripId) => {
+    console.log('[join] called, tripId:', tripId, 'dbUser:', dbUser?.id);
+    if (!isSupabaseConfigured || !dbUser) { console.warn('[join] no supabase or dbUser'); return null; }
     try {
-      if (!(await ensureSession())) { console.warn('[joinInvite] session check failed'); return null; }
-
-      // Look up the invite
-      console.log('[joinInvite] looking up invite code...');
-      const { data: invite, error: invErr } = await supabase
-        .from('trip_invites')
-        .select('trip_id')
-        .eq('invite_code', inviteCode)
-        .single();
-
-      if (invErr || !invite) {
-        console.error('[joinInvite] invalid invite code:', invErr);
-        alert('This invite link is invalid or has expired.');
-        return null;
-      }
-      console.log('[joinInvite] found trip_id:', invite.trip_id);
-
-      const tripId = invite.trip_id;
+      if (!(await ensureSession())) { console.warn('[join] session check failed'); return null; }
 
       // Check if already a member
       const { data: existing } = await supabase
@@ -346,41 +329,45 @@ export function TripProvider({ children }) {
         .eq('user_id', dbUser.id)
         .maybeSingle();
 
+      console.log('[join] already member?', !!existing);
+
       if (!existing) {
-        // Add to trip_members
+        // Add to trip_members table
         const memberColor = colorFromId(dbUser.id);
         const { error: memErr } = await supabase
           .from('trip_members')
           .insert({ trip_id: tripId, user_id: dbUser.id, role: 'member', color: memberColor });
 
-        if (memErr) { console.error('join trip member error:', memErr); alert('Failed to join trip.'); return null; }
+        if (memErr) { console.error('[join] member insert error:', memErr); alert('Failed to join trip.'); return null; }
+        console.log('[join] inserted into trip_members');
 
-        // Add user to trip's data.members array (replace placeholder if exists)
+        // Add user to trip's data.members JSON
         const { data: tripRow } = await supabase.from('trips').select('data').eq('id', tripId).single();
         if (tripRow?.data) {
           const memberName = dbUser.user_metadata?.full_name || dbUser.email?.split('@')[0] || 'User';
           const userEmail = dbUser.email?.toLowerCase();
           // Remove any placeholder entry with same email
-          const existingMembers = (tripRow.data.members || []).filter(
-            m => m.email?.toLowerCase() !== userEmail || (!m.id.startsWith('invited-') && m.id !== dbUser.id)
+          const cleanMembers = (tripRow.data.members || []).filter(
+            m => !(m.id?.startsWith('invited-') && m.email?.toLowerCase() === userEmail)
           );
           const updatedData = {
             ...tripRow.data,
-            members: [...existingMembers, {
+            members: [...cleanMembers, {
               id: dbUser.id, name: memberName, email: dbUser.email,
               color: memberColor, role: 'member',
             }],
           };
           await supabase.from('trips').update({ data: updatedData, updated_at: new Date().toISOString() }).eq('id', tripId);
-          console.log('[joinInvite] updated trip data.members');
+          console.log('[join] updated trip data.members');
         }
       }
 
       // Reload trips so the joined trip appears
       await fetchTrips(dbUser.id);
+      console.log('[join] done, returning tripId:', tripId);
       return tripId;
     } catch (err) {
-      console.error('joinTripViaInvite error:', err);
+      console.error('[join] error:', err);
       alert('Failed to join trip. Please try again.');
       return null;
     }

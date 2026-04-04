@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useTrips } from '../context/TripContext';
 import Modal from './Modal';
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { Copy, Mail, Users, Check, X, Link2, UserPlus, Crown } from 'lucide-react';
 
 const MEMBER_COLORS = ['#2563eb', '#7c3aed', '#16a34a', '#d97706', '#dc2626', '#0891b2', '#ea580c', '#be185d'];
@@ -13,64 +12,16 @@ export default function InviteModal({ onClose }) {
   const [tab, setTab] = useState('invite');
   const [emailError, setEmailError] = useState('');
   const [emailSent, setEmailSent] = useState('');
-  const [dbInviteCode, setDbInviteCode] = useState('');
-
-  // In Supabase mode: get or create a trip_invites record
-  useEffect(() => {
-    if (!isSupabaseConfigured || !activeTrip || !currentUser) return;
-
-    async function getOrCreateInvite() {
-      // First try to find an existing invite for this trip
-      const { data: existing, error: selErr } = await supabase
-        .from('trip_invites')
-        .select('invite_code')
-        .eq('trip_id', activeTrip.id)
-        .limit(1)
-        .maybeSingle();
-
-      if (selErr) console.error('[invite] select error:', selErr);
-
-      if (existing?.invite_code) {
-        console.log('[invite] using existing code:', existing.invite_code);
-        setDbInviteCode(existing.invite_code);
-        return;
-      }
-
-      // Create new invite
-      const { data, error: insErr } = await supabase
-        .from('trip_invites')
-        .insert({ trip_id: activeTrip.id, invited_by: currentUser.id })
-        .select('invite_code')
-        .single();
-
-      if (insErr) {
-        console.error('[invite] insert error:', insErr);
-        return;
-      }
-      if (data?.invite_code) {
-        console.log('[invite] created code:', data.invite_code);
-        setDbInviteCode(data.invite_code);
-      }
-    }
-
-    getOrCreateInvite();
-  }, [activeTrip?.id, currentUser?.id]);
 
   if (!activeTrip) return null;
 
-  // Demo mode: derive code from trip id (no DB)
-  const fallbackCode = btoa(activeTrip.id + '-tripsync').replace(/[^a-zA-Z0-9]/g, '').substring(0, 16);
-  const inviteCode = isSupabaseConfigured ? dbInviteCode : fallbackCode;
-  const inviteLink = inviteCode
-    ? `${window.location.origin}${window.location.pathname}?invite=${inviteCode}`
-    : 'Generating link…';
+  // Static invite link — just uses the trip ID, no DB lookup needed
+  const inviteLink = `${window.location.origin}${window.location.pathname}?join=${activeTrip.id}`;
 
   async function copyLink() {
-    if (!inviteCode) return;
     try {
       await navigator.clipboard.writeText(inviteLink);
     } catch {
-      // Fallback for browsers without clipboard API
       const ta = document.createElement('textarea');
       ta.value = inviteLink;
       document.body.appendChild(ta);
@@ -98,8 +49,6 @@ export default function InviteModal({ onClose }) {
     const colorIdx = activeTrip.members.length % MEMBER_COLORS.length;
     const trimmedEmail = email.trim().toLowerCase();
 
-    // Add as a pending placeholder in the trip's data.members
-    // The real join happens when they click the invite link (joinTripViaInvite)
     updateTrip(activeTrip.id, trip => ({
       ...trip,
       members: [
@@ -180,41 +129,8 @@ export default function InviteModal({ onClose }) {
 
       {tab === 'invite' && (
         <>
-          {/* Add by email */}
+          {/* Invite link — shown first */}
           <div style={{ marginBottom: 24 }}>
-            <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 8 }}>
-              <Mail size={13} style={{ display: 'inline', verticalAlign: -2, marginRight: 4 }} />
-              Add by Email
-            </label>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <input
-                className="form-input"
-                type="email"
-                placeholder="friend@example.com"
-                value={email}
-                onChange={e => { setEmail(e.target.value); setEmailError(''); }}
-                onKeyDown={e => e.key === 'Enter' && addMember()}
-                style={{ flex: 1 }}
-              />
-              <button className="btn btn-primary" onClick={addMember} style={{ whiteSpace: 'nowrap' }}>
-                <UserPlus size={14} /> Add Member
-              </button>
-            </div>
-            {emailError && (
-              <p style={{ fontSize: 12, color: '#dc2626', marginTop: 5 }}>{emailError}</p>
-            )}
-            {emailSent && (
-              <p style={{ fontSize: 12, color: '#16a34a', marginTop: 5 }}>
-                ✓ {emailSent} added — share the invite link below so they can access the trip.
-              </p>
-            )}
-            <p style={{ fontSize: 12, color: '#9ca3af', marginTop: 6 }}>
-              Members must open the invite link to see the trip on their dashboard.
-            </p>
-          </div>
-
-          {/* Invite link */}
-          <div>
             <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 8 }}>
               <Link2 size={13} style={{ display: 'inline', verticalAlign: -2, marginRight: 4 }} />
               Shareable Invite Link
@@ -242,15 +158,44 @@ export default function InviteModal({ onClose }) {
               </button>
             </div>
             <p style={{ fontSize: 12, color: '#9ca3af', marginTop: 6 }}>
-              Anyone with this link can join this trip. Link expires in 7 days.
+              Anyone with this link can join this trip after signing in.
             </p>
+          </div>
+
+          {/* Add by email */}
+          <div>
+            <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 8 }}>
+              <Mail size={13} style={{ display: 'inline', verticalAlign: -2, marginRight: 4 }} />
+              Add by Email
+            </label>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <input
+                className="form-input"
+                type="email"
+                placeholder="friend@example.com"
+                value={email}
+                onChange={e => { setEmail(e.target.value); setEmailError(''); }}
+                onKeyDown={e => e.key === 'Enter' && addMember()}
+                style={{ flex: 1 }}
+              />
+              <button className="btn btn-primary" onClick={addMember} style={{ whiteSpace: 'nowrap' }}>
+                <UserPlus size={14} /> Add Member
+              </button>
+            </div>
+            {emailError && (
+              <p style={{ fontSize: 12, color: '#dc2626', marginTop: 5 }}>{emailError}</p>
+            )}
+            {emailSent && (
+              <p style={{ fontSize: 12, color: '#16a34a', marginTop: 5 }}>
+                ✓ {emailSent} added — share the invite link above so they can access the trip.
+              </p>
+            )}
           </div>
         </>
       )}
 
       {tab === 'members' && (
         <div>
-          {/* Organizers */}
           {organizers.length > 0 && (
             <div style={{ marginBottom: 16 }}>
               <p style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', letterSpacing: '0.5px', textTransform: 'uppercase', marginBottom: 8 }}>
@@ -262,7 +207,6 @@ export default function InviteModal({ onClose }) {
             </div>
           )}
 
-          {/* Members */}
           {members.length > 0 ? (
             <div>
               <p style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', letterSpacing: '0.5px', textTransform: 'uppercase', marginBottom: 8 }}>
