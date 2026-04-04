@@ -165,18 +165,25 @@ export function TripProvider({ children }) {
       paidSettlements: [],
     };
 
-    const { data: tripId, error } = await supabase.rpc('create_trip', {
-      p_name: tripData.name,
-      p_destination: tripData.destination,
-      p_data: fullTripData,
-      p_color: colorFromId(dbUser.id),
-    });
+    try {
+      const rpcPromise = supabase.rpc('create_trip', {
+        p_name: tripData.name,
+        p_destination: tripData.destination,
+        p_data: fullTripData,
+        p_color: colorFromId(dbUser.id),
+      });
+      const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Request timed out')), 15000));
+      const { data: tripId, error } = await Promise.race([rpcPromise, timeout]);
 
-    if (error) { console.error('addTrip error:', error); return; }
+      if (error) { console.error('addTrip error:', error); alert('Failed to create trip: ' + error.message); return; }
 
-    const newTrip = { ...fullTripData, id: tripId };
-    setTrips(prev => [newTrip, ...prev]);
-    setActiveTripId(tripId);
+      const newTrip = { ...fullTripData, id: tripId };
+      setTrips(prev => [newTrip, ...prev]);
+      setActiveTripId(tripId);
+    } catch (err) {
+      console.error('addTrip exception:', err);
+      alert('Failed to create trip. Please check your connection and try again.');
+    }
   }, [dbUser]);
 
   const removeTrip = useCallback(async (tripId) => {
