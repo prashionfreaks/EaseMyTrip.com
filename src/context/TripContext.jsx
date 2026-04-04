@@ -37,6 +37,7 @@ function normalizeTrip(trip) {
     members: [], polls: [], expenses: [], itinerary: [], routes: [],
     activity: [], contingencies: [], messages: [], photos: [],
     paidSettlements: [],
+    budget: { total: 0, spent: 0, currency: 'INR' },
     ...trip,
   };
 }
@@ -271,7 +272,7 @@ export function TripProvider({ children }) {
   const vote = useCallback((tripId, pollId, optionId, userId) => {
     updateTrip(tripId, trip => ({
       ...trip,
-      polls: trip.polls.map(p => {
+      polls: (trip.polls || []).map(p => {
         if (p.id !== pollId) return p;
         return {
           ...p,
@@ -289,28 +290,28 @@ export function TripProvider({ children }) {
   }, [updateTrip]);
 
   const addPoll = useCallback((tripId, poll) => {
-    updateTrip(tripId, trip => ({ ...trip, polls: [...trip.polls, { ...poll, id: 'p' + Date.now(), status: 'active' }] }));
+    updateTrip(tripId, trip => ({ ...trip, polls: [...(trip.polls || []), { ...poll, id: 'p' + Date.now(), status: 'active' }] }));
   }, [updateTrip]);
 
   const addExpense = useCallback((tripId, expense) => {
     updateTrip(tripId, trip => ({
       ...trip,
-      expenses: [...trip.expenses, { ...expense, id: 'e' + Date.now() }],
-      budget: { ...trip.budget, spent: trip.budget.spent + expense.amount },
+      expenses: [...(trip.expenses || []), { ...expense, id: 'e' + Date.now() }],
+      budget: { ...(trip.budget || {}), spent: ((trip.budget || {}).spent || 0) + expense.amount },
     }));
   }, [updateTrip]);
 
   const addItineraryItem = useCallback((tripId, dayId, item) => {
     updateTrip(tripId, trip => ({
       ...trip,
-      itinerary: trip.itinerary.map(day =>
+      itinerary: (trip.itinerary || []).map(day =>
         day.id === dayId ? { ...day, items: [...day.items, { ...item, id: 'it' + Date.now() }] } : day
       ),
     }));
   }, [updateTrip]);
 
   const addContingency = useCallback((tripId, contingency) => {
-    updateTrip(tripId, trip => ({ ...trip, contingencies: [...trip.contingencies, { ...contingency, id: 'c' + Date.now() }] }));
+    updateTrip(tripId, trip => ({ ...trip, contingencies: [...(trip.contingencies || []), { ...contingency, id: 'c' + Date.now() }] }));
   }, [updateTrip]);
 
   const sendMessage = useCallback((tripId, message) => {

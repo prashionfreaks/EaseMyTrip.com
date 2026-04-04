@@ -50,7 +50,7 @@ export default function TripDetail({ onInvite, defaultTab = 'chat' }) {
     }).length;
   }, [activeTrip, currentUser]);
 
-  const activePolls = activeTrip?.polls.filter(p => p.status === 'active').length || 0;
+  const activePolls = (activeTrip?.polls || []).filter(p => p.status === 'active').length || 0;
 
   const badges = { chat: unreadMessages || null, polls: activePolls || null };
 
@@ -107,24 +107,24 @@ export default function TripDetail({ onInvite, defaultTab = 'chat' }) {
               </span>
               <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                 <Calendar size={12} />
-                {format(parseISO(activeTrip.startDate), 'MMM d')} – {format(parseISO(activeTrip.endDate), 'MMM d, yyyy')}
+                {activeTrip.startDate ? format(parseISO(activeTrip.startDate), 'MMM d') : '?'} – {activeTrip.endDate ? format(parseISO(activeTrip.endDate), 'MMM d, yyyy') : '?'}
               </span>
               <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <Users size={12} /> {activeTrip.members.length} traveler{activeTrip.members.length !== 1 ? 's' : ''}
+                <Users size={12} /> {(activeTrip.members || []).length} traveler{(activeTrip.members || []).length !== 1 ? 's' : ''}
               </span>
             </p>
           </div>
           <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
             <div className="avatar-group" style={{ marginRight: 4 }}>
-              {activeTrip.members.slice(0, 4).map(m => (
+              {(activeTrip.members || []).slice(0, 4).map(m => (
                 <div key={m.id} className="user-avatar" title={m.name}
                   style={{ background: m.color, width: 28, height: 28, fontSize: 11, border: '2px solid rgba(255,255,255,0.4)' }}>
                   {m.name[0]}
                 </div>
               ))}
-              {activeTrip.members.length > 4 && (
+              {(activeTrip.members || []).length > 4 && (
                 <div className="user-avatar" style={{ background: 'rgba(255,255,255,0.25)', color: 'white', width: 28, height: 28, fontSize: 10, border: '2px solid rgba(255,255,255,0.4)' }}>
-                  +{activeTrip.members.length - 4}
+                  +{(activeTrip.members || []).length - 4}
                 </div>
               )}
             </div>

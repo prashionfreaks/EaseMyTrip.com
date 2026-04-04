@@ -20,7 +20,7 @@ function countOutstandingDues(trips, currentUserId) {
     if (!trip.expenses?.length || !trip.members?.length) return;
     const paid = new Set((trip.paidSettlements || []).map(p => `${p.from}→${p.to}`));
     const bal = {};
-    trip.members.forEach(m => { bal[m.id] = 0; });
+    (trip.members || []).forEach(m => { bal[m.id] = 0; });
     trip.expenses.forEach(exp => {
       if (!exp.splitAmong?.length) return;
       const share = exp.amount / exp.splitAmong.length;
@@ -58,7 +58,7 @@ const statusConfig = {
 
 export default function Dashboard({ onNavigate }) {
   const { trips: allTrips, setActiveTripId, activeTrip, addTrip, removeTrip, currentUser, tripsLoaded } = useTrips();
-  const trips = allTrips.filter(t => t.members.some(m => m.id === currentUser?.id));
+  const trips = allTrips.filter(t => (t.members || []).some(m => m.id === currentUser?.id));
   const [showCreate, setShowCreate] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -498,7 +498,7 @@ export default function Dashboard({ onNavigate }) {
 function TripCard({ trip, isActive, onSelect, onDelete, isDeleting }) {
   const cfg = statusConfig[trip.status] || statusConfig.planning;
   const StatusIcon = cfg.icon;
-  const daysUntil = differenceInDays(parseISO(trip.startDate), new Date());
+  const daysUntil = trip.startDate ? differenceInDays(parseISO(trip.startDate), new Date()) : null;
   const totalSpent = (trip.expenses || []).reduce((sum, e) => sum + e.amount, 0);
   const budgetPct = trip.budget.total > 0 ? Math.min(100, (totalSpent / trip.budget.total) * 100) : 0;
 
@@ -589,8 +589,8 @@ function TripCard({ trip, isActive, onSelect, onDelete, isDeleting }) {
       <div style={{ padding: '12px 14px 14px' }}>
         <p style={{ fontSize: 11.5, color: 'var(--text-tertiary)', display: 'flex', alignItems: 'center', gap: 4, marginBottom: 10 }}>
           <Calendar size={11} />
-          {format(parseISO(trip.startDate), 'MMM d')} – {format(parseISO(trip.endDate), 'MMM d, yyyy')}
-          {daysUntil > 0 && (
+          {trip.startDate ? format(parseISO(trip.startDate), 'MMM d') : '?'} – {trip.endDate ? format(parseISO(trip.endDate), 'MMM d, yyyy') : '?'}
+          {daysUntil != null && daysUntil > 0 && (
             <span style={{ marginLeft: 'auto', background: 'var(--brand-light)', color: 'var(--brand)', fontWeight: 700, fontSize: 10, padding: '1px 7px', borderRadius: 999 }}>
               {daysUntil}d away
             </span>
@@ -605,15 +605,15 @@ function TripCard({ trip, isActive, onSelect, onDelete, isDeleting }) {
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div className="avatar-group">
-            {trip.members.slice(0, 4).map(m => (
+            {(trip.members || []).slice(0, 4).map(m => (
               <div key={m.id} className="user-avatar" title={m.name}
                 style={{ background: m.color, width: 24, height: 24, fontSize: 10, border: '2px solid white' }}>
                 {m.name[0]}
               </div>
             ))}
-            {trip.members.length > 4 && (
+            {(trip.members || []).length > 4 && (
               <div className="user-avatar" style={{ background: '#e2eaf4', color: '#4a607a', width: 24, height: 24, fontSize: 10, border: '2px solid white' }}>
-                +{trip.members.length - 4}
+                +{(trip.members || []).length - 4}
               </div>
             )}
           </div>

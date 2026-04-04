@@ -43,7 +43,9 @@ export default function Budget() {
     );
   }
 
-  const { budget, expenses, members } = activeTrip;
+  const budget = activeTrip.budget || { total: 0, spent: 0, currency: 'INR' };
+  const expenses = activeTrip.expenses || [];
+  const members = activeTrip.members || [];
   const sym = getDestinationCurrency(activeTrip.destination) === 'INR' ? '₹' : '$';
   const totalSpent = expenses.reduce((sum, e) => sum + e.amount, 0);
   const remaining = budget.total - totalSpent;

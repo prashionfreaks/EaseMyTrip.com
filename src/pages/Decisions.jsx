@@ -29,7 +29,7 @@ export default function Decisions() {
     );
   }
 
-  const polls = activeTrip.polls.filter(p => filter === 'all' || p.status === filter);
+  const polls = (activeTrip.polls || []).filter(p => filter === 'all' || p.status === filter);
 
   function handleCreate() {
     const validOptions = newPoll.options.filter(o => o.trim());
@@ -47,7 +47,7 @@ export default function Decisions() {
   function closePoll(pollId) {
     updateTrip(activeTrip.id, trip => ({
       ...trip,
-      polls: trip.polls.map(p => p.id === pollId ? { ...p, status: 'closed' } : p),
+      polls: (trip.polls || []).map(p => p.id === pollId ? { ...p, status: 'closed' } : p),
     }));
   }
 
@@ -56,7 +56,7 @@ export default function Decisions() {
       <div className="page-header" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
         <div>
           <h1>Group Decisions</h1>
-          <p>{activeTrip.name} — {activeTrip.polls.length} polls total</p>
+          <p>{activeTrip.name} — {(activeTrip.polls || []).length} polls total</p>
         </div>
         <button className="btn btn-primary" onClick={() => setShowCreate(true)}>
           <Plus size={16} /> New Poll
@@ -66,9 +66,9 @@ export default function Decisions() {
       {/* Filters */}
       <div className="tab-nav">
         {[
-          { id: 'all', label: 'All', count: activeTrip.polls.length },
-          { id: 'active', label: 'Active', count: activeTrip.polls.filter(p => p.status === 'active').length },
-          { id: 'closed', label: 'Closed', count: activeTrip.polls.filter(p => p.status === 'closed').length },
+          { id: 'all', label: 'All', count: (activeTrip.polls || []).length },
+          { id: 'active', label: 'Active', count: (activeTrip.polls || []).filter(p => p.status === 'active').length },
+          { id: 'closed', label: 'Closed', count: (activeTrip.polls || []).filter(p => p.status === 'closed').length },
         ].map(tab => (
           <button
             key={tab.id}
@@ -168,7 +168,7 @@ export default function Decisions() {
 }
 
 function PollCard({ poll, trip, currentUser, onVote, onClose }) {
-  const totalVoters = trip.members.length;
+  const totalVoters = (trip.members || []).length;
   const totalVotes = new Set(poll.options.flatMap(o => o.votes)).size;
   const maxVotes = Math.max(...poll.options.map(o => o.votes.length), 1);
   const isActive = poll.status === 'active';

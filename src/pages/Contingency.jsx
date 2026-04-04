@@ -54,7 +54,7 @@ export default function Contingency() {
   function toggleStatus(id) {
     updateTrip(activeTrip.id, trip => ({
       ...trip,
-      contingencies: trip.contingencies.map(c =>
+      contingencies: (trip.contingencies || []).map(c =>
         c.id === id ? { ...c, status: c.status === 'prepared' ? 'activated' : 'prepared' } : c
       ),
     }));

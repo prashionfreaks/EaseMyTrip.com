@@ -31,19 +31,19 @@ export default function InviteModal({ onClose }) {
   function removeMember(memberId) {
     updateTrip(activeTrip.id, trip => ({
       ...trip,
-      members: trip.members.filter(m => m.id !== memberId),
+      members: (trip.members || []).filter(m => m.id !== memberId),
     }));
   }
 
   function setRole(memberId, role) {
     updateTrip(activeTrip.id, trip => ({
       ...trip,
-      members: trip.members.map(m => m.id === memberId ? { ...m, role } : m),
+      members: (trip.members || []).map(m => m.id === memberId ? { ...m, role } : m),
     }));
   }
 
-  const organizers = activeTrip.members.filter(m => m.role === 'organizer');
-  const members = activeTrip.members.filter(m => m.role !== 'organizer');
+  const organizers = (activeTrip.members || []).filter(m => m.role === 'organizer');
+  const members = (activeTrip.members || []).filter(m => m.role !== 'organizer');
 
   return (
     <Modal
@@ -66,7 +66,7 @@ export default function InviteModal({ onClose }) {
       <div style={{ display: 'flex', background: '#f3f4f6', borderRadius: 10, padding: 4, marginBottom: 20, gap: 4 }}>
         {[
           { id: 'invite', label: 'Invite People', icon: UserPlus },
-          { id: 'members', label: `Members (${activeTrip.members.length})`, icon: Users },
+          { id: 'members', label: `Members (${(activeTrip.members || []).length})`, icon: Users },
         ].map(({ id, label, icon: Icon }) => (
           <button
             key={id}

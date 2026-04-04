@@ -39,7 +39,7 @@ function computeSettlements(expenses, members) {
 }
 
 function getMember(trip, uid) {
-  return trip.members.find(m => m.id === uid);
+  return (trip.members || []).find(m => m.id === uid);
 }
 
 export default function NotificationPanel({ onClose }) {

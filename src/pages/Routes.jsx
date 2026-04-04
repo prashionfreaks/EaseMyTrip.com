@@ -115,7 +115,7 @@ export default function Routes() {
   }
 
   function handleDelete(routeId) {
-    updateTrip(activeTrip.id, trip => ({ ...trip, routes: trip.routes.filter(r => r.id !== routeId) }));
+    updateTrip(activeTrip.id, trip => ({ ...trip, routes: (trip.routes || []).filter(r => r.id !== routeId) }));
   }
 
   const allStops = [];
