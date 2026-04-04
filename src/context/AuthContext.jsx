@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 const DEMO_USER = {
@@ -7,6 +7,8 @@ const DEMO_USER = {
   user_metadata: { full_name: 'Prachi Patil' },
   isDemoUser: true,
 };
+
+const INACTIVITY_TIMEOUT = 10 * 60 * 1000; // 10 minutes
 
 const AuthContext = createContext(null);
 
@@ -83,6 +85,35 @@ export function AuthProvider({ children }) {
     }
     setUser(null);
   }
+
+  // ── Inactivity auto-logout ──
+  const timerRef = useRef(null);
+
+  const resetInactivityTimer = useCallback(() => {
+    if (!isSupabaseConfigured) return;
+    clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      if (user) {
+        console.warn('Signed out due to 10 minutes of inactivity');
+        signOut();
+      }
+    }, INACTIVITY_TIMEOUT);
+  }, [user]);
+
+  useEffect(() => {
+    if (!isSupabaseConfigured || !user) return;
+
+    const events = ['mousedown', 'keydown', 'scroll', 'touchstart', 'mousemove'];
+    const handler = () => resetInactivityTimer();
+
+    events.forEach(e => window.addEventListener(e, handler, { passive: true }));
+    resetInactivityTimer(); // start the timer
+
+    return () => {
+      events.forEach(e => window.removeEventListener(e, handler));
+      clearTimeout(timerRef.current);
+    };
+  }, [user, resetInactivityTimer]);
 
   const displayName = user?.user_metadata?.full_name
     || user?.email?.split('@')[0]?.replace(/[^a-zA-Z ]/g, ' ').trim()
