@@ -249,5 +249,5 @@ export const currentUser = {
 };
 
 export function getMemberById(trip, userId) {
-  return trip.members.find(m => m.id === userId);
+  return (trip.members || []).find(m => m.id === userId);
 }
