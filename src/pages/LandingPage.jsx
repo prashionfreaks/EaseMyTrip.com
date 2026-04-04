@@ -17,6 +17,24 @@ const FEATURES = [
 
 const DESTINATIONS_PILLS = ['Japan', 'Bali', 'Bhutan', 'Switzerland', 'Costa Rica', 'Australia', 'Egypt', 'Finland'];
 
+// Rolling columns — left scrolls up, right scrolls down
+const ROLL_LEFT = [
+  'https://images.unsplash.com/photo-1524413840807-0c3cb6fa808d?w=400&h=520&fit=crop', // Santorini
+  'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=400&h=520&fit=crop', // Kyoto
+  'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=520&fit=crop', // Swiss Alps
+  'https://images.unsplash.com/photo-1548013146-72479768bada?w=400&h=520&fit=crop', // Taj Mahal
+  'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=520&fit=crop', // Maldives
+  'https://images.unsplash.com/photo-1533929736458-ca588d08c8be?w=400&h=520&fit=crop', // London
+];
+const ROLL_RIGHT = [
+  'https://images.unsplash.com/photo-1539037116277-4db20889f2d4?w=400&h=520&fit=crop', // Northern Lights
+  'https://images.unsplash.com/photo-1518548419970-58e3b4079ab2?w=400&h=520&fit=crop', // Bali
+  'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=400&h=520&fit=crop', // Amalfi Coast
+  'https://images.unsplash.com/photo-1526392060635-9d6019884377?w=400&h=520&fit=crop', // Machu Picchu
+  'https://images.unsplash.com/photo-1512100356356-de1b84283e18?w=400&h=520&fit=crop', // Dubai
+  'https://images.unsplash.com/photo-1470093851219-69951fcbb533?w=400&h=520&fit=crop', // Hot air balloons
+];
+
 const SLIDER_IMAGES = [
   { url: 'https://images.unsplash.com/photo-1524413840807-0c3cb6fa808d?w=1200&h=600&fit=crop', place: 'Santorini, Greece', caption: 'Where sunsets paint the sky' },
   { url: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=1200&h=600&fit=crop', place: 'Kyoto, Japan', caption: 'Ancient temples & cherry blossoms' },
@@ -57,6 +75,14 @@ export default function LandingPage() {
         @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes rollUp {
+          0% { transform: translateY(0); }
+          100% { transform: translateY(-50%); }
+        }
+        @keyframes rollDown {
+          0% { transform: translateY(-50%); }
+          100% { transform: translateY(0); }
+        }
         .hero-anim { animation: fadeUp 0.7s ease forwards; }
         .hero-anim-2 { animation: fadeUp 0.7s 0.15s ease both; }
         .hero-anim-3 { animation: fadeUp 0.7s 0.3s ease both; }
@@ -65,6 +91,17 @@ export default function LandingPage() {
         .google-btn:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.15); transform: translateY(-2px); }
         .slider-arrow { opacity: 0; transition: opacity 0.2s; }
         .slider-wrap:hover .slider-arrow { opacity: 1; }
+        .roll-col { display: flex; flex-direction: column; gap: 16px; }
+        .roll-col-up { animation: rollUp 30s linear infinite; }
+        .roll-col-down { animation: rollDown 30s linear infinite; }
+        .roll-img {
+          width: 100%; border-radius: 14px; object-fit: cover;
+          height: 200px; display: block;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        @media (max-width: 900px) {
+          .roll-strip { display: none !important; }
+        }
       `}</style>
 
       {/* ── Navbar ── */}
@@ -105,43 +142,41 @@ export default function LandingPage() {
       {/* ── Hero ── */}
       <section style={{
         background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #4c1d95 100%)',
-        padding: '90px 5% 100px',
-        position: 'relative', overflow: 'hidden', textAlign: 'center',
+        position: 'relative', overflow: 'hidden',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        minHeight: 'clamp(560px, 85vh, 780px)',
       }}>
-        {/* Background blobs */}
-        {[
-          { w: 400, h: 400, top: '-10%', left: '-5%', op: 0.05 },
-          { w: 300, h: 300, top: '50%', left: '80%', op: 0.06 },
-          { w: 500, h: 500, top: '30%', left: '-15%', op: 0.03 },
-        ].map((c, i) => (
-          <div key={i} style={{
-            position: 'absolute', borderRadius: '50%', background: 'white',
-            width: c.w, height: c.h, top: c.top, left: c.left,
-            opacity: c.op, pointerEvents: 'none',
-          }} />
-        ))}
-
-        {/* Floating destination pills */}
-        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' }}>
-          {DESTINATIONS_PILLS.map((d, i) => (
-            <div key={d} style={{
-              position: 'absolute',
-              top: `${15 + (i * 10) % 70}%`,
-              left: i % 2 === 0 ? `${2 + (i * 7) % 12}%` : `${80 + (i * 4) % 15}%`,
-              background: 'rgba(255,255,255,0.1)',
-              backdropFilter: 'blur(8px)',
-              border: '1px solid rgba(255,255,255,0.15)',
-              borderRadius: 999, padding: '5px 14px',
-              fontSize: 12, color: 'rgba(255,255,255,0.7)', fontWeight: 500,
-              animation: `float ${3 + i * 0.4}s ease-in-out infinite`,
-              animationDelay: `${i * 0.3}s`,
-            }}>
-              {d}
-            </div>
-          ))}
+        {/* Left rolling strip */}
+        <div className="roll-strip" style={{
+          position: 'absolute', left: 0, top: 0, bottom: 0,
+          width: 220, overflow: 'hidden', pointerEvents: 'none',
+          maskImage: 'linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)',
+          opacity: 0.55,
+        }}>
+          <div className="roll-col roll-col-up" style={{ paddingTop: 16 }}>
+            {[...ROLL_LEFT, ...ROLL_LEFT].map((url, i) => (
+              <img key={i} src={url} alt="" className="roll-img" loading="lazy" />
+            ))}
+          </div>
         </div>
 
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: 720, margin: '0 auto' }}>
+        {/* Right rolling strip */}
+        <div className="roll-strip" style={{
+          position: 'absolute', right: 0, top: 0, bottom: 0,
+          width: 220, overflow: 'hidden', pointerEvents: 'none',
+          maskImage: 'linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)',
+          opacity: 0.55,
+        }}>
+          <div className="roll-col roll-col-down" style={{ paddingTop: 16 }}>
+            {[...ROLL_RIGHT, ...ROLL_RIGHT].map((url, i) => (
+              <img key={i} src={url} alt="" className="roll-img" loading="lazy" />
+            ))}
+          </div>
+        </div>
+
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: 620, margin: '0 auto', textAlign: 'center', padding: '80px 5% 90px' }}>
           <div className="hero-anim" style={{
             display: 'inline-flex', alignItems: 'center', gap: 8,
             background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(8px)',
