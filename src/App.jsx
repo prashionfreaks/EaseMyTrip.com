@@ -23,12 +23,13 @@ export default function App() {
   const { user, loading, isDemo } = useAuth();
   const [inviteProcessed, setInviteProcessed] = useState(false);
 
-  // Handle invite code in URL — save it for processing after login
+  // Handle invite code in URL — save to localStorage (survives OAuth redirects)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const inviteCode = params.get('invite');
     if (inviteCode) {
-      sessionStorage.setItem('pendingInvite', inviteCode);
+      console.log('[invite] saved invite code from URL:', inviteCode);
+      localStorage.setItem('pendingInvite', inviteCode);
       window.history.replaceState({}, '', window.location.pathname);
     }
   }, []);
@@ -36,16 +37,18 @@ export default function App() {
   // Process pending invite after user is logged in and trips context is ready
   useEffect(() => {
     if (!user || !tripsLoaded || inviteProcessed) return;
-    const pending = sessionStorage.getItem('pendingInvite');
+    const pending = localStorage.getItem('pendingInvite');
     if (!pending) return;
 
-    sessionStorage.removeItem('pendingInvite');
+    console.log('[invite] processing pending invite:', pending, 'user:', user.id);
+    localStorage.removeItem('pendingInvite');
     setInviteProcessed(true);
 
     if (joinTripViaInvite) {
-      // Supabase mode
       joinTripViaInvite(pending).then(tripId => {
+        console.log('[invite] joinTripViaInvite result:', tripId);
         if (tripId) { setActiveTripId(tripId); setCurrentPage('dashboard'); }
+        else { console.warn('[invite] join returned null — check console for errors'); }
       });
     } else {
       // Demo mode: match by derived code

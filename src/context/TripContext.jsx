@@ -311,11 +311,13 @@ export function TripProvider({ children }) {
   }, [updateTrip]);
 
   const joinTripViaInvite = useCallback(async (inviteCode) => {
-    if (!isSupabaseConfigured || !dbUser) return null;
+    console.log('[joinInvite] called, code:', inviteCode, 'dbUser:', dbUser?.id);
+    if (!isSupabaseConfigured || !dbUser) { console.warn('[joinInvite] no supabase or dbUser'); return null; }
     try {
-      if (!(await ensureSession())) return null;
+      if (!(await ensureSession())) { console.warn('[joinInvite] session check failed'); return null; }
 
       // Look up the invite
+      console.log('[joinInvite] looking up invite code...');
       const { data: invite, error: invErr } = await supabase
         .from('trip_invites')
         .select('trip_id')
@@ -323,10 +325,11 @@ export function TripProvider({ children }) {
         .single();
 
       if (invErr || !invite) {
-        console.error('Invalid invite code:', invErr);
+        console.error('[joinInvite] invalid invite code:', invErr);
         alert('This invite link is invalid or has expired.');
         return null;
       }
+      console.log('[joinInvite] found trip_id:', invite.trip_id);
 
       const tripId = invite.trip_id;
 
