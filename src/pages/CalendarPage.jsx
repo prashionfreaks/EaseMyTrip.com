@@ -255,7 +255,7 @@ export default function CalendarPage() {
     const longWeekend = longWeekends.find(lw =>
       isWithinInterval(date, { start: lw.start, end: lw.end })
     );
-    const inTrip = activeTrip
+    const inTrip = activeTrip?.startDate && activeTrip?.endDate
       ? isWithinInterval(date, { start: parseISO(activeTrip.startDate), end: parseISO(activeTrip.endDate) })
       : false;
     const inPreview = previewRange
