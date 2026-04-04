@@ -56,7 +56,7 @@ const statusConfig = {
 };
 
 export default function Dashboard({ onNavigate }) {
-  const { trips: allTrips, setActiveTripId, activeTrip, addTrip, removeTrip, currentUser } = useTrips();
+  const { trips: allTrips, setActiveTripId, activeTrip, addTrip, removeTrip, currentUser, tripsLoaded } = useTrips();
   const trips = allTrips.filter(t => t.members.some(m => m.id === currentUser?.id));
   const [showCreate, setShowCreate] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
@@ -102,7 +102,42 @@ export default function Dashboard({ onNavigate }) {
 
   return (
     <>
-      <style>{`@keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+      <style>{`
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes tripPulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+        @keyframes tripFadeIn { from { opacity: 0; filter: blur(8px); } to { opacity: 1; filter: blur(0); } }
+      `}</style>
+
+      {/* Trip loading overlay */}
+      {!tripsLoaded && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 50,
+          background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(8px)',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          gap: 16,
+        }}>
+          <div style={{
+            width: 56, height: 56, borderRadius: 16,
+            background: 'linear-gradient(135deg, #2563eb, #7c3aed)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 8px 24px rgba(37,99,235,0.3)',
+            animation: 'tripPulse 1.5s ease-in-out infinite',
+          }}>
+            <Globe size={26} color="white" />
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <p style={{ fontSize: 15, fontWeight: 700, color: '#1e293b' }}>Loading your trips...</p>
+            <p style={{ fontSize: 12, color: '#94a3b8', marginTop: 4 }}>Hang tight, getting everything ready</p>
+          </div>
+        </div>
+      )}
+
+      <div style={{
+        opacity: tripsLoaded ? 1 : 0.3,
+        filter: tripsLoaded ? 'none' : 'blur(4px)',
+        transition: 'opacity 0.4s, filter 0.4s',
+        animation: tripsLoaded ? 'tripFadeIn 0.4s ease' : 'none',
+      }}>
       <div className="page-header" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
         <div>
           <h1>{activeTrip ? activeTrip.name : 'Your Trips'}</h1>
@@ -385,6 +420,8 @@ export default function Dashboard({ onNavigate }) {
           </div>
         </div>}
       </div>
+
+      </div>{/* end blur wrapper */}
 
       {/* Create trip modal */}
       {showCreate && (
