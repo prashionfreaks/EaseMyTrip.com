@@ -1,12 +1,13 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useTrips } from '../context/TripContext';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import Modal from '../components/Modal';
 import InviteModal from '../components/InviteModal';
 import NotificationPanel from '../components/NotificationPanel';
 import TripDetail from '../components/TripDetail';
 import {
   Plus, MapPin, Calendar, Vote, Wallet,
-  Clock, CheckCircle2, Trash2, Bell,
+  Clock, CheckCircle2, Trash2, Bell, Users, Globe, TrendingUp,
 } from 'lucide-react';
 import { getDestinationCurrency } from '../lib/itinerary';
 import { format, differenceInDays, parseISO } from 'date-fns';
@@ -62,7 +63,15 @@ export default function Dashboard({ onNavigate }) {
   const [newTrip, setNewTrip] = useState({ name: '', destination: '', startDate: '', endDate: '', budget: '', currency: 'INR' });
   const [creating, setCreating] = useState(false);
   const [deleting, setDeleting] = useState(null);
+  const [platformStats, setPlatformStats] = useState(null);
   const dueCount = useMemo(() => countOutstandingDues(trips, currentUser?.id), [trips, currentUser?.id]);
+
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+    supabase.rpc('get_platform_stats').then(({ data }) => {
+      if (data) setPlatformStats(data);
+    });
+  }, []);
 
   async function handleCreate() {
     if (!newTrip.name.trim() || !newTrip.destination.trim()) return;
@@ -229,17 +238,86 @@ export default function Dashboard({ onNavigate }) {
           {trips.length === 0 && (
             <div style={{
               gridColumn: '1 / -1',
-              textAlign: 'center', padding: '56px 24px',
+              borderRadius: 20, overflow: 'hidden',
               background: 'linear-gradient(135deg, #f0f9ff, #e0f2fe)',
-              borderRadius: 20, border: '1px dashed #bae6fd',
+              border: '1px solid #bae6fd',
+              padding: '36px 28px',
             }}>
-              <div style={{ fontSize: 48, marginBottom: 12 }}>🌍</div>
-              <h3 style={{ fontSize: 20, fontWeight: 800, color: '#0c4a6e', marginBottom: 6 }}>
-                No trips yet — where to next?
-              </h3>
-              <p style={{ fontSize: 14, color: '#0369a1', marginBottom: 20 }}>
-                Create your first trip and start planning adventures with your crew.
-              </p>
+              {/* Stats cards */}
+              {platformStats && (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 14, marginBottom: 28 }}>
+                  <div style={{
+                    background: 'white', borderRadius: 14, padding: '18px 20px',
+                    border: '1px solid #e0f2fe', textAlign: 'center',
+                  }}>
+                    <div style={{
+                      width: 40, height: 40, borderRadius: 12, margin: '0 auto 10px',
+                      background: 'linear-gradient(135deg, #dbeafe, #ede9fe)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <Globe size={20} style={{ color: '#2563eb' }} />
+                    </div>
+                    <div style={{ fontSize: 28, fontWeight: 800, color: '#0c4a6e' }}>
+                      {platformStats.trips || 0}
+                    </div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: '#64748b', marginTop: 2 }}>Trips Created</div>
+                  </div>
+                  <div style={{
+                    background: 'white', borderRadius: 14, padding: '18px 20px',
+                    border: '1px solid #e0f2fe', textAlign: 'center',
+                  }}>
+                    <div style={{
+                      width: 40, height: 40, borderRadius: 12, margin: '0 auto 10px',
+                      background: 'linear-gradient(135deg, #d1fae5, #cffafe)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <Users size={20} style={{ color: '#059669' }} />
+                    </div>
+                    <div style={{ fontSize: 28, fontWeight: 800, color: '#0c4a6e' }}>
+                      {platformStats.users || 0}
+                    </div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: '#64748b', marginTop: 2 }}>Wanderers</div>
+                  </div>
+                  <div style={{
+                    background: 'white', borderRadius: 14, padding: '18px 20px',
+                    border: '1px solid #e0f2fe', textAlign: 'center',
+                  }}>
+                    <div style={{
+                      width: 40, height: 40, borderRadius: 12, margin: '0 auto 10px',
+                      background: 'linear-gradient(135deg, #fef3c7, #fce7f3)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <TrendingUp size={20} style={{ color: '#d97706' }} />
+                    </div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: '#64748b', marginBottom: 6 }}>Top Destinations</div>
+                    {(platformStats.topDestinations || []).map((d, i) => (
+                      <div key={i} style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                        fontSize: 13, fontWeight: 600, color: '#0c4a6e', marginTop: 4,
+                      }}>
+                        <span style={{
+                          width: 18, height: 18, borderRadius: 6, fontSize: 10, fontWeight: 700,
+                          background: i === 0 ? '#fbbf24' : i === 1 ? '#94a3b8' : '#d97706',
+                          color: 'white', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                        }}>{i + 1}</span>
+                        {d.destination}
+                        <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 500 }}>({d.trip_count})</span>
+                      </div>
+                    ))}
+                    {(!platformStats.topDestinations || platformStats.topDestinations.length === 0) && (
+                      <div style={{ fontSize: 13, color: '#94a3b8' }}>No trips yet</div>
+                    )}
+                  </div>
+                </div>
+              )}
+              <div style={{ textAlign: 'center' }}>
+                <h3 style={{ fontSize: 18, fontWeight: 800, color: '#0c4a6e', marginBottom: 6 }}>
+                  Start your adventure
+                </h3>
+                <p style={{ fontSize: 13, color: '#0369a1' }}>
+                  Create your first trip and invite your crew to plan together.
+                </p>
+              </div>
             </div>
           )}
           {trips.length > 0 && (
