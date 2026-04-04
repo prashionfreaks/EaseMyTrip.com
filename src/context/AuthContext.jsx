@@ -53,10 +53,17 @@ export function AuthProvider({ children }) {
 
   async function signInWithGoogle() {
     if (!isSupabaseConfigured) return { error: { message: 'Supabase not configured.' } };
-    return supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: window.location.origin },
-    });
+    try {
+      const result = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin },
+      });
+      console.log('[auth] signInWithOAuth result:', result);
+      return result;
+    } catch (err) {
+      console.error('[auth] signInWithOAuth exception:', err);
+      return { error: { message: 'Failed to connect to auth service. Please try again.' } };
+    }
   }
 
   async function resetPassword(email) {
@@ -72,7 +79,11 @@ export function AuthProvider({ children }) {
   }
 
   async function signOut() {
-    if (isSupabaseConfigured) await supabase.auth.signOut();
+    try {
+      if (isSupabaseConfigured) await supabase.auth.signOut();
+    } catch (err) {
+      console.error('[auth] signOut error:', err);
+    }
     setUser(null);
   }
 
