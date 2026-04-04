@@ -31,10 +31,20 @@ function colorFromId(id) {
   return colors[Math.abs(h) % colors.length];
 }
 
+/** Ensure every trip has all expected arrays so downstream code never hits undefined */
+function normalizeTrip(trip) {
+  return {
+    members: [], polls: [], expenses: [], itinerary: [], routes: [],
+    activity: [], contingencies: [], messages: [], photos: [],
+    paidSettlements: [],
+    ...trip,
+  };
+}
+
 function loadLocalTrips() {
   try {
     const s = localStorage.getItem('tripsync-trips');
-    if (s) return JSON.parse(s);
+    if (s) return JSON.parse(s).map(normalizeTrip);
   } catch { /* ignore */ }
   return sampleTrips;
 }
@@ -78,7 +88,7 @@ export function TripProvider({ children }) {
       console.log('[fetchTrips] trips result:', rows?.length, 'rows, error:', tErr);
       if (tErr) throw tErr;
 
-      setTrips((rows || []).map(r => ({ ...(r.data || {}), id: r.id })));
+      setTrips((rows || []).map(r => normalizeTrip({ ...(r.data || {}), id: r.id })));
     } catch (err) {
       // AbortError = React re-render cancelled the request — ignore and retry
       if (err?.name === 'AbortError') { console.log('[fetchTrips] aborted, will retry'); return; }
@@ -129,7 +139,7 @@ export function TripProvider({ children }) {
         }
         setTrips(prev =>
           prev.map(t => t.id === tripId
-            ? { ...(payload.new.data || {}), id: tripId }
+            ? normalizeTrip({ ...(payload.new.data || {}), id: tripId })
             : t)
         );
       })
