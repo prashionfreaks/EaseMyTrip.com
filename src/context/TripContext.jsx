@@ -7,17 +7,22 @@ const TripContext = createContext(null);
 /** Ensure we have a valid session; refreshes token or forces re-login */
 async function ensureSession() {
   if (!isSupabaseConfigured) return true;
-  // First check in-memory session
-  const { data: { session } } = await supabase.auth.getSession();
-  if (session) return true;
-  // Session missing — try explicit refresh before giving up
-  const { data: { session: refreshed } } = await supabase.auth.refreshSession();
-  if (refreshed) return true;
-  // Both failed — force re-login
-  console.warn('Session expired, signing out');
-  await supabase.auth.signOut();
-  window.location.reload();
-  return false;
+  try {
+    // First check in-memory session
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) return true;
+    // Session missing — try explicit refresh before giving up
+    const { data: { session: refreshed } } = await supabase.auth.refreshSession();
+    if (refreshed) return true;
+    // Both failed — force re-login
+    console.warn('Session expired, signing out');
+    await supabase.auth.signOut();
+    window.location.reload();
+    return false;
+  } catch (err) {
+    console.error('ensureSession error:', err);
+    return true; // proceed anyway, let the API call fail with a clear error
+  }
 }
 
 function colorFromId(id) {
@@ -165,44 +170,57 @@ export function TripProvider({ children }) {
       return;
     }
 
-    // Supabase mode
-    const creatorMember = {
-      id: dbUser.id,
-      name: dbUser.user_metadata?.full_name || dbUser.email?.split('@')[0] || 'User',
-      email: dbUser.email,
-      color: colorFromId(dbUser.id),
-      role: 'organizer',
-    };
-    const fullTripData = {
-      ...tripData,
-      members: [creatorMember],
-      polls: [], expenses: [], itinerary: [], routes: [],
-      activity: [], contingencies: [], messages: [], photos: [],
-      budget: { total: 0, spent: 0, currency: 'INR' },
-      paidSettlements: [],
-    };
+    try {
+      // Supabase mode
+      console.log('[addTrip] starting, dbUser:', dbUser.id);
+      const creatorMember = {
+        id: dbUser.id,
+        name: dbUser.user_metadata?.full_name || dbUser.email?.split('@')[0] || 'User',
+        email: dbUser.email,
+        color: colorFromId(dbUser.id),
+        role: 'organizer',
+      };
+      const fullTripData = {
+        ...tripData,
+        members: [creatorMember],
+        polls: [], expenses: [], itinerary: [], routes: [],
+        activity: [], contingencies: [], messages: [], photos: [],
+        budget: { total: 0, spent: 0, currency: 'INR' },
+        paidSettlements: [],
+      };
 
-    if (!(await ensureSession())) return;
+      console.log('[addTrip] checking session...');
+      if (!(await ensureSession())) { console.error('[addTrip] session check failed'); return; }
+      console.log('[addTrip] session OK');
 
-    const tripId = crypto.randomUUID();
+      const tripId = crypto.randomUUID();
 
-    // Insert trip (no .select() to avoid SELECT RLS issue)
-    const { error: tripErr } = await supabase
-      .from('trips')
-      .insert({ id: tripId, name: tripData.name, destination: tripData.destination, status: 'planning', data: fullTripData, created_by: dbUser.id });
+      // Insert trip (no .select() to avoid SELECT RLS issue)
+      console.log('[addTrip] inserting trip:', tripId);
+      const { error: tripErr } = await supabase
+        .from('trips')
+        .insert({ id: tripId, name: tripData.name, destination: tripData.destination, status: 'planning', data: fullTripData, created_by: dbUser.id });
 
-    if (tripErr) { console.error('addTrip insert error:', tripErr); alert('Failed to create trip: ' + tripErr.message); return; }
+      if (tripErr) { console.error('[addTrip] insert error:', tripErr); alert('Failed to create trip: ' + tripErr.message); return; }
+      console.log('[addTrip] trip inserted OK');
 
-    // Insert trip member
-    const { error: memberErr } = await supabase
-      .from('trip_members')
-      .insert({ trip_id: tripId, user_id: dbUser.id, role: 'organizer', color: colorFromId(dbUser.id) });
+      // Insert trip member
+      console.log('[addTrip] inserting member...');
+      const { error: memberErr } = await supabase
+        .from('trip_members')
+        .insert({ trip_id: tripId, user_id: dbUser.id, role: 'organizer', color: colorFromId(dbUser.id) });
 
-    if (memberErr) console.error('addTrip member error:', memberErr);
+      if (memberErr) console.error('[addTrip] member error:', memberErr);
+      else console.log('[addTrip] member inserted OK');
 
-    const newTrip = { ...fullTripData, id: tripId };
-    setTrips(prev => [newTrip, ...prev]);
-    setActiveTripId(tripId);
+      const newTrip = { ...fullTripData, id: tripId };
+      setTrips(prev => [newTrip, ...prev]);
+      setActiveTripId(tripId);
+      console.log('[addTrip] done, trip active:', tripId);
+    } catch (err) {
+      console.error('[addTrip] exception:', err);
+      alert('Failed to create trip: ' + (err.message || err));
+    }
   }, [dbUser]);
 
   const removeTrip = useCallback(async (tripId) => {
