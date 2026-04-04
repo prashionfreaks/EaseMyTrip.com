@@ -54,14 +54,11 @@ export function AuthProvider({ children }) {
   async function signInWithGoogle() {
     if (!isSupabaseConfigured) return { error: { message: 'Supabase not configured.' } };
     try {
-      const result = await supabase.auth.signInWithOAuth({
+      return await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: { redirectTo: window.location.origin },
       });
-      console.log('[auth] signInWithOAuth result:', result);
-      return result;
-    } catch (err) {
-      console.error('[auth] signInWithOAuth exception:', err);
+    } catch {
       return { error: { message: 'Failed to connect to auth service. Please try again.' } };
     }
   }

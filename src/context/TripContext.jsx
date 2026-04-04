@@ -140,13 +140,11 @@ export function TripProvider({ children }) {
   }, [syncToDB]);
 
   const addTrip = useCallback(async (tripData) => {
-    console.log('[addTrip] called, isSupabaseConfigured:', isSupabaseConfigured, 'dbUser:', !!dbUser);
     if (!isSupabaseConfigured || !dbUser) {
       // Demo mode — synchronous
       const newTrip = { ...tripData, id: String(Date.now()) };
       setTrips(prev => [...prev, newTrip]);
       setActiveTripId(newTrip.id);
-      console.log('[addTrip] demo mode trip created');
       return;
     }
 
@@ -167,7 +165,6 @@ export function TripProvider({ children }) {
       paidSettlements: [],
     };
 
-    console.log('[addTrip] calling create_trip RPC...');
     const { data: tripId, error } = await supabase.rpc('create_trip', {
       p_name: tripData.name,
       p_destination: tripData.destination,
@@ -175,13 +172,11 @@ export function TripProvider({ children }) {
       p_color: colorFromId(dbUser.id),
     });
 
-    console.log('[addTrip] RPC result — tripId:', tripId, 'error:', error);
     if (error) { console.error('addTrip error:', error); return; }
 
     const newTrip = { ...fullTripData, id: tripId };
     setTrips(prev => [newTrip, ...prev]);
     setActiveTripId(tripId);
-    console.log('[addTrip] trip added to state, id:', tripId);
   }, [dbUser]);
 
   const removeTrip = useCallback(async (tripId) => {

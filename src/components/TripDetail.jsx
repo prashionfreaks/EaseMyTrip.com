@@ -3,7 +3,7 @@ import { useTrips } from '../context/TripContext';
 import {
   MessageCircle, Vote, Wallet, CalendarRange, Map,
   Route, Activity, ShieldAlert, MapPin, Calendar,
-  UserPlus, Users, Clock, CheckCircle2, X, Globe, Camera,
+  UserPlus, Users, Clock, CheckCircle2, X, Globe, Camera, Trash2,
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import ChatPage from '../pages/ChatPage';
@@ -37,7 +37,7 @@ const TABS = [
 ];
 
 export default function TripDetail({ onInvite, defaultTab = 'chat' }) {
-  const { activeTrip, setActiveTripId, currentUser } = useTrips();
+  const { activeTrip, setActiveTripId, removeTrip, currentUser } = useTrips();
   const [activeTab, setActiveTab] = useState(defaultTab);
 
   const unreadMessages = useMemo(() => {
@@ -133,6 +133,22 @@ export default function TripDetail({ onInvite, defaultTab = 'chat' }) {
               style={{ background: 'rgba(255,255,255,0.2)', color: 'white', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.3)', flexShrink: 0 }}
             >
               <UserPlus size={13} /> Invite
+            </button>
+            <button
+              onClick={() => {
+                if (window.confirm(`Delete "${activeTrip.name}"? This cannot be undone.`)) {
+                  removeTrip(activeTrip.id);
+                }
+              }}
+              title="Delete trip"
+              style={{
+                width: 30, height: 30, borderRadius: 8, border: 'none',
+                background: 'rgba(220,38,38,0.3)', backdropFilter: 'blur(8px)',
+                color: 'white', cursor: 'pointer', flexShrink: 0,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              <Trash2 size={14} />
             </button>
             <button
               onClick={() => setActiveTripId(null)}
