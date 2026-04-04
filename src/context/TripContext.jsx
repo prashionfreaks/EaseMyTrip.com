@@ -112,14 +112,24 @@ export function TripProvider({ children }) {
     return () => { subscription.unsubscribe(); clearTimeout(fallback); };
   }, [fetchTrips]);
 
+  // Track which trips have pending local changes (not yet synced to DB)
+  const pendingSync = useRef({});
+
   // Realtime: update local state when another user changes a shared trip
+  // Skip if we have a pending local sync (our data is newer)
   useEffect(() => {
     if (!isSupabaseConfigured || !dbUser) return;
     const channel = supabase.channel('trips-rt')
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'trips' }, payload => {
+        const tripId = payload.new.id;
+        // Don't overwrite local changes that haven't synced yet
+        if (pendingSync.current[tripId]) {
+          console.log('[realtime] skipping update for', tripId, '(pending local sync)');
+          return;
+        }
         setTrips(prev =>
-          prev.map(t => t.id === payload.new.id
-            ? { ...(payload.new.data || {}), id: payload.new.id }
+          prev.map(t => t.id === tripId
+            ? { ...(payload.new.data || {}), id: tripId }
             : t)
         );
       })
@@ -127,21 +137,24 @@ export function TripProvider({ children }) {
     return () => supabase.removeChannel(channel);
   }, [dbUser]);
 
-  // Debounced DB sync (avoids hammering Supabase on rapid updates like typing)
+  // Debounced DB sync
   const syncToDB = useCallback((trip) => {
     if (!isSupabaseConfigured) return;
+    pendingSync.current[trip.id] = true;
     clearTimeout(syncTimers.current[trip.id]);
     syncTimers.current[trip.id] = setTimeout(async () => {
-      if (!(await ensureSession())) return;
+      if (!(await ensureSession())) { pendingSync.current[trip.id] = false; return; }
       const { id, ...data } = trip;
-      await supabase.from('trips').update({
+      const { error } = await supabase.from('trips').update({
         name: trip.name,
         destination: trip.destination,
         status: trip.status,
         data,
         updated_at: new Date().toISOString(),
       }).eq('id', id);
-    }, 800); // 800ms debounce
+      pendingSync.current[trip.id] = false;
+      if (error) console.error('[syncToDB] error:', error);
+    }, 400); // 400ms debounce (faster sync)
   }, []);
 
   // ── currentUser ──────────────────────────────────────────────────────────
