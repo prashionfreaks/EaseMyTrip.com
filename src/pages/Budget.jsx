@@ -20,7 +20,7 @@ const categories = [
 ];
 
 export default function Budget() {
-  const { activeTrip, addExpense, currentUser } = useTrips();
+  const { activeTrip, addExpense, markSettlementPaid, currentUser } = useTrips();
   const [showAdd, setShowAdd] = useState(false);
   const [view, setView] = useState('overview');
   const [newExpense, setNewExpense] = useState({
@@ -394,20 +394,46 @@ export default function Budget() {
                 settlements.map((s, i) => {
                   const from = getMemberById(activeTrip, s.from);
                   const to = getMemberById(activeTrip, s.to);
+                  const isPaid = (activeTrip.paidSettlements || []).some(
+                    p => p.from === s.from && p.to === s.to
+                  );
                   return (
                     <div key={i} style={{
                       display: 'flex', alignItems: 'center', gap: 12,
                       padding: '14px 0',
                       borderBottom: i < settlements.length - 1 ? '1px solid var(--border-light)' : 'none',
+                      opacity: isPaid ? 0.55 : 1,
                     }}>
                       <div className="user-avatar" style={{ background: from?.color }}>{from?.name[0]}</div>
-                      <span style={{ fontWeight: 500, fontSize: 14 }}>{from?.name}</span>
+                      <span style={{ fontWeight: 500, fontSize: 14, textDecoration: isPaid ? 'line-through' : 'none' }}>{from?.name}</span>
                       <ArrowRight size={16} style={{ color: 'var(--text-tertiary)' }} />
                       <div className="user-avatar" style={{ background: to?.color }}>{to?.name[0]}</div>
-                      <span style={{ fontWeight: 500, fontSize: 14 }}>{to?.name}</span>
-                      <span style={{ marginLeft: 'auto', fontWeight: 700, fontSize: 16, color: 'var(--danger)' }}>
+                      <span style={{ fontWeight: 500, fontSize: 14, textDecoration: isPaid ? 'line-through' : 'none' }}>{to?.name}</span>
+                      <span style={{
+                        fontWeight: 700, fontSize: 16,
+                        color: isPaid ? 'var(--success)' : 'var(--danger)',
+                        textDecoration: isPaid ? 'line-through' : 'none',
+                      }}>
                         {sym}{s.amount.toFixed(0)}
                       </span>
+                      <button
+                        onClick={() => !isPaid && markSettlementPaid(activeTrip.id, s.from, s.to)}
+                        style={{
+                          marginLeft: 'auto',
+                          display: 'flex', alignItems: 'center', gap: 5,
+                          padding: '5px 12px', borderRadius: 'var(--radius-full)',
+                          fontSize: 12, fontWeight: 600, cursor: isPaid ? 'default' : 'pointer',
+                          border: 'none',
+                          background: isPaid ? 'rgba(16,185,129,0.12)' : 'rgba(16,185,129,0.08)',
+                          color: isPaid ? 'var(--success)' : 'var(--text-secondary)',
+                          transition: 'all 0.15s',
+                        }}
+                        onMouseEnter={e => { if (!isPaid) e.currentTarget.style.background = 'rgba(16,185,129,0.18)'; }}
+                        onMouseLeave={e => { if (!isPaid) e.currentTarget.style.background = 'rgba(16,185,129,0.08)'; }}
+                      >
+                        <CheckCircle2 size={13} />
+                        {isPaid ? 'Paid' : 'Mark Paid'}
+                      </button>
                     </div>
                   );
                 })

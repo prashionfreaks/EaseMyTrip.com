@@ -3,7 +3,7 @@ import { useTrips } from '../context/TripContext';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import {
   Camera, Upload, X, Download, Trash2, ChevronLeft, ChevronRight,
-  ZoomIn,
+  ZoomIn, AlertCircle,
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 
@@ -38,6 +38,7 @@ export default function Photos() {
   const [lightbox, setLightbox] = useState(null); // index into photos array
   const [pendingFiles, setPendingFiles] = useState([]); // { file, preview, caption }
   const [showCaptionModal, setShowCaptionModal] = useState(false);
+  const [uploadError, setUploadError] = useState(null);
   const fileInputRef = useRef();
 
   if (!activeTrip) {
@@ -72,49 +73,86 @@ export default function Photos() {
   async function commitUpload() {
     setUploading(true);
     setShowCaptionModal(false);
+    setUploadError(null);
+    let successCount = 0;
+    let lastError = null;
+
     try {
       for (const pf of pendingFiles) {
-        let url = pf.preview; // fallback: base64
+        let url = null;
         let storagePath = null;
 
-        if (isSupabaseConfigured) {
-          // Convert base64 to blob
-          const res = await fetch(pf.preview);
-          const blob = await res.blob();
-          const path = `${activeTrip.id}/${Date.now()}-${pf.file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
-          const { data: uploadData, error } = await supabase.storage
-            .from('trip-photos')
-            .upload(path, blob, { contentType: 'image/jpeg', upsert: false });
+        if (isSupabaseConfigured && supabase) {
+          // Upload to Supabase Storage — never fall back to base64 in DB mode
+          // (base64 in the trip JSON would exceed Supabase row/request limits)
+          try {
+            const res = await fetch(pf.preview);
+            const blob = await res.blob();
+            const path = `${activeTrip.id}/${Date.now()}-${pf.file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+            const { data: uploadData, error } = await supabase.storage
+              .from('trip-photos')
+              .upload(path, blob, { contentType: 'image/jpeg', upsert: false });
 
-          if (!error) {
+            if (error) {
+              console.error('Supabase storage upload error:', error);
+              lastError = error.message || 'Storage upload failed';
+              // Common causes: bucket doesn't exist, RLS policy, size limit
+              if (error.message?.includes('Bucket not found') || error.statusCode === 404) {
+                lastError = 'Photo storage bucket not found. Please create a "trip-photos" bucket in Supabase Storage (Settings → Storage → New bucket) and enable public access.';
+              } else if (error.statusCode === 403 || error.message?.includes('security') || error.message?.includes('policy')) {
+                lastError = 'Permission denied. Check that the "trip-photos" bucket has INSERT policies for authenticated users.';
+              } else if (error.statusCode === 413 || error.message?.includes('too large')) {
+                lastError = 'Image too large for storage. Try a smaller photo.';
+              }
+              continue; // skip this file, try next
+            }
+
             const { data: { publicUrl } } = supabase.storage
               .from('trip-photos')
               .getPublicUrl(uploadData.path);
             url = publicUrl;
             storagePath = uploadData.path;
+          } catch (storageErr) {
+            console.error('Storage exception:', storageErr);
+            lastError = storageErr.message || 'Failed to connect to storage';
+            continue;
           }
+        } else {
+          // Demo/local mode — safe to use base64 since it only goes to localStorage
+          url = pf.preview;
         }
 
-        addPhoto(activeTrip.id, {
-          url,
-          storagePath,
-          caption: pf.caption.trim(),
-          uploadedBy: currentUser.id,
-          uploaderName: currentUser.name,
-          uploaderColor: currentUser.color,
-          date: new Date().toISOString(),
-          filename: pf.file.name,
-        });
+        if (url) {
+          addPhoto(activeTrip.id, {
+            url,
+            storagePath,
+            caption: pf.caption.trim(),
+            uploadedBy: currentUser.id,
+            uploaderName: currentUser.name,
+            uploaderColor: currentUser.color,
+            date: new Date().toISOString(),
+            filename: pf.file.name,
+          });
+          successCount++;
+        }
       }
     } catch (err) {
+      console.error('Upload error:', err);
       if (err?.name === 'QuotaExceededError') {
-        alert('Storage is full. Please delete some photos before uploading more.');
+        lastError = 'Browser storage is full. Delete some photos before uploading more.';
       } else {
-        console.error('Upload error:', err);
+        lastError = err.message || 'Upload failed unexpectedly';
       }
     } finally {
       setPendingFiles([]);
       setUploading(false);
+      if (lastError && successCount < pendingFiles.length) {
+        setUploadError(
+          successCount > 0
+            ? `${successCount} photo(s) uploaded, but some failed: ${lastError}`
+            : lastError
+        );
+      }
     }
   }
 
@@ -217,6 +255,29 @@ export default function Photos() {
       </div>
 
       <div className="page-body">
+        {/* Upload error banner */}
+        {uploadError && (
+          <div style={{
+            display: 'flex', alignItems: 'flex-start', gap: 10,
+            padding: '12px 16px', marginBottom: 16,
+            borderRadius: 'var(--radius-md)',
+            background: 'rgba(239,68,68,0.08)',
+            border: '1px solid rgba(239,68,68,0.25)',
+          }}>
+            <AlertCircle size={16} style={{ color: 'var(--danger)', flexShrink: 0, marginTop: 1 }} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ fontSize: 13, color: 'var(--danger)', fontWeight: 600 }}>Upload failed</p>
+              <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>{uploadError}</p>
+            </div>
+            <button
+              onClick={() => setUploadError(null)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, color: 'var(--text-tertiary)', flexShrink: 0 }}
+            >
+              <X size={14} />
+            </button>
+          </div>
+        )}
+
         {photos.length === 0 ? (
           /* Empty drop zone */
           <div

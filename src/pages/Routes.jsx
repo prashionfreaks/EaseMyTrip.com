@@ -23,6 +23,11 @@ const INDIAN_ROUTES = {
   'mahabaleshwar|pune':     { dist: 120,  flight: [0, 0, 'No direct flight'], train: [0, 0, 'No direct train'], bus: [180, 150, 'MSRTC / Private buses · 3h'], car: [150, 400, 'NH48 + Panchgani Rd · 2h 30m'] },
   'mumbai|udaipur':         { dist: 780,  flight: [90, 5000, 'IndiGo · 1h 30m'], train: [720, 700, 'Bandra Terminus Express · 12h'], bus: [960, 800, 'Private Volvo · 16h'], car: [840, 3500, 'NH48 + NH27 · 14h'] },
   'delhi|varanasi':         { dist: 820,  flight: [90, 5000, 'IndiGo / Vistara · 1h 30m'], train: [660, 700, 'Vande Bharat Express · 8h (fastest)'], bus: [780, 500, 'UP Roadways AC · 13h'], car: [720, 2800, 'NH19 · 12h'] },
+  'delhi|wayanad':          { dist: 2600, flight: [210, 7500, 'Delhi → Calicut (IndiGo / Air India · 3h) + 2.5h drive to Wayanad'], train: [2400, 1500, 'Kerala Express to Kozhikode · 40h + cab to Wayanad'], bus: [2640, 1200, 'Delhi → Bangalore KSRTC + bus to Wayanad · 44h'], car: [2400, 9500, 'NH44 via Bangalore · ~40h (2-day drive)'] },
+  'bangalore|wayanad':      { dist: 280,  flight: [60, 5000, 'Fly to Calicut (1h) + 2.5h drive'], train: [600, 450, 'Train to Kozhikode · 10h + cab 2.5h'], bus: [360, 600, 'KSRTC Volvo to Sultan Bathery · 6h'], car: [330, 1500, 'NH275 via Mysore · 5h 30m'] },
+  'delhi|kerala':           { dist: 2600, flight: [195, 7000, 'IndiGo / Air India to Kochi · 3h 15m'], train: [2400, 1500, 'Kerala Express · 40h'], bus: [2640, 1200, 'Multi-stop private buses · 44h'], car: [2400, 9500, 'NH44 via Bangalore · ~40h'] },
+  'delhi|calicut':          { dist: 2550, flight: [180, 7000, 'IndiGo / Air India · 3h direct'], train: [2280, 1400, 'Mangala Express / Kerala Express · 38h'], bus: [2520, 1100, 'Private AC sleeper · 42h'], car: [2340, 9000, 'NH44 + NH66 · ~39h'] },
+  'mumbai|wayanad':         { dist: 1100, flight: [150, 5500, 'Mumbai → Calicut (IndiGo · 1h 40m) + 2.5h drive'], train: [1200, 900, 'Netravati Express to Kozhikode · 20h + cab'], bus: [1080, 700, 'Private AC sleeper to Kozhikode · 18h + cab'], car: [1020, 4500, 'NH66 coastal route · 17h'] },
 };
 
 const MODE_CONFIG = {
@@ -259,11 +264,19 @@ export default function Routes() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             {routes.map(route => {
               const isLoading = loadingOptions === route.id;
+              const hasReturn = route.returnTo && route.returnTo !== route.to;
+
               const opts = (route.from && route.to) ? generateOptions(route.from, route.to, isINR) : [];
               const available = opts.filter(o => !o.unavailable);
               const cheapest = available.length ? available.reduce((a, b) => a.cost < b.cost ? a : b) : null;
               const fastest  = available.length ? available.reduce((a, b) => a.duration < b.duration ? a : b) : null;
               const distance = (route.from && route.to) ? getRouteDistance(route.from, route.to) : null;
+
+              const retOpts = hasReturn ? generateOptions(route.to, route.returnTo, isINR) : [];
+              const retAvailable = retOpts.filter(o => !o.unavailable);
+              const retCheapest = retAvailable.length ? retAvailable.reduce((a, b) => a.cost < b.cost ? a : b) : null;
+              const retFastest  = retAvailable.length ? retAvailable.reduce((a, b) => a.duration < b.duration ? a : b) : null;
+              const retDistance = hasReturn ? getRouteDistance(route.to, route.returnTo) : null;
 
               return (
                 <div key={route.id} className="card route-card" style={{ overflow: 'hidden' }}>
@@ -364,6 +377,23 @@ export default function Routes() {
                     </div>
                   )}
 
+                  {/* Outbound leg label */}
+                  {hasReturn && !isLoading && (
+                    <div style={{
+                      padding: '10px 20px 0', display: 'flex', alignItems: 'center', gap: 8,
+                    }}>
+                      <MapPin size={13} style={{ color: '#38bdf8' }} />
+                      <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                        {route.from} → {route.to}
+                      </span>
+                      {distance && (
+                        <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 500 }}>
+                          · {distance.toLocaleString()} km
+                        </span>
+                      )}
+                    </div>
+                  )}
+
                   {/* Transport options */}
                   <div style={{ padding: '16px 20px 20px' }}>
                     {isLoading ? (
@@ -450,9 +480,11 @@ export default function Routes() {
                                     </span>
                                     <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 500 }}>/ person</span>
                                   </div>
-                                  <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>
-                                    RT ~{sym}{(opt.cost * 2).toLocaleString()}
-                                  </p>
+                                  {!hasReturn && (
+                                    <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>
+                                      RT ~{sym}{(opt.cost * 2).toLocaleString()}
+                                    </p>
+                                  )}
                                 </div>
 
                                 {/* Duration */}
@@ -480,6 +512,127 @@ export default function Routes() {
                       </>
                     )}
                   </div>
+
+                  {/* Return leg */}
+                  {hasReturn && !isLoading && (
+                    <>
+                      <div style={{ borderTop: '1px solid var(--border-light)', margin: '0 20px' }} />
+
+                      {/* Return leg label */}
+                      <div style={{
+                        padding: '12px 20px 0', display: 'flex', alignItems: 'center', gap: 8,
+                      }}>
+                        <MapPin size={13} style={{ color: '#f97316' }} />
+                        <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                          {route.to} → {route.returnTo} (Return)
+                        </span>
+                        {retDistance && (
+                          <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 500 }}>
+                            · {retDistance.toLocaleString()} km
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Return best picks */}
+                      {retCheapest && retFastest && (
+                        <div style={{
+                          display: 'flex', flexWrap: 'wrap', gap: 0, margin: '10px 20px 0',
+                          borderRadius: 'var(--radius-md)', overflow: 'hidden',
+                          border: '1px solid var(--border-light)', background: 'var(--bg-tertiary)',
+                        }}>
+                          <div style={{ flex: '1 1 200px', padding: '8px 14px', display: 'flex', alignItems: 'center', gap: 8, borderRight: '1px solid var(--border-light)' }}>
+                            <span style={{ fontSize: 9, fontWeight: 800, background: '#06b6d4', color: 'white', padding: '2px 7px', borderRadius: 99 }}>
+                              ⚡ FASTEST
+                            </span>
+                            <span style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 600 }}>
+                              {MODE_CONFIG[retFastest.mode]?.label} · {fmtDuration(retFastest.duration)}
+                            </span>
+                          </div>
+                          <div style={{ flex: '1 1 200px', padding: '8px 14px', display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <span style={{ fontSize: 9, fontWeight: 800, background: '#10b981', color: 'white', padding: '2px 7px', borderRadius: 99 }}>
+                              💰 CHEAPEST
+                            </span>
+                            <span style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 600 }}>
+                              {MODE_CONFIG[retCheapest.mode]?.label} · {sym}{retCheapest.cost.toLocaleString()}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Return transport options */}
+                      <div style={{ padding: '12px 20px 20px' }}>
+                        {retAvailable.length === 0 ? (
+                          <p style={{ fontSize: 13, color: 'var(--text-tertiary)', textAlign: 'center', padding: '16px 0' }}>
+                            No travel options found for this return route.
+                          </p>
+                        ) : (
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
+                            {retAvailable.map(opt => {
+                              const cfg = MODE_CONFIG[opt.mode] || MODE_CONFIG.car;
+                              const Icon = cfg.icon;
+                              const isCheapest = retCheapest?.mode === opt.mode;
+                              const isFastest  = retFastest?.mode === opt.mode;
+                              const isHighlighted = isCheapest || isFastest;
+
+                              return (
+                                <div key={opt.mode} className="mode-card" style={{
+                                  borderColor: isHighlighted ? cfg.color + '50' : 'var(--border-light)',
+                                  background: isHighlighted ? cfg.bg : 'var(--bg-secondary)',
+                                }}>
+                                  <div style={{
+                                    position: 'absolute', top: 0, left: 0, right: 0, height: 3,
+                                    background: cfg.color, borderRadius: '14px 14px 0 0',
+                                    opacity: isHighlighted ? 1 : 0.35,
+                                  }} />
+                                  <div style={{ display: 'flex', gap: 4, minHeight: 20, marginBottom: 12, flexWrap: 'wrap' }}>
+                                    {isFastest && (
+                                      <span style={{ fontSize: 9, fontWeight: 800, background: '#06b6d4', color: 'white', padding: '2px 8px', borderRadius: 99, display: 'flex', alignItems: 'center', gap: 3 }}>
+                                        <Zap size={8} /> FASTEST
+                                      </span>
+                                    )}
+                                    {isCheapest && (
+                                      <span style={{ fontSize: 9, fontWeight: 800, background: '#10b981', color: 'white', padding: '2px 8px', borderRadius: 99, display: 'flex', alignItems: 'center', gap: 3 }}>
+                                        <Wallet size={8} /> CHEAPEST
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+                                    <div style={{
+                                      width: 38, height: 38, borderRadius: 10,
+                                      background: cfg.color + '20',
+                                      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                                    }}>
+                                      <Icon size={18} style={{ color: cfg.color }} />
+                                    </div>
+                                    <span style={{ fontWeight: 800, fontSize: 14, color: cfg.color }}>{cfg.label}</span>
+                                  </div>
+                                  <div style={{ marginBottom: 6 }}>
+                                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 5 }}>
+                                      <span style={{ fontSize: 22, fontWeight: 900, color: 'var(--text-primary)', lineHeight: 1 }}>
+                                        {sym}{opt.cost.toLocaleString()}
+                                      </span>
+                                      <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 500 }}>/ person</span>
+                                    </div>
+                                  </div>
+                                  <div style={{
+                                    display: 'inline-flex', alignItems: 'center', gap: 5,
+                                    background: 'rgba(0,0,0,0.05)', borderRadius: 6,
+                                    padding: '4px 8px', marginBottom: 10,
+                                  }}>
+                                    <Clock size={11} style={{ color: 'var(--text-tertiary)' }} />
+                                    <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)' }}>{fmtDuration(opt.duration)}</span>
+                                  </div>
+                                  <p style={{ fontSize: 11, color: 'var(--text-tertiary)', lineHeight: 1.5, borderTop: '1px solid rgba(0,0,0,0.06)', paddingTop: 8, marginTop: 2 }}>
+                                    {opt.note}
+                                  </p>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
                 </div>
               );
             })}
