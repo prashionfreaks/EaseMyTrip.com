@@ -85,10 +85,10 @@ export default function Sidebar({ currentPage, onNavigate, isOpen, onClose }) {
               <div className="user-name" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {displayName}
               </div>
-              <div className="user-role">
+              <div className="user-role" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {activeTrip
                   ? (activeTrip.members.find(m => m.id === currentUser?.id)?.role === 'organizer' ? 'Trip Organizer' : 'Member')
-                  : 'No trip selected'}
+                  : (currentUser?.email || 'No trip selected')}
               </div>
             </div>
           </div>
