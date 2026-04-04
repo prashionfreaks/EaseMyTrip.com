@@ -485,6 +485,14 @@ export default function Routes() {
             })}
           </div>
         )}
+
+        {/* Bottom hint */}
+        <p style={{
+          textAlign: 'center', fontSize: 13, color: 'var(--text-tertiary)',
+          marginTop: 32, padding: '0 20px', lineHeight: 1.6,
+        }}>
+          Add a route and we'll instantly suggest the best flight, train, bus and drive options.
+        </p>
       </div>
 
       {/* Add route modal */}
