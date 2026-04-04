@@ -62,20 +62,25 @@ export function TripProvider({ children }) {
   // ── Supabase mode: DB + Realtime ─────────────────────────────────────────
   const fetchTrips = useCallback(async (userId) => {
     try {
+      console.log('[fetchTrips] loading for user:', userId);
       const { data: memberRows, error: mErr } = await supabase
         .from('trip_members').select('trip_id').eq('user_id', userId);
+      console.log('[fetchTrips] trip_members result:', memberRows?.length, 'rows, error:', mErr);
       if (mErr) throw mErr;
       if (!memberRows?.length) { setTrips([]); setTripsLoaded(true); return; }
 
+      const tripIds = memberRows.map(r => r.trip_id);
+      console.log('[fetchTrips] fetching trips:', tripIds);
       const { data: rows, error: tErr } = await supabase
         .from('trips').select('id, data, updated_at')
-        .in('id', memberRows.map(r => r.trip_id))
+        .in('id', tripIds)
         .order('created_at', { ascending: false });
+      console.log('[fetchTrips] trips result:', rows?.length, 'rows, error:', tErr);
       if (tErr) throw tErr;
 
       setTrips((rows || []).map(r => ({ ...(r.data || {}), id: r.id })));
     } catch (err) {
-      console.error('Failed to load trips:', err);
+      console.error('[fetchTrips] FAILED:', err);
       setTrips([]);
     } finally {
       setTripsLoaded(true);
