@@ -68,12 +68,14 @@ export default function InviteModal({ onClose }) {
     const colorIdx = activeTrip.members.length % MEMBER_COLORS.length;
     const trimmedEmail = email.trim().toLowerCase();
 
+    // Add as a pending placeholder in the trip's data.members
+    // The real join happens when they click the invite link (joinTripViaInvite)
     updateTrip(activeTrip.id, trip => ({
       ...trip,
       members: [
         ...trip.members,
         {
-          id: 'u' + Date.now(),
+          id: 'invited-' + Date.now(),
           name,
           email: trimmedEmail,
           avatar: null,
@@ -173,11 +175,11 @@ export default function InviteModal({ onClose }) {
             )}
             {emailSent && (
               <p style={{ fontSize: 12, color: '#16a34a', marginTop: 5 }}>
-                ✓ Invite email sent to {emailSent}
+                ✓ {emailSent} added — share the invite link below so they can access the trip.
               </p>
             )}
             <p style={{ fontSize: 12, color: '#9ca3af', marginTop: 6 }}>
-              Share the invite link below so they can join the trip.
+              Members must open the invite link to see the trip on their dashboard.
             </p>
           </div>
 

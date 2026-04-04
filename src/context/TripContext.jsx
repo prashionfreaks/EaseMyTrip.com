@@ -350,18 +350,24 @@ export function TripProvider({ children }) {
 
         if (memErr) { console.error('join trip member error:', memErr); alert('Failed to join trip.'); return null; }
 
-        // Add user to trip's data.members array
+        // Add user to trip's data.members array (replace placeholder if exists)
         const { data: tripRow } = await supabase.from('trips').select('data').eq('id', tripId).single();
         if (tripRow?.data) {
           const memberName = dbUser.user_metadata?.full_name || dbUser.email?.split('@')[0] || 'User';
+          const userEmail = dbUser.email?.toLowerCase();
+          // Remove any placeholder entry with same email
+          const existingMembers = (tripRow.data.members || []).filter(
+            m => m.email?.toLowerCase() !== userEmail || (!m.id.startsWith('invited-') && m.id !== dbUser.id)
+          );
           const updatedData = {
             ...tripRow.data,
-            members: [...(tripRow.data.members || []), {
+            members: [...existingMembers, {
               id: dbUser.id, name: memberName, email: dbUser.email,
               color: memberColor, role: 'member',
             }],
           };
           await supabase.from('trips').update({ data: updatedData, updated_at: new Date().toISOString() }).eq('id', tripId);
+          console.log('[joinInvite] updated trip data.members');
         }
       }
 
