@@ -341,11 +341,11 @@ export default function Routes() {
                   {/* Best picks summary bar */}
                   {!isLoading && cheapest && fastest && (
                     <div style={{
-                      display: 'flex', gap: 0,
+                      display: 'flex', flexWrap: 'wrap', gap: 0,
                       borderBottom: '1px solid var(--border-light)',
                       background: 'var(--bg-tertiary)',
                     }}>
-                      <div style={{ flex: 1, padding: '10px 16px', display: 'flex', alignItems: 'center', gap: 8, borderRight: '1px solid var(--border-light)' }}>
+                      <div style={{ flex: '1 1 200px', padding: '10px 16px', display: 'flex', alignItems: 'center', gap: 8, borderRight: '1px solid var(--border-light)' }}>
                         <span style={{ fontSize: 10, fontWeight: 800, background: '#06b6d4', color: 'white', padding: '2px 7px', borderRadius: 99 }}>
                           ⚡ FASTEST
                         </span>
@@ -353,7 +353,7 @@ export default function Routes() {
                           {MODE_CONFIG[fastest.mode]?.label} · {fmtDuration(fastest.duration)}
                         </span>
                       </div>
-                      <div style={{ flex: 1, padding: '10px 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div style={{ flex: '1 1 200px', padding: '10px 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
                         <span style={{ fontSize: 10, fontWeight: 800, background: '#10b981', color: 'white', padding: '2px 7px', borderRadius: 99 }}>
                           💰 CHEAPEST
                         </span>
@@ -394,7 +394,7 @@ export default function Routes() {
                       </p>
                     ) : (
                       <>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12 }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
                           {available.map(opt => {
                             const cfg = MODE_CONFIG[opt.mode] || MODE_CONFIG.car;
                             const Icon = cfg.icon;
@@ -532,26 +532,26 @@ export default function Routes() {
                 </div>
               )}
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr auto 1fr', gap: 8, alignItems: 'end' }}>
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--brand)', display: 'inline-block' }} /> From
-                  </label>
-                  <input className="form-input" placeholder="e.g. Mumbai" value={newRoute.from}
-                    onChange={e => setNewRoute(p => ({ ...p, from: e.target.value, returnTo: p.returnTo || e.target.value }))} />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--brand)', display: 'inline-block' }} /> From
+                    </label>
+                    <input className="form-input" placeholder="e.g. Mumbai" value={newRoute.from}
+                      onChange={e => setNewRoute(p => ({ ...p, from: e.target.value, returnTo: p.returnTo || e.target.value }))} />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--success)', display: 'inline-block' }} /> To
+                    </label>
+                    <input className="form-input" placeholder="e.g. Goa" value={newRoute.to}
+                      onChange={e => setNewRoute(p => ({ ...p, to: e.target.value }))} />
+                  </div>
                 </div>
-                <ArrowRight size={18} style={{ color: 'var(--text-tertiary)', marginBottom: 10, flexShrink: 0 }} />
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--success)', display: 'inline-block' }} /> To
-                  </label>
-                  <input className="form-input" placeholder="e.g. Goa" value={newRoute.to}
-                    onChange={e => setNewRoute(p => ({ ...p, to: e.target.value }))} />
-                </div>
-                <ArrowRight size={18} style={{ color: 'var(--text-tertiary)', marginBottom: 10, flexShrink: 0 }} />
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--orange)', display: 'inline-block' }} /> Return To
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--orange)', display: 'inline-block' }} /> Return To <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span>
                   </label>
                   <input className="form-input" placeholder="e.g. Mumbai" value={newRoute.returnTo}
                     onChange={e => setNewRoute(p => ({ ...p, returnTo: e.target.value }))} />
