@@ -313,9 +313,7 @@ export default function Dashboard({ onNavigate }) {
                 <div style={{ fontSize: 12, fontWeight: 600, color: '#92400e', marginBottom: 6 }}>Top Destinations</div>
                 {(platformStats?.topDestinations || [
                   { destination: 'Goa', trip_count: 342 },
-                  { destination: 'Manali', trip_count: 281 },
-                  { destination: 'Bali', trip_count: 197 },
-                ]).slice(0, 3).map((d, i) => (
+                ]).slice(0, 1).map((d, i) => (
                   <div key={i} style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                     fontSize: 13, fontWeight: 600, color: '#78350f', marginTop: 4,
