@@ -190,18 +190,20 @@ export default function LandingPage() {
 
           <h1 className="hero-anim-2" style={{
             letterSpacing: '-1.5px',
-            lineHeight: 1.1, marginBottom: 24, whiteSpace: 'nowrap',
+            lineHeight: 1.2, marginBottom: 24,
+            display: 'flex', flexWrap: 'wrap', alignItems: 'baseline',
+            justifyContent: 'center', gap: '0 10px',
           }}>
             <span style={{
-              fontSize: 'clamp(42px, 7vw, 80px)', fontWeight: 950,
+              fontSize: 'clamp(32px, 6vw, 80px)', fontWeight: 950,
               color: 'white', textShadow: '0 0 30px rgba(96,165,250,0.4)',
-            }}>Plan trips</span>{' '}
+            }}>Plan trips</span>
             <span style={{
-              fontSize: 'clamp(22px, 3.5vw, 40px)', fontWeight: 400,
+              fontSize: 'clamp(18px, 3vw, 40px)', fontWeight: 400,
               color: 'rgba(255,255,255,0.5)',
-            }}>together, with</span>{' '}
+            }}>together, with</span>
             <span style={{
-              fontSize: 'clamp(42px, 7vw, 80px)', fontWeight: 950,
+              fontSize: 'clamp(32px, 6vw, 80px)', fontWeight: 950,
               background: 'linear-gradient(90deg, #60a5fa, #c084fc)',
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
             }}>Zero Drama.</span>
