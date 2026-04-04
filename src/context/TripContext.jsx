@@ -14,10 +14,9 @@ async function ensureSession() {
     // Session missing — try explicit refresh before giving up
     const { data: { session: refreshed } } = await supabase.auth.refreshSession();
     if (refreshed) return true;
-    // Both failed — force re-login
+    // Both failed — sign out (AuthContext will redirect to landing page)
     console.warn('Session expired, signing out');
     await supabase.auth.signOut();
-    window.location.reload();
     return false;
   } catch (err) {
     console.error('ensureSession error:', err);
@@ -314,12 +313,61 @@ export function TripProvider({ children }) {
   const joinTripViaInvite = useCallback(async (inviteCode) => {
     if (!isSupabaseConfigured || !dbUser) return null;
     try {
-      const { data: tripId, error } = await supabase.rpc('accept_invite', { p_invite_code: inviteCode });
-      if (error) { console.error('accept_invite error:', error); return null; }
+      if (!(await ensureSession())) return null;
+
+      // Look up the invite
+      const { data: invite, error: invErr } = await supabase
+        .from('trip_invites')
+        .select('trip_id')
+        .eq('invite_code', inviteCode)
+        .single();
+
+      if (invErr || !invite) {
+        console.error('Invalid invite code:', invErr);
+        alert('This invite link is invalid or has expired.');
+        return null;
+      }
+
+      const tripId = invite.trip_id;
+
+      // Check if already a member
+      const { data: existing } = await supabase
+        .from('trip_members')
+        .select('id')
+        .eq('trip_id', tripId)
+        .eq('user_id', dbUser.id)
+        .maybeSingle();
+
+      if (!existing) {
+        // Add to trip_members
+        const memberColor = colorFromId(dbUser.id);
+        const { error: memErr } = await supabase
+          .from('trip_members')
+          .insert({ trip_id: tripId, user_id: dbUser.id, role: 'member', color: memberColor });
+
+        if (memErr) { console.error('join trip member error:', memErr); alert('Failed to join trip.'); return null; }
+
+        // Add user to trip's data.members array
+        const { data: tripRow } = await supabase.from('trips').select('data').eq('id', tripId).single();
+        if (tripRow?.data) {
+          const memberName = dbUser.user_metadata?.full_name || dbUser.email?.split('@')[0] || 'User';
+          const updatedData = {
+            ...tripRow.data,
+            members: [...(tripRow.data.members || []), {
+              id: dbUser.id, name: memberName, email: dbUser.email,
+              color: memberColor, role: 'member',
+            }],
+          };
+          await supabase.from('trips').update({ data: updatedData, updated_at: new Date().toISOString() }).eq('id', tripId);
+        }
+      }
+
+      // Reload trips so the joined trip appears
       await fetchTrips(dbUser.id);
       return tripId;
     } catch (err) {
       console.error('joinTripViaInvite error:', err);
+      alert('Failed to join trip. Please try again.');
       return null;
     }
   }, [dbUser, fetchTrips]);

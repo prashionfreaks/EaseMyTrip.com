@@ -19,52 +19,46 @@ import './App.css';
 export default function App() {
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { setActiveTripId, trips, joinTripViaInvite } = useTrips();
+  const { setActiveTripId, trips, tripsLoaded, joinTripViaInvite } = useTrips();
   const { user, loading, isDemo } = useAuth();
+  const [inviteProcessed, setInviteProcessed] = useState(false);
 
-  // Handle invite code in URL
+  // Handle invite code in URL — save it for processing after login
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const inviteCode = params.get('invite');
-    if (!inviteCode) return;
-
-    if (!user) {
-      // Not logged in yet — save for after login
+    if (inviteCode) {
       sessionStorage.setItem('pendingInvite', inviteCode);
-      return;
-    }
-
-    // Supabase mode: use the DB function to join
-    if (joinTripViaInvite) {
-      window.history.replaceState({}, '', window.location.pathname);
-      joinTripViaInvite(inviteCode).then(tripId => {
-        if (tripId) { setActiveTripId(tripId); setCurrentPage('dashboard'); }
-      });
-      return;
-    }
-
-    // Demo mode: match by derived code
-    const matchingTrip = trips.find(trip => {
-      const code = btoa(trip.id + '-tripsync').replace(/[^a-zA-Z0-9]/g, '').substring(0, 16);
-      return code === inviteCode;
-    });
-    if (matchingTrip) {
-      setActiveTripId(matchingTrip.id);
-      setCurrentPage('dashboard');
       window.history.replaceState({}, '', window.location.pathname);
     }
-  }, [user, trips, setActiveTripId, joinTripViaInvite]);
+  }, []);
 
-  // After login, process any pending invite
+  // Process pending invite after user is logged in and trips context is ready
   useEffect(() => {
-    if (!user || !joinTripViaInvite) return;
+    if (!user || !tripsLoaded || inviteProcessed) return;
     const pending = sessionStorage.getItem('pendingInvite');
     if (!pending) return;
+
     sessionStorage.removeItem('pendingInvite');
-    joinTripViaInvite(pending).then(tripId => {
-      if (tripId) { setActiveTripId(tripId); setCurrentPage('dashboard'); }
-    });
-  }, [user, joinTripViaInvite, setActiveTripId]);
+    setInviteProcessed(true);
+
+    if (joinTripViaInvite) {
+      // Supabase mode
+      joinTripViaInvite(pending).then(tripId => {
+        if (tripId) { setActiveTripId(tripId); setCurrentPage('dashboard'); }
+      });
+    } else {
+      // Demo mode: match by derived code
+      const matchingTrip = trips.find(trip => {
+        const code = btoa(trip.id + '-tripsync').replace(/[^a-zA-Z0-9]/g, '').substring(0, 16);
+        return code === pending;
+      });
+      if (matchingTrip) {
+        setActiveTripId(matchingTrip.id);
+        setCurrentPage('dashboard');
+      }
+    }
+  }, [user, tripsLoaded, trips, inviteProcessed, setActiveTripId, joinTripViaInvite]);
 
   function navigate(page, tripId) {
     setCurrentPage(page);

@@ -189,25 +189,19 @@ export default function LandingPage() {
           </div>
 
           <h1 className="hero-anim-2" style={{
-            fontSize: 'clamp(36px, 6vw, 68px)',
-            fontWeight: 900, color: 'white', letterSpacing: '-1.5px',
+            fontSize: 'clamp(40px, 7vw, 78px)',
+            fontWeight: 950, color: 'rgba(255,255,255,0.7)', letterSpacing: '-1.5px',
             lineHeight: 1.1, marginBottom: 24,
           }}>
-            Plan trips together,<br />
             <span style={{
+              color: 'white',
+              textShadow: '0 0 30px rgba(96,165,250,0.4)',
+            }}>Plan trips</span> together, <span style={{
               background: 'linear-gradient(90deg, #60a5fa, #c084fc)',
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-            }}>
-              stress-free
-            </span>
+              fontWeight: 950,
+            }}>zero drama.</span>
           </h1>
-
-          <p className="hero-anim-3" style={{
-            fontSize: 18, color: 'rgba(255,255,255,0.75)',
-            lineHeight: 1.7, marginBottom: 40, maxWidth: 520, margin: '0 auto 40px',
-          }}>
-            LetsWander brings your whole crew onto one page — chat, polls, expenses, itineraries, and photos. From idea to takeoff.
-          </p>
 
           {error && (
             <div style={{
@@ -219,7 +213,7 @@ export default function LandingPage() {
             </div>
           )}
 
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
+          <div className="hero-anim-3" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, marginBottom: 32 }}>
             <button
               onClick={handleGoogle}
               disabled={loading}
@@ -251,6 +245,13 @@ export default function LandingPage() {
               No credit card required · Free forever for small groups
             </p>
           </div>
+
+          <p style={{
+            fontSize: 17, color: 'rgba(255,255,255,0.65)',
+            lineHeight: 1.7, maxWidth: 520, margin: '0 auto', textAlign: 'center',
+          }}>
+            One link. Your whole crew. LetsWander puts chat, polls, budgets, itineraries, and photos in one place — so you spend less time in group chats and more time at the gate.
+          </p>
         </div>
       </section>
 

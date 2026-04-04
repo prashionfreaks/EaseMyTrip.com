@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useTrips } from '../context/TripContext';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -12,6 +13,7 @@ const navItems = [
 export default function Sidebar({ currentPage, onNavigate, isOpen, onClose }) {
   const { activeTrip, trips, currentUser } = useTrips();
   const { displayName, initials, signOut, isDemo } = useAuth();
+  const [signingOut, setSigningOut] = useState(false);
 
   return (
     <>
@@ -94,19 +96,22 @@ export default function Sidebar({ currentPage, onNavigate, isOpen, onClose }) {
           </div>
           {!isDemo && (
             <button
-              onClick={signOut}
+              onClick={async () => { setSigningOut(true); await signOut(); }}
+              disabled={signingOut}
               style={{
                 width: '100%', padding: '8px 12px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
                 borderRadius: 8, border: '1px solid rgba(248,113,113,0.3)',
                 background: 'rgba(248,113,113,0.08)', color: '#f87171',
+                opacity: signingOut ? 0.6 : 1,
                 cursor: 'pointer', fontSize: 13, fontWeight: 600,
                 transition: 'all 0.15s',
               }}
               onMouseOver={e => { e.currentTarget.style.background = 'rgba(248,113,113,0.18)'; e.currentTarget.style.borderColor = 'rgba(248,113,113,0.5)'; }}
               onMouseOut={e => { e.currentTarget.style.background = 'rgba(248,113,113,0.08)'; e.currentTarget.style.borderColor = 'rgba(248,113,113,0.3)'; }}
             >
-              <LogOut size={14} /> Sign Out
+              {signingOut ? <span className="spinner-sm spinner" style={{ borderColor: 'rgba(248,113,113,0.3)', borderTopColor: '#f87171' }} /> : <LogOut size={14} />}
+              {signingOut ? 'Signing Out…' : 'Sign Out'}
             </button>
           )}
         </div>
