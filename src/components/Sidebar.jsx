@@ -96,7 +96,7 @@ export default function Sidebar({ currentPage, onNavigate, isOpen, onClose }) {
           </div>
           {!isDemo && (
             <button
-              onClick={async () => { setSigningOut(true); await signOut(); }}
+              onClick={async () => { setSigningOut(true); try { await signOut(); } catch (e) { console.error('signOut error:', e); setSigningOut(false); } }}
               disabled={signingOut}
               style={{
                 width: '100%', padding: '8px 12px',

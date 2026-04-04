@@ -79,7 +79,13 @@ export function AuthProvider({ children }) {
 
   async function signOut() {
     try {
-      if (isSupabaseConfigured) await supabase.auth.signOut();
+      if (isSupabaseConfigured) {
+        // Timeout after 3s so sign-out always completes
+        await Promise.race([
+          supabase.auth.signOut(),
+          new Promise(resolve => setTimeout(resolve, 3000)),
+        ]);
+      }
     } catch (err) {
       console.error('[auth] signOut error:', err);
     }
