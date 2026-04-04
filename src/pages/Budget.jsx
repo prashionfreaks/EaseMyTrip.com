@@ -20,9 +20,11 @@ const categories = [
 ];
 
 export default function Budget() {
-  const { activeTrip, addExpense, markSettlementPaid, currentUser } = useTrips();
+  const { activeTrip, addExpense, markSettlementPaid, updateTrip, currentUser } = useTrips();
   const [showAdd, setShowAdd] = useState(false);
   const [view, setView] = useState('overview');
+  const [editingBudget, setEditingBudget] = useState(false);
+  const [budgetInput, setBudgetInput] = useState('');
   const [newExpense, setNewExpense] = useState({
     title: '', amount: '', category: 'transport', paidBy: currentUser?.id || '',
     splitAmong: [], date: new Date().toISOString().split('T')[0],
@@ -140,13 +142,42 @@ export default function Budget() {
           <>
             {/* Budget summary cards */}
             <div className="grid-3" style={{ marginBottom: 24 }}>
-              <div className="card">
+              <div className="card" style={{ cursor: 'pointer' }} onClick={() => {
+                if (!editingBudget) { setBudgetInput(String(budget.total || '')); setEditingBudget(true); }
+              }}>
                 <div className="card-body">
-                  <p style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>Total Budget</p>
-                  <p style={{ fontSize: 28, fontWeight: 800, letterSpacing: -1 }}>{sym}{budget.total.toLocaleString()}</p>
-                  <p style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
-                    {sym}{(budget.total / members.length).toLocaleString()} per person
-                  </p>
+                  <p style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>Total Budget {!editingBudget && <span style={{ fontSize: 10, color: 'var(--brand)' }}>(click to edit)</span>}</p>
+                  {editingBudget ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }} onClick={e => e.stopPropagation()}>
+                      <span style={{ fontSize: 20, fontWeight: 800 }}>{sym}</span>
+                      <input
+                        className="form-input"
+                        type="number"
+                        value={budgetInput}
+                        onChange={e => setBudgetInput(e.target.value)}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') {
+                            updateTrip(activeTrip.id, t => ({ ...t, budget: { ...t.budget, total: Number(budgetInput) || 0 } }));
+                            setEditingBudget(false);
+                          } else if (e.key === 'Escape') setEditingBudget(false);
+                        }}
+                        autoFocus
+                        style={{ fontSize: 20, fontWeight: 800, padding: '4px 8px', width: 160 }}
+                      />
+                      <button className="btn btn-primary btn-sm" onClick={() => {
+                        updateTrip(activeTrip.id, t => ({ ...t, budget: { ...t.budget, total: Number(budgetInput) || 0 } }));
+                        setEditingBudget(false);
+                      }}>Save</button>
+                      <button className="btn btn-secondary btn-sm" onClick={() => setEditingBudget(false)}>Cancel</button>
+                    </div>
+                  ) : (
+                    <>
+                      <p style={{ fontSize: 28, fontWeight: 800, letterSpacing: -1 }}>{sym}{budget.total.toLocaleString()}</p>
+                      <p style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+                        {sym}{members.length > 0 ? (budget.total / members.length).toLocaleString() : 0} per person
+                      </p>
+                    </>
+                  )}
                 </div>
               </div>
               <div className="card">
