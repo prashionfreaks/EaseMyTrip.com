@@ -60,11 +60,14 @@ export default function Dashboard({ onNavigate }) {
   const [showInvite, setShowInvite] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [newTrip, setNewTrip] = useState({ name: '', destination: '', startDate: '', endDate: '', budget: '', currency: 'INR' });
+  const [creating, setCreating] = useState(false);
+  const [deleting, setDeleting] = useState(null);
   const dueCount = useMemo(() => countOutstandingDues(trips, currentUser?.id), [trips, currentUser?.id]);
 
-  function handleCreate() {
+  async function handleCreate() {
     if (!newTrip.name.trim() || !newTrip.destination.trim()) return;
-    addTrip({
+    setCreating(true);
+    await addTrip({
       name: newTrip.name.trim(),
       destination: newTrip.destination.trim(),
       coverImage: 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=600&h=400&fit=crop',
@@ -75,8 +78,16 @@ export default function Dashboard({ onNavigate }) {
       budget: { total: newTrip.budget ? parseFloat(newTrip.budget) : 0, spent: 0, currency: newTrip.currency || 'INR' },
       polls: [], itinerary: [], expenses: [], routes: [], activity: [], contingencies: [], messages: [],
     });
+    setCreating(false);
     setNewTrip({ name: '', destination: '', startDate: '', endDate: '', budget: '', currency: 'INR' });
     setShowCreate(false);
+  }
+
+  async function handleDelete(trip) {
+    if (!window.confirm(`Delete "${trip.name}"? This cannot be undone.`)) return;
+    setDeleting(trip.id);
+    await removeTrip(trip.id);
+    setDeleting(null);
   }
 
   return (
@@ -174,11 +185,8 @@ export default function Dashboard({ onNavigate }) {
                 setActiveTripId(trip.id);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-                onDelete={() => {
-                  if (window.confirm(`Delete "${trip.name}"? This cannot be undone.`)) {
-                    removeTrip(trip.id);
-                  }
-                }}
+                onDelete={() => handleDelete(trip)}
+                isDeleting={deleting === trip.id}
               />
             ))}
 
@@ -255,13 +263,13 @@ export default function Dashboard({ onNavigate }) {
           onClose={() => setShowCreate(false)}
           footer={
             <>
-              <button className="btn btn-secondary" onClick={() => setShowCreate(false)}>Cancel</button>
+              <button className="btn btn-secondary" onClick={() => setShowCreate(false)} disabled={creating}>Cancel</button>
               <button
                 className="btn btn-primary"
                 onClick={handleCreate}
-                disabled={!newTrip.name.trim() || !newTrip.destination.trim()}
+                disabled={!newTrip.name.trim() || !newTrip.destination.trim() || creating}
               >
-                <Plus size={14} /> Create Trip
+                {creating ? <><div className="spinner spinner-sm" /> Creating...</> : <><Plus size={14} /> Create Trip</>}
               </button>
             </>
           }
@@ -324,7 +332,7 @@ export default function Dashboard({ onNavigate }) {
   );
 }
 
-function TripCard({ trip, isActive, onSelect, onDelete }) {
+function TripCard({ trip, isActive, onSelect, onDelete, isDeleting }) {
   const cfg = statusConfig[trip.status] || statusConfig.planning;
   const StatusIcon = cfg.icon;
   const daysUntil = differenceInDays(parseISO(trip.startDate), new Date());
@@ -399,17 +407,18 @@ function TripCard({ trip, isActive, onSelect, onDelete }) {
         <button
           onClick={e => { e.stopPropagation(); onDelete(); }}
           title="Delete trip"
+          disabled={isDeleting}
           style={{
             position: 'absolute', bottom: 10, right: 10,
             width: 26, height: 26, borderRadius: 8,
-            background: 'rgba(0,0,0,0.45)', border: 'none',
-            color: 'white', cursor: 'pointer',
+            background: isDeleting ? 'rgba(220,38,38,0.7)' : 'rgba(0,0,0,0.45)', border: 'none',
+            color: 'white', cursor: isDeleting ? 'wait' : 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            opacity: 0, transition: 'opacity 0.15s',
+            opacity: isDeleting ? 1 : 0, transition: 'opacity 0.15s',
           }}
           className="trip-delete-btn"
         >
-          <Trash2 size={12} />
+          {isDeleting ? <div className="spinner spinner-sm" /> : <Trash2 size={12} />}
         </button>
       </div>
 

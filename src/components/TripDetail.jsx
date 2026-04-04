@@ -39,6 +39,7 @@ const TABS = [
 export default function TripDetail({ onInvite, defaultTab = 'chat' }) {
   const { activeTrip, setActiveTripId, removeTrip, currentUser } = useTrips();
   const [activeTab, setActiveTab] = useState(defaultTab);
+  const [deleting, setDeleting] = useState(false);
 
   const unreadMessages = useMemo(() => {
     if (!activeTrip || !currentUser) return 0;
@@ -135,20 +136,23 @@ export default function TripDetail({ onInvite, defaultTab = 'chat' }) {
               <UserPlus size={13} /> Invite
             </button>
             <button
-              onClick={() => {
-                if (window.confirm(`Delete "${activeTrip.name}"? This cannot be undone.`)) {
-                  removeTrip(activeTrip.id);
-                }
+              onClick={async () => {
+                if (deleting) return;
+                if (!window.confirm(`Delete "${activeTrip.name}"? This cannot be undone.`)) return;
+                setDeleting(true);
+                await removeTrip(activeTrip.id);
+                setDeleting(false);
               }}
               title="Delete trip"
+              disabled={deleting}
               style={{
                 width: 30, height: 30, borderRadius: 8, border: 'none',
-                background: 'rgba(220,38,38,0.3)', backdropFilter: 'blur(8px)',
-                color: 'white', cursor: 'pointer', flexShrink: 0,
+                background: deleting ? 'rgba(220,38,38,0.6)' : 'rgba(220,38,38,0.3)', backdropFilter: 'blur(8px)',
+                color: 'white', cursor: deleting ? 'wait' : 'pointer', flexShrink: 0,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}
             >
-              <Trash2 size={14} />
+              {deleting ? <div className="spinner spinner-sm" /> : <Trash2 size={14} />}
             </button>
             <button
               onClick={() => setActiveTripId(null)}
