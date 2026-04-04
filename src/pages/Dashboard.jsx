@@ -236,88 +236,9 @@ export default function Dashboard({ onNavigate }) {
           </div>
 
           {trips.length === 0 && (
-            <div style={{
-              gridColumn: '1 / -1',
-              borderRadius: 20, overflow: 'hidden',
-              background: 'linear-gradient(135deg, #f0f9ff, #e0f2fe)',
-              border: '1px solid #bae6fd',
-              padding: '36px 28px',
-            }}>
-              {/* Stats cards */}
-              {platformStats && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 14, marginBottom: 28 }}>
-                  <div style={{
-                    background: 'white', borderRadius: 14, padding: '18px 20px',
-                    border: '1px solid #e0f2fe', textAlign: 'center',
-                  }}>
-                    <div style={{
-                      width: 40, height: 40, borderRadius: 12, margin: '0 auto 10px',
-                      background: 'linear-gradient(135deg, #dbeafe, #ede9fe)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}>
-                      <Globe size={20} style={{ color: '#2563eb' }} />
-                    </div>
-                    <div style={{ fontSize: 28, fontWeight: 800, color: '#0c4a6e' }}>
-                      {platformStats.trips || 0}
-                    </div>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: '#64748b', marginTop: 2 }}>Trips Created</div>
-                  </div>
-                  <div style={{
-                    background: 'white', borderRadius: 14, padding: '18px 20px',
-                    border: '1px solid #e0f2fe', textAlign: 'center',
-                  }}>
-                    <div style={{
-                      width: 40, height: 40, borderRadius: 12, margin: '0 auto 10px',
-                      background: 'linear-gradient(135deg, #d1fae5, #cffafe)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}>
-                      <Users size={20} style={{ color: '#059669' }} />
-                    </div>
-                    <div style={{ fontSize: 28, fontWeight: 800, color: '#0c4a6e' }}>
-                      {platformStats.users || 0}
-                    </div>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: '#64748b', marginTop: 2 }}>Wanderers</div>
-                  </div>
-                  <div style={{
-                    background: 'white', borderRadius: 14, padding: '18px 20px',
-                    border: '1px solid #e0f2fe', textAlign: 'center',
-                  }}>
-                    <div style={{
-                      width: 40, height: 40, borderRadius: 12, margin: '0 auto 10px',
-                      background: 'linear-gradient(135deg, #fef3c7, #fce7f3)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}>
-                      <TrendingUp size={20} style={{ color: '#d97706' }} />
-                    </div>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: '#64748b', marginBottom: 6 }}>Top Destinations</div>
-                    {(platformStats.topDestinations || []).map((d, i) => (
-                      <div key={i} style={{
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                        fontSize: 13, fontWeight: 600, color: '#0c4a6e', marginTop: 4,
-                      }}>
-                        <span style={{
-                          width: 18, height: 18, borderRadius: 6, fontSize: 10, fontWeight: 700,
-                          background: i === 0 ? '#fbbf24' : i === 1 ? '#94a3b8' : '#d97706',
-                          color: 'white', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                        }}>{i + 1}</span>
-                        {d.destination}
-                        <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 500 }}>({d.trip_count})</span>
-                      </div>
-                    ))}
-                    {(!platformStats.topDestinations || platformStats.topDestinations.length === 0) && (
-                      <div style={{ fontSize: 13, color: '#94a3b8' }}>No trips yet</div>
-                    )}
-                  </div>
-                </div>
-              )}
-              <div style={{ textAlign: 'center' }}>
-                <h3 style={{ fontSize: 18, fontWeight: 800, color: '#0c4a6e', marginBottom: 6 }}>
-                  Start your adventure
-                </h3>
-                <p style={{ fontSize: 13, color: '#0369a1' }}>
-                  Create your first trip and invite your crew to plan together.
-                </p>
-              </div>
+            <div style={{ textAlign: 'center', padding: '24px 20px', background: 'linear-gradient(135deg, #f0f9ff, #e0f2fe)', borderRadius: 16, border: '1px solid #bae6fd' }}>
+              <h3 style={{ fontSize: 18, fontWeight: 800, color: '#0c4a6e', marginBottom: 6 }}>Start your adventure</h3>
+              <p style={{ fontSize: 13, color: '#0369a1' }}>Create your first trip and invite your crew to plan together.</p>
             </div>
           )}
           {trips.length > 0 && (
@@ -331,6 +252,112 @@ export default function Dashboard({ onNavigate }) {
               </p>
             </div>
           )}
+
+          {/* ── App Insights ── */}
+          <div style={{ marginTop: 28 }}>
+            <h2 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.3px', marginBottom: 16 }}>
+              LetsWander Insights
+            </h2>
+
+            {/* Stats row */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginBottom: 20 }}>
+              <div style={{
+                background: 'linear-gradient(135deg, #eff6ff, #dbeafe)', borderRadius: 14, padding: '20px 16px',
+                border: '1px solid #bfdbfe', textAlign: 'center',
+              }}>
+                <div style={{
+                  width: 42, height: 42, borderRadius: 12, margin: '0 auto 10px',
+                  background: 'linear-gradient(135deg, #2563eb, #3b82f6)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: '0 4px 12px rgba(37,99,235,0.3)',
+                }}>
+                  <Globe size={20} color="white" />
+                </div>
+                <div style={{ fontSize: 30, fontWeight: 900, color: '#1e40af' }}>
+                  {platformStats?.trips || trips.length || 0}
+                </div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: '#3b82f6', marginTop: 2 }}>Trips Created</div>
+              </div>
+
+              <div style={{
+                background: 'linear-gradient(135deg, #ecfdf5, #d1fae5)', borderRadius: 14, padding: '20px 16px',
+                border: '1px solid #a7f3d0', textAlign: 'center',
+              }}>
+                <div style={{
+                  width: 42, height: 42, borderRadius: 12, margin: '0 auto 10px',
+                  background: 'linear-gradient(135deg, #059669, #10b981)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: '0 4px 12px rgba(5,150,105,0.3)',
+                }}>
+                  <Users size={20} color="white" />
+                </div>
+                <div style={{ fontSize: 30, fontWeight: 900, color: '#065f46' }}>
+                  {platformStats?.users || 1}
+                </div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: '#10b981', marginTop: 2 }}>Wanderers</div>
+              </div>
+
+              <div style={{
+                background: 'linear-gradient(135deg, #fefce8, #fef3c7)', borderRadius: 14, padding: '20px 16px',
+                border: '1px solid #fde68a', textAlign: 'center',
+              }}>
+                <div style={{
+                  width: 42, height: 42, borderRadius: 12, margin: '0 auto 10px',
+                  background: 'linear-gradient(135deg, #d97706, #f59e0b)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: '0 4px 12px rgba(217,119,6,0.3)',
+                }}>
+                  <TrendingUp size={20} color="white" />
+                </div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: '#92400e', marginBottom: 6 }}>Top Destinations</div>
+                {(platformStats?.topDestinations || []).slice(0, 3).map((d, i) => (
+                  <div key={i} style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                    fontSize: 13, fontWeight: 600, color: '#78350f', marginTop: 4,
+                  }}>
+                    <span style={{
+                      width: 18, height: 18, borderRadius: 6, fontSize: 10, fontWeight: 700,
+                      background: i === 0 ? '#fbbf24' : i === 1 ? '#94a3b8' : '#d97706',
+                      color: 'white', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                    }}>{i + 1}</span>
+                    {d.destination}
+                    <span style={{ fontSize: 11, color: '#b45309', fontWeight: 500 }}>({d.trip_count})</span>
+                  </div>
+                ))}
+                {(!platformStats?.topDestinations?.length) && (
+                  <div style={{ fontSize: 13, color: '#b45309' }}>Be the first!</div>
+                )}
+              </div>
+            </div>
+
+            {/* What users love */}
+            <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>
+              What our wanderers love
+            </h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
+              {[
+                { emoji: '🗳️', title: 'Group Polls', desc: 'No more endless group chat debates. Vote and decide together.' },
+                { emoji: '💰', title: 'Split Expenses', desc: 'Track every chai to flight ticket. Know who owes what, always.' },
+                { emoji: '📋', title: 'Shared Itinerary', desc: 'Day-by-day plans everyone can see and edit in real time.' },
+                { emoji: '💬', title: 'Trip Chat', desc: 'All trip talk in one place. No more lost messages across apps.' },
+                { emoji: '🚗', title: 'Route Planner', desc: 'Map out every leg — flights, trains, cabs — with the whole crew.' },
+                { emoji: '📸', title: 'Photo Wall', desc: 'Share trip memories in a shared album. Relive the moments together.' },
+              ].map((f, i) => (
+                <div key={i} style={{
+                  padding: '16px 18px', borderRadius: 14,
+                  background: 'var(--bg-secondary)', border: '1px solid var(--border)',
+                  transition: 'all 0.15s',
+                }}
+                  onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = 'var(--shadow-md)'; }}
+                  onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
+                >
+                  <div style={{ fontSize: 24, marginBottom: 8 }}>{f.emoji}</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>{f.title}</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>{f.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>}
       </div>
 
