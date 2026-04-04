@@ -80,6 +80,8 @@ export function TripProvider({ children }) {
 
       setTrips((rows || []).map(r => ({ ...(r.data || {}), id: r.id })));
     } catch (err) {
+      // AbortError = React re-render cancelled the request — ignore and retry
+      if (err?.name === 'AbortError') { console.log('[fetchTrips] aborted, will retry'); return; }
       console.error('[fetchTrips] FAILED:', err);
       setTrips([]);
     } finally {
@@ -89,22 +91,25 @@ export function TripProvider({ children }) {
 
   useEffect(() => {
     if (!isSupabaseConfigured) return;
-
-    async function init() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) { setDbUser(user); await fetchTrips(user.id); }
-      else setTripsLoaded(true);
-    }
+    let initialLoadDone = false;
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       const user = session?.user ?? null;
       setDbUser(user);
       if (user) { await fetchTrips(user.id); }
       else { setTrips([]); setActiveTripId(null); setTripsLoaded(true); }
+      initialLoadDone = true;
     });
 
-    init();
-    return () => subscription.unsubscribe();
+    // Fallback: if onAuthStateChange doesn't fire within 2s, load manually
+    const fallback = setTimeout(async () => {
+      if (initialLoadDone) return;
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) { setDbUser(user); await fetchTrips(user.id); }
+      else setTripsLoaded(true);
+    }, 2000);
+
+    return () => { subscription.unsubscribe(); clearTimeout(fallback); };
   }, [fetchTrips]);
 
   // Realtime: update local state when another user changes a shared trip
