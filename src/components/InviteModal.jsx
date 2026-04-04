@@ -12,7 +12,6 @@ export default function InviteModal({ onClose }) {
   const [copied, setCopied] = useState(false);
   const [tab, setTab] = useState('invite');
   const [emailError, setEmailError] = useState('');
-  const [emailSending, setEmailSending] = useState(false);
   const [emailSent, setEmailSent] = useState('');
   const [dbInviteCode, setDbInviteCode] = useState('');
 
@@ -85,23 +84,7 @@ export default function InviteModal({ onClose }) {
       ],
     }));
     setEmail('');
-
-    // Send invite email via Edge Function
-    if (isSupabaseConfigured && inviteCode) {
-      setEmailSending(true);
-      supabase.functions.invoke('send-invite-email', {
-        body: {
-          email: trimmedEmail,
-          tripName: activeTrip.name,
-          inviterName: currentUser?.name || 'Someone',
-          inviteLink,
-        },
-      }).then(({ error }) => {
-        setEmailSending(false);
-        if (error) setEmailError('Member added, but email failed to send.');
-        else setEmailSent(trimmedEmail);
-      });
-    }
+    setEmailSent(trimmedEmail);
   }
 
   function removeMember(memberId) {
@@ -181,8 +164,8 @@ export default function InviteModal({ onClose }) {
                 onKeyDown={e => e.key === 'Enter' && addMember()}
                 style={{ flex: 1 }}
               />
-              <button className="btn btn-primary" onClick={addMember} disabled={emailSending} style={{ whiteSpace: 'nowrap' }}>
-                <UserPlus size={14} /> {emailSending ? 'Sending…' : 'Add & Invite'}
+              <button className="btn btn-primary" onClick={addMember} style={{ whiteSpace: 'nowrap' }}>
+                <UserPlus size={14} /> Add Member
               </button>
             </div>
             {emailError && (
@@ -194,7 +177,7 @@ export default function InviteModal({ onClose }) {
               </p>
             )}
             <p style={{ fontSize: 12, color: '#9ca3af', marginTop: 6 }}>
-              They'll receive an email with a link to join the trip.
+              Share the invite link below so they can join the trip.
             </p>
           </div>
 
