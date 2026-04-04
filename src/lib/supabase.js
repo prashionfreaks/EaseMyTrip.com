@@ -10,5 +10,9 @@ export const isSupabaseConfigured = !!(
 );
 
 export const supabase = isSupabaseConfigured
-  ? createClient(supabaseUrl, supabaseAnonKey)
+  ? createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        lock: false,
+      },
+    })
   : null;
