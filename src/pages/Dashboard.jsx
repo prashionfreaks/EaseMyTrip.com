@@ -290,133 +290,125 @@ export default function Dashboard({ onNavigate }) {
             </div>
           )}
 
-          {/* ── App Insights ── */}
-          <div style={{ marginTop: 28 }}>
-            <h2 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.3px', marginBottom: 16 }}>
-              LetsWander Insights
-            </h2>
+          {/* ── App Insights (dark theme) ── */}
+          <div style={{
+            marginTop: 28, borderRadius: 20, overflow: 'hidden',
+            background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)',
+            padding: '32px 24px', position: 'relative',
+          }}>
+            {/* Decorative glow */}
+            <div style={{
+              position: 'absolute', top: -60, right: -60, width: 200, height: 200,
+              background: 'radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%)',
+              borderRadius: '50%', pointerEvents: 'none',
+            }} />
+            <div style={{
+              position: 'absolute', bottom: -40, left: -40, width: 160, height: 160,
+              background: 'radial-gradient(circle, rgba(14,165,233,0.12) 0%, transparent 70%)',
+              borderRadius: '50%', pointerEvents: 'none',
+            }} />
 
-            {/* Stats row */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginBottom: 20 }}>
-              <div style={{
-                background: 'linear-gradient(135deg, #eff6ff, #dbeafe)', borderRadius: 14, padding: '20px 16px',
-                border: '1px solid #bfdbfe', textAlign: 'center',
-              }}>
+            <div style={{ position: 'relative', zIndex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
                 <div style={{
-                  width: 42, height: 42, borderRadius: 12, margin: '0 auto 10px',
-                  background: 'linear-gradient(135deg, #2563eb, #3b82f6)',
+                  width: 36, height: 36, borderRadius: 10,
+                  background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  boxShadow: '0 4px 12px rgba(37,99,235,0.3)',
                 }}>
-                  <Globe size={20} color="white" />
+                  <TrendingUp size={18} color="white" />
                 </div>
-                <div style={{ fontSize: 30, fontWeight: 900, color: '#1e40af' }}>
-                  {platformStats?.trips || 1247}
+                <div>
+                  <h2 style={{ fontSize: 17, fontWeight: 800, color: 'white', letterSpacing: '-0.3px' }}>
+                    LetsWander Insights
+                  </h2>
+                  <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 1 }}>Live platform activity</p>
                 </div>
-                <div style={{ fontSize: 12, fontWeight: 600, color: '#3b82f6', marginTop: 2 }}>Trips Created</div>
               </div>
 
-              <div style={{
-                background: 'linear-gradient(135deg, #ecfdf5, #d1fae5)', borderRadius: 14, padding: '20px 16px',
-                border: '1px solid #a7f3d0', textAlign: 'center',
-              }}>
-                <div style={{
-                  width: 42, height: 42, borderRadius: 12, margin: '0 auto 10px',
-                  background: 'linear-gradient(135deg, #059669, #10b981)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  boxShadow: '0 4px 12px rgba(5,150,105,0.3)',
-                }}>
-                  <Users size={20} color="white" />
-                </div>
-                <div style={{ fontSize: 30, fontWeight: 900, color: '#065f46' }}>
-                  {platformStats?.users || 3891}
-                </div>
-                <div style={{ fontSize: 12, fontWeight: 600, color: '#10b981', marginTop: 2 }}>Wanderers</div>
-              </div>
-
-              <div style={{
-                background: 'linear-gradient(135deg, #fefce8, #fef3c7)', borderRadius: 14, padding: '20px 16px',
-                border: '1px solid #fde68a', textAlign: 'center',
-              }}>
-                <div style={{
-                  width: 42, height: 42, borderRadius: 12, margin: '0 auto 10px',
-                  background: 'linear-gradient(135deg, #d97706, #f59e0b)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  boxShadow: '0 4px 12px rgba(217,119,6,0.3)',
-                }}>
-                  <TrendingUp size={20} color="white" />
-                </div>
-                <div style={{ fontSize: 12, fontWeight: 600, color: '#92400e', marginBottom: 6 }}>Top Destinations</div>
-                {(platformStats?.topDestinations || [
-                  { destination: 'Goa', trip_count: 342 },
-                ]).slice(0, 1).map((d, i) => (
+              {/* Stats row */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10, marginBottom: 20 }}>
+                {[
+                  { value: platformStats?.trips || 1247, label: 'Trips Created', icon: Globe, color: '#60a5fa', glow: 'rgba(96,165,250,0.2)' },
+                  { value: platformStats?.users || 3891, label: 'Wanderers', icon: Users, color: '#34d399', glow: 'rgba(52,211,153,0.2)' },
+                  { value: (platformStats?.topDestinations || [{ destination: 'Goa' }])[0]?.destination || 'Goa', label: '#1 Destination', icon: MapPin, color: '#fbbf24', glow: 'rgba(251,191,36,0.2)', isText: true },
+                ].map((s, i) => (
                   <div key={i} style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                    fontSize: 13, fontWeight: 600, color: '#78350f', marginTop: 4,
-                  }}>
-                    <span style={{
-                      width: 18, height: 18, borderRadius: 6, fontSize: 10, fontWeight: 700,
-                      background: i === 0 ? '#fbbf24' : i === 1 ? '#94a3b8' : '#d97706',
-                      color: 'white', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                    }}>{i + 1}</span>
-                    {d.destination}
-                    <span style={{ fontSize: 11, color: '#b45309', fontWeight: 500 }}>({d.trip_count})</span>
+                    background: 'rgba(255,255,255,0.05)', borderRadius: 14, padding: '18px 14px',
+                    border: '1px solid rgba(255,255,255,0.08)', textAlign: 'center',
+                    backdropFilter: 'blur(10px)',
+                    transition: 'all 0.2s',
+                  }}
+                    onMouseOver={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.borderColor = `${s.color}44`; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                    onMouseOut={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                  >
+                    <s.icon size={18} style={{ color: s.color, marginBottom: 8 }} />
+                    <div style={{
+                      fontSize: s.isText ? 20 : 28, fontWeight: 900, color: 'white',
+                      textShadow: `0 0 20px ${s.glow}`,
+                    }}>
+                      {s.isText ? s.value : s.value.toLocaleString()}
+                    </div>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.45)', marginTop: 3 }}>{s.label}</div>
                   </div>
                 ))}
               </div>
-            </div>
 
-            {/* Fun facts ticker */}
-            <div style={{
-              display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-              gap: 10, marginBottom: 20,
-            }}>
-              {[
-                { stat: '12,400+', label: 'Messages sent between crews', icon: '💬' },
-                { stat: '8,720', label: 'Polls voted on', icon: '🗳️' },
-                { stat: '₹2.4Cr', label: 'Expenses tracked & split', icon: '💰' },
-                { stat: '94%', label: 'Groups that settled up on time', icon: '🤝' },
-              ].map((item, i) => (
-                <div key={i} style={{
-                  display: 'flex', alignItems: 'center', gap: 12,
-                  padding: '14px 16px', borderRadius: 12,
-                  background: 'var(--bg-secondary)', border: '1px solid var(--border)',
-                }}>
-                  <span style={{ fontSize: 22 }}>{item.icon}</span>
-                  <div>
-                    <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>{item.stat}</div>
-                    <div style={{ fontSize: 11, color: 'var(--text-tertiary)', lineHeight: 1.3 }}>{item.label}</div>
+              {/* Activity ticker */}
+              <div style={{
+                display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 24,
+              }}>
+                {[
+                  { stat: '12,400+', label: 'Messages', color: '#818cf8' },
+                  { stat: '8,720', label: 'Polls voted', color: '#34d399' },
+                  { stat: '₹2.4Cr', label: 'Tracked', color: '#fbbf24' },
+                  { stat: '94%', label: 'Settled up', color: '#f472b6' },
+                ].map((item, i) => (
+                  <div key={i} style={{
+                    display: 'flex', alignItems: 'center', gap: 8,
+                    padding: '8px 14px', borderRadius: 999,
+                    background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)',
+                  }}>
+                    <span style={{ fontSize: 14, fontWeight: 800, color: item.color }}>{item.stat}</span>
+                    <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>{item.label}</span>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
 
-            {/* What users love */}
-            <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>
-              What our wanderers love
-            </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
-              {[
-                { emoji: '🗳️', title: 'Group Polls', desc: 'No more endless group chat debates. Vote and decide together.' },
-                { emoji: '💰', title: 'Split Expenses', desc: 'Track every chai to flight ticket. Know who owes what, always.' },
-                { emoji: '📋', title: 'Shared Itinerary', desc: 'Day-by-day plans everyone can see and edit in real time.' },
-                { emoji: '💬', title: 'Trip Chat', desc: 'All trip talk in one place. No more lost messages across apps.' },
-                { emoji: '🚗', title: 'Route Planner', desc: 'Map out every leg — flights, trains, cabs — with the whole crew.' },
-                { emoji: '📸', title: 'Photo Wall', desc: 'Share trip memories in a shared album. Relive the moments together.' },
-              ].map((f, i) => (
-                <div key={i} style={{
-                  padding: '16px 18px', borderRadius: 14,
-                  background: 'var(--bg-secondary)', border: '1px solid var(--border)',
-                  transition: 'all 0.15s',
-                }}
-                  onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = 'var(--shadow-md)'; }}
-                  onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
-                >
-                  <div style={{ fontSize: 24, marginBottom: 8 }}>{f.emoji}</div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>{f.title}</div>
-                  <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>{f.desc}</div>
-                </div>
-              ))}
+              {/* Feature highlights */}
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14,
+              }}>
+                <div style={{ height: 1, flex: 1, background: 'rgba(255,255,255,0.08)' }} />
+                <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                  What wanderers love
+                </span>
+                <div style={{ height: 1, flex: 1, background: 'rgba(255,255,255,0.08)' }} />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 8 }}>
+                {[
+                  { emoji: '🗳️', title: 'Group Polls', desc: 'Vote and decide — no more group chat chaos' },
+                  { emoji: '💰', title: 'Split Expenses', desc: 'Track every rupee, know who owes what' },
+                  { emoji: '📋', title: 'Itinerary', desc: 'Day-by-day plans, edited by everyone' },
+                  { emoji: '💬', title: 'Trip Chat', desc: 'All trip talk, one place' },
+                  { emoji: '🚗', title: 'Route Planner', desc: 'Flights, trains, drives — compared instantly' },
+                  { emoji: '📸', title: 'Photo Wall', desc: 'Shared album for every memory' },
+                ].map((f, i) => (
+                  <div key={i} style={{
+                    padding: '14px 14px', borderRadius: 12,
+                    background: 'rgba(255,255,255,0.04)',
+                    border: '1px solid rgba(255,255,255,0.06)',
+                    transition: 'all 0.2s', cursor: 'default',
+                  }}
+                    onMouseOver={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                    onMouseOut={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                  >
+                    <div style={{ fontSize: 20, marginBottom: 6 }}>{f.emoji}</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.9)', marginBottom: 3 }}>{f.title}</div>
+                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', lineHeight: 1.4 }}>{f.desc}</div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>}

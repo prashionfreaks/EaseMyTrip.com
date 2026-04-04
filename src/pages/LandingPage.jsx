@@ -195,7 +195,7 @@ export default function LandingPage() {
             justifyContent: 'center', gap: '0 10px',
           }}>
             <span style={{
-              fontSize: 'clamp(32px, 6vw, 80px)', fontWeight: 950,
+              fontSize: 'clamp(32px, 6vw, 80px)', fontWeight: 700,
               color: 'white', textShadow: '0 0 30px rgba(96,165,250,0.4)',
             }}>Plan trips</span>
             <span style={{
@@ -203,7 +203,7 @@ export default function LandingPage() {
               color: 'rgba(255,255,255,0.5)',
             }}>together, with</span>
             <span style={{
-              fontSize: 'clamp(32px, 6vw, 80px)', fontWeight: 950,
+              fontSize: 'clamp(32px, 6vw, 80px)', fontWeight: 700,
               background: 'linear-gradient(90deg, #60a5fa, #c084fc)',
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
             }}>Zero Drama.</span>
