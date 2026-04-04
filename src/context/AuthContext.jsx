@@ -78,18 +78,15 @@ export function AuthProvider({ children }) {
   }
 
   async function signOut() {
+    setUser(null);
     try {
       if (isSupabaseConfigured) {
-        // Timeout after 3s so sign-out always completes
-        await Promise.race([
-          supabase.auth.signOut(),
-          new Promise(resolve => setTimeout(resolve, 3000)),
-        ]);
+        await supabase.auth.signOut({ scope: 'local' });
       }
     } catch (err) {
-      console.error('[auth] signOut error:', err);
+      // Ignore lock errors — user is already signed out locally
+      console.warn('[auth] signOut cleanup:', err.message);
     }
-    setUser(null);
   }
 
   // ── Inactivity auto-logout ──
