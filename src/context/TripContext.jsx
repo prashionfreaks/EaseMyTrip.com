@@ -4,6 +4,18 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 const TripContext = createContext(null);
 
+/** Ensure we have a valid session; refreshes token or forces re-login */
+async function ensureSession() {
+  if (!isSupabaseConfigured) return true;
+  const { data: { session }, error } = await supabase.auth.getSession();
+  if (session) return true;
+  // Session expired and refresh failed — force re-login
+  console.warn('Session expired, signing out');
+  await supabase.auth.signOut();
+  window.location.reload();
+  return false;
+}
+
 function colorFromId(id) {
   const colors = ['#2563eb', '#7c3aed', '#0891b2', '#059669', '#d97706', '#dc2626', '#db2777'];
   let h = 0;
@@ -102,6 +114,7 @@ export function TripProvider({ children }) {
     if (!isSupabaseConfigured) return;
     clearTimeout(syncTimers.current[trip.id]);
     syncTimers.current[trip.id] = setTimeout(async () => {
+      if (!(await ensureSession())) return;
       const { id, ...data } = trip;
       await supabase.from('trips').update({
         name: trip.name,
@@ -165,6 +178,8 @@ export function TripProvider({ children }) {
       paidSettlements: [],
     };
 
+    if (!(await ensureSession())) return;
+
     const tripId = crypto.randomUUID();
 
     // Insert trip (no .select() to avoid SELECT RLS issue)
@@ -188,6 +203,7 @@ export function TripProvider({ children }) {
 
   const removeTrip = useCallback(async (tripId) => {
     if (isSupabaseConfigured) {
+      if (!(await ensureSession())) return;
       // Delete trip_members first (FK constraint), then the trip
       await supabase.from('trip_members').delete().eq('trip_id', tripId);
       const { error } = await supabase.from('trips').delete().eq('id', tripId);
