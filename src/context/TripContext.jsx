@@ -165,18 +165,18 @@ export function TripProvider({ children }) {
       paidSettlements: [],
     };
 
-    const { data: row, error } = await supabase
-      .from('trips')
-      .insert({ name: tripData.name, destination: tripData.destination, status: 'planning', data: fullTripData, created_by: dbUser.id })
-      .select('id').single();
+    const { data: tripId, error } = await supabase.rpc('create_trip', {
+      p_name: tripData.name,
+      p_destination: tripData.destination,
+      p_data: fullTripData,
+      p_color: colorFromId(dbUser.id),
+    });
 
     if (error) { console.error('addTrip error:', error); return; }
 
-    await supabase.from('trip_members').insert({ trip_id: row.id, user_id: dbUser.id, role: 'organizer', color: colorFromId(dbUser.id) });
-
-    const newTrip = { ...fullTripData, id: row.id };
+    const newTrip = { ...fullTripData, id: tripId };
     setTrips(prev => [newTrip, ...prev]);
-    setActiveTripId(row.id);
+    setActiveTripId(tripId);
   }, [dbUser]);
 
   const removeTrip = useCallback(async (tripId) => {
