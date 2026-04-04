@@ -15,15 +15,45 @@ export default function InviteModal({ onClose }) {
   const [emailSent, setEmailSent] = useState('');
   const [dbInviteCode, setDbInviteCode] = useState('');
 
-  // In Supabase mode: create a trip_invites record so the link can be accepted by new users
+  // In Supabase mode: get or create a trip_invites record
   useEffect(() => {
     if (!isSupabaseConfigured || !activeTrip || !currentUser) return;
-    supabase
-      .from('trip_invites')
-      .insert({ trip_id: activeTrip.id, invited_by: currentUser.id })
-      .select('invite_code')
-      .single()
-      .then(({ data }) => { if (data) setDbInviteCode(data.invite_code); });
+
+    async function getOrCreateInvite() {
+      // First try to find an existing invite for this trip
+      const { data: existing, error: selErr } = await supabase
+        .from('trip_invites')
+        .select('invite_code')
+        .eq('trip_id', activeTrip.id)
+        .limit(1)
+        .maybeSingle();
+
+      if (selErr) console.error('[invite] select error:', selErr);
+
+      if (existing?.invite_code) {
+        console.log('[invite] using existing code:', existing.invite_code);
+        setDbInviteCode(existing.invite_code);
+        return;
+      }
+
+      // Create new invite
+      const { data, error: insErr } = await supabase
+        .from('trip_invites')
+        .insert({ trip_id: activeTrip.id, invited_by: currentUser.id })
+        .select('invite_code')
+        .single();
+
+      if (insErr) {
+        console.error('[invite] insert error:', insErr);
+        return;
+      }
+      if (data?.invite_code) {
+        console.log('[invite] created code:', data.invite_code);
+        setDbInviteCode(data.invite_code);
+      }
+    }
+
+    getOrCreateInvite();
   }, [activeTrip?.id, currentUser?.id]);
 
   if (!activeTrip) return null;
