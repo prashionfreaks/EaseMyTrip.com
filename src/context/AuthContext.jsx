@@ -22,8 +22,13 @@ export function AuthProvider({ children }) {
       return;
     }
 
+    const sessionTimeout = setTimeout(() => setLoading(false), 5000);
     supabase.auth.getSession().then(({ data: { session } }) => {
+      clearTimeout(sessionTimeout);
       setUser(session?.user ?? null);
+      setLoading(false);
+    }).catch(() => {
+      clearTimeout(sessionTimeout);
       setLoading(false);
     });
 
