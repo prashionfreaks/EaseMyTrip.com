@@ -10,6 +10,7 @@ import {
   Clock, CheckCircle2, Trash2, Bell, Users, Globe, TrendingUp,
 } from 'lucide-react';
 import { getDestinationCurrency } from '../lib/itinerary';
+import PlacesAutocomplete from '../components/PlacesAutocomplete';
 import { format, differenceInDays, parseISO } from 'date-fns';
 
 function countOutstandingDues(trips, currentUserId) {
@@ -386,8 +387,11 @@ export default function Dashboard({ onNavigate }) {
           </div>
           <div className="form-group">
             <label className="form-label">Destination *</label>
-            <input className="form-input" placeholder="e.g. Tokyo, Kyoto & Osaka" value={newTrip.destination}
-              onChange={e => setNewTrip(p => ({ ...p, destination: e.target.value }))} />
+            <PlacesAutocomplete
+              placeholder="Search a city..."
+              value={newTrip.destination}
+              onChange={val => setNewTrip(p => ({ ...p, destination: val }))}
+            />
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div className="form-group">
