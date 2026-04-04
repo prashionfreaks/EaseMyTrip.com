@@ -1,52 +1,17 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { MapPin } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { MapPin, Loader2 } from 'lucide-react';
 
-const API_KEY = import.meta.env.VITE_GOOGLE_PLACES_API_KEY;
-
-let scriptLoaded = false;
-let scriptLoading = false;
-const loadCallbacks = [];
-
-function loadGoogleScript() {
-  if (scriptLoaded) return Promise.resolve();
-  if (scriptLoading) return new Promise(resolve => loadCallbacks.push(resolve));
-
-  scriptLoading = true;
-  return new Promise((resolve) => {
-    loadCallbacks.push(resolve);
-    const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${API_KEY}&libraries=places`;
-    script.async = true;
-    script.onload = () => {
-      scriptLoaded = true;
-      scriptLoading = false;
-      loadCallbacks.forEach(cb => cb());
-      loadCallbacks.length = 0;
-    };
-    document.head.appendChild(script);
-  });
-}
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
 export default function PlacesAutocomplete({ value, onChange, placeholder }) {
   const [query, setQuery] = useState(value || '');
-  const [predictions, setPredictions] = useState([]);
+  const [suggestions, setSuggestions] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [ready, setReady] = useState(false);
-  const serviceRef = useRef(null);
+  const [loading, setLoading] = useState(false);
   const wrapperRef = useRef(null);
   const debounceRef = useRef(null);
 
-  // Sync external value
   useEffect(() => { setQuery(value || ''); }, [value]);
-
-  // Load Google Maps script
-  useEffect(() => {
-    if (!API_KEY) return;
-    loadGoogleScript().then(() => {
-      serviceRef.current = new window.google.maps.places.AutocompleteService();
-      setReady(true);
-    });
-  }, []);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -59,42 +24,65 @@ export default function PlacesAutocomplete({ value, onChange, placeholder }) {
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
-  const fetchPredictions = useCallback((input) => {
-    if (!ready || !serviceRef.current || !input.trim()) {
-      setPredictions([]);
+  async function fetchSuggestions(input) {
+    if (!API_KEY || !input.trim() || input.trim().length < 2) {
+      setSuggestions([]);
       return;
     }
-    serviceRef.current.getPlacePredictions(
-      { input, types: ['(cities)'] },
-      (results, status) => {
-        if (status === window.google.maps.places.PlacesServiceStatus.OK && results) {
-          setPredictions(results.slice(0, 5));
-        } else {
-          setPredictions([]);
+
+    setLoading(true);
+    try {
+      const prompt = `Given the partial search "${input}", suggest up to 5 real travel destinations (cities/places) that match. Return ONLY a JSON array of objects with "name" (city/place name) and "region" (state/country). No explanation, no markdown, just the JSON array. Example: [{"name":"Tokyo","region":"Japan"},{"name":"Toronto","region":"Canada"}]`;
+
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { temperature: 0.1, maxOutputTokens: 300 },
+          }),
         }
+      );
+
+      const data = await res.json();
+      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      // Extract JSON array from response
+      const jsonMatch = text.match(/\[[\s\S]*\]/);
+      if (jsonMatch) {
+        const places = JSON.parse(jsonMatch[0]);
+        setSuggestions(places.slice(0, 5));
+        setShowDropdown(true);
+      } else {
+        setSuggestions([]);
       }
-    );
-  }, [ready]);
+    } catch (err) {
+      console.error('[places] Gemini error:', err);
+      setSuggestions([]);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   function handleInput(e) {
     const val = e.target.value;
     setQuery(val);
     onChange(val);
-    setShowDropdown(true);
 
     clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => fetchPredictions(val), 300);
+    debounceRef.current = setTimeout(() => fetchSuggestions(val), 400);
   }
 
-  function selectPlace(prediction) {
-    const desc = prediction.description;
-    setQuery(desc);
-    onChange(desc);
-    setPredictions([]);
+  function selectPlace(place) {
+    const full = `${place.name}, ${place.region}`;
+    setQuery(full);
+    onChange(full);
+    setSuggestions([]);
     setShowDropdown(false);
   }
 
-  // If no API key, fall back to plain input
+  // No API key — plain input
   if (!API_KEY) {
     return (
       <input
@@ -108,14 +96,22 @@ export default function PlacesAutocomplete({ value, onChange, placeholder }) {
 
   return (
     <div ref={wrapperRef} style={{ position: 'relative' }}>
-      <input
-        className="form-input"
-        placeholder={placeholder}
-        value={query}
-        onChange={handleInput}
-        onFocus={() => { if (predictions.length) setShowDropdown(true); }}
-      />
-      {showDropdown && predictions.length > 0 && (
+      <div style={{ position: 'relative' }}>
+        <input
+          className="form-input"
+          placeholder={placeholder}
+          value={query}
+          onChange={handleInput}
+          onFocus={() => { if (suggestions.length) setShowDropdown(true); }}
+        />
+        {loading && (
+          <Loader2 size={14} style={{
+            position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
+            color: '#94a3b8', animation: 'spin 1s linear infinite',
+          }} />
+        )}
+      </div>
+      {showDropdown && suggestions.length > 0 && (
         <div style={{
           position: 'absolute', top: '100%', left: 0, right: 0,
           zIndex: 1000, marginTop: 4,
@@ -124,9 +120,9 @@ export default function PlacesAutocomplete({ value, onChange, placeholder }) {
           boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
           overflow: 'hidden',
         }}>
-          {predictions.map((p) => (
+          {suggestions.map((p, i) => (
             <button
-              key={p.place_id}
+              key={i}
               onClick={() => selectPlace(p)}
               style={{
                 width: '100%', padding: '10px 14px',
@@ -140,21 +136,11 @@ export default function PlacesAutocomplete({ value, onChange, placeholder }) {
             >
               <MapPin size={14} style={{ color: '#94a3b8', flexShrink: 0 }} />
               <div>
-                <div style={{ fontWeight: 600 }}>
-                  {p.structured_formatting.main_text}
-                </div>
-                <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 1 }}>
-                  {p.structured_formatting.secondary_text}
-                </div>
+                <div style={{ fontWeight: 600 }}>{p.name}</div>
+                <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 1 }}>{p.region}</div>
               </div>
             </button>
           ))}
-          <div style={{
-            padding: '6px 14px', fontSize: 10, color: '#94a3b8',
-            borderTop: '1px solid #f1f5f9', textAlign: 'right',
-          }}>
-            Powered by Google
-          </div>
         </div>
       )}
     </div>
