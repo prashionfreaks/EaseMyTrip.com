@@ -181,7 +181,10 @@ export function TripProvider({ children }) {
 
   const removeTrip = useCallback(async (tripId) => {
     if (isSupabaseConfigured) {
-      await supabase.from('trips').delete().eq('id', tripId);
+      // Delete trip_members first (FK constraint), then the trip
+      await supabase.from('trip_members').delete().eq('trip_id', tripId);
+      const { error } = await supabase.from('trips').delete().eq('id', tripId);
+      if (error) console.error('removeTrip error:', error);
     }
     setTrips(prev => prev.filter(t => t.id !== tripId));
     setActiveTripId(prev => prev === tripId ? null : prev);
