@@ -7,9 +7,13 @@ const TripContext = createContext(null);
 /** Ensure we have a valid session; refreshes token or forces re-login */
 async function ensureSession() {
   if (!isSupabaseConfigured) return true;
-  const { data: { session }, error } = await supabase.auth.getSession();
+  // First check in-memory session
+  const { data: { session } } = await supabase.auth.getSession();
   if (session) return true;
-  // Session expired and refresh failed — force re-login
+  // Session missing — try explicit refresh before giving up
+  const { data: { session: refreshed } } = await supabase.auth.refreshSession();
+  if (refreshed) return true;
+  // Both failed — force re-login
   console.warn('Session expired, signing out');
   await supabase.auth.signOut();
   window.location.reload();
