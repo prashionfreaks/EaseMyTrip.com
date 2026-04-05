@@ -48,6 +48,7 @@ export default function ActivityFeed() {
   // Group by date
   const grouped = {};
   activities.forEach(act => {
+    if (!act.timestamp) return;
     const dateKey = format(parseISO(act.timestamp), 'yyyy-MM-dd');
     if (!grouped[dateKey]) grouped[dateKey] = [];
     grouped[dateKey].push(act);

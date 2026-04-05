@@ -75,6 +75,7 @@ export default function ChatPage() {
   let lastTimestamp = null;
 
   messages.forEach(msg => {
+    if (!msg.timestamp) return;
     const dateStr = msg.timestamp.slice(0, 10);
     if (dateStr !== lastDateStr) {
       items.push({ type: 'separator', dateStr, key: `sep-${dateStr}` });

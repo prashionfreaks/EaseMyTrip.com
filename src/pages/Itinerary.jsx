@@ -142,10 +142,10 @@ if (!activeTrip) {
                       </div>
                       <div style={{ textAlign: 'left' }}>
                         <h3 style={{ fontSize: 15, fontWeight: 600 }}>
-                          {format(parseISO(day.date), 'EEEE, MMM d')}
+                          {day.date ? format(parseISO(day.date), 'EEEE, MMM d') : `Day ${dayIdx + 1}`}
                         </h3>
                         <p style={{ fontSize: 12, color: 'var(--text-tertiary)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                          <MapPin size={11} /> {day.location} · {day.items.length} activities
+                          <MapPin size={11} /> {day.location} · {(day.items || []).length} activities
                           {dayTotal > 0 && <> · <DollarSign size={11} />{sym}{dayTotal.toLocaleString()}</>}
                         </p>
                       </div>

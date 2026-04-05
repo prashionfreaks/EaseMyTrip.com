@@ -169,8 +169,8 @@ export default function Decisions() {
 
 function PollCard({ poll, trip, currentUser, onVote, onClose }) {
   const totalVoters = (trip.members || []).length;
-  const totalVotes = new Set(poll.options.flatMap(o => o.votes)).size;
-  const maxVotes = Math.max(...poll.options.map(o => o.votes.length), 1);
+  const totalVotes = new Set((poll.options || []).flatMap(o => o.votes || [])).size;
+  const maxVotes = Math.max(...(poll.options || []).map(o => (o.votes || []).length), 1);
   const isActive = poll.status === 'active';
   const expired = poll.deadline && isPast(parseISO(poll.deadline));
 
