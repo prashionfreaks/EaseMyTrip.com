@@ -10,7 +10,7 @@ import {
   Clock, CheckCircle2, Trash2, Bell, Users, Globe, TrendingUp,
 } from 'lucide-react';
 import { getDestinationCurrency } from '../lib/itinerary';
-import PlacesAutocomplete from '../components/PlacesAutocomplete';
+import DestinationPicker from '../components/DestinationPicker';
 import { getDestinationImage } from '../lib/destinationImages';
 import { format, differenceInDays, parseISO } from 'date-fns';
 
@@ -441,8 +441,7 @@ export default function Dashboard({ onNavigate }) {
           </div>
           <div className="form-group">
             <label className="form-label">Destination *</label>
-            <PlacesAutocomplete
-              placeholder="Search a city..."
+            <DestinationPicker
               value={newTrip.destination}
               onChange={val => setNewTrip(p => ({ ...p, destination: val }))}
             />
