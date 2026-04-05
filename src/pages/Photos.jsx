@@ -88,10 +88,11 @@ export default function Photos() {
           try {
             const res = await fetch(pf.preview);
             const blob = await res.blob();
-            const path = `${activeTrip.id}/${Date.now()}-${pf.file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+            const safeName = pf.file.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 80);
+            const path = `${activeTrip.id}/${Date.now()}-${Math.random().toString(36).slice(2, 6)}-${safeName}`;
             const { data: uploadData, error } = await supabase.storage
               .from('trip-photos')
-              .upload(path, blob, { contentType: 'image/jpeg', upsert: false });
+              .upload(path, blob, { contentType: blob.type || 'image/jpeg', upsert: true });
 
             if (error) {
               console.error('Supabase storage upload error:', error);
@@ -103,6 +104,8 @@ export default function Photos() {
                 lastError = 'Permission denied. Check that the "trip-photos" bucket has INSERT policies for authenticated users.';
               } else if (error.statusCode === 413 || error.message?.includes('too large')) {
                 lastError = 'Image too large for storage. Try a smaller photo.';
+              } else if (error.statusCode === 400) {
+                lastError = `Upload rejected (400): ${error.message || 'Bad request'}. Try a different photo or rename the file.`;
               }
               continue; // skip this file, try next
             }
