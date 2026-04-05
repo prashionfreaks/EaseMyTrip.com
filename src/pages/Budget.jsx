@@ -58,6 +58,7 @@ export default function Budget() {
     const bal = {}, paid = {}, share = {};
     members.forEach(m => { bal[m.id] = 0; paid[m.id] = 0; share[m.id] = 0; });
     expenses.forEach(exp => {
+      if (!exp.splitAmong?.length) return;
       const perHead = exp.amount / exp.splitAmong.length;
       paid[exp.paidBy] = (paid[exp.paidBy] || 0) + exp.amount;
       bal[exp.paidBy]  = (bal[exp.paidBy]  || 0) + exp.amount;
@@ -399,7 +400,7 @@ export default function Budget() {
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <p style={{ fontWeight: 500, fontSize: 14 }}>{exp.title}</p>
                         <p style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>
-                          Paid by {payer?.name || 'Unknown'} · Split {exp.splitAmong.length} ways · {format(parseISO(exp.date), 'MMM d')}
+                          Paid by {payer?.name || 'Unknown'} · Split {(exp.splitAmong || []).length} ways{exp.date ? ` · ${format(parseISO(exp.date), 'MMM d')}` : ''}
                         </p>
                       </div>
                       <span style={{ fontWeight: 700, fontSize: 15 }}>{sym}{exp.amount.toLocaleString()}</span>

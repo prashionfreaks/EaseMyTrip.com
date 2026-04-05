@@ -70,9 +70,9 @@ export default function Dashboard({ onNavigate }) {
 
   useEffect(() => {
     if (!isSupabaseConfigured) return;
-    supabase.rpc('get_platform_stats').then(({ data }) => {
-      if (data) setPlatformStats(data);
-    });
+    supabase.rpc('get_platform_stats').then(({ data, error }) => {
+      if (data && !error) setPlatformStats(data);
+    }).catch(() => {});
   }, []);
 
   async function handleCreate() {

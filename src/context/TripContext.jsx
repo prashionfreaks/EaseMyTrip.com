@@ -31,15 +31,16 @@ function colorFromId(id) {
   return colors[Math.abs(h) % colors.length];
 }
 
-/** Ensure every trip has all expected arrays so downstream code never hits undefined */
+/** Ensure every trip has all expected arrays so downstream code never hits undefined/null */
 function normalizeTrip(trip) {
-  return {
-    members: [], polls: [], expenses: [], itinerary: [], routes: [],
-    activity: [], contingencies: [], messages: [], photos: [],
-    paidSettlements: [],
-    budget: { total: 0, spent: 0, currency: 'INR' },
-    ...trip,
-  };
+  const t = { ...trip };
+  const arrayFields = ['members', 'polls', 'expenses', 'itinerary', 'routes',
+    'activity', 'contingencies', 'messages', 'photos', 'paidSettlements'];
+  for (const f of arrayFields) {
+    if (!Array.isArray(t[f])) t[f] = [];
+  }
+  if (!t.budget || typeof t.budget !== 'object') t.budget = { total: 0, spent: 0, currency: 'INR' };
+  return t;
 }
 
 function loadLocalTrips() {
@@ -138,9 +139,15 @@ export function TripProvider({ children }) {
           console.log('[realtime] skipping update for', tripId, '(pending local sync)');
           return;
         }
+        // SAFETY: reject empty/null data payloads — they would wipe local state
+        const incoming = payload.new.data;
+        if (!incoming || (!incoming.name && !incoming.destination && !incoming.members)) {
+          console.warn('[realtime] BLOCKED — incoming data looks empty, ignoring:', tripId);
+          return;
+        }
         setTrips(prev =>
           prev.map(t => t.id === tripId
-            ? normalizeTrip({ ...(payload.new.data || {}), id: tripId })
+            ? normalizeTrip({ ...incoming, id: tripId })
             : t)
         );
       })
@@ -148,9 +155,14 @@ export function TripProvider({ children }) {
     return () => supabase.removeChannel(channel);
   }, [dbUser]);
 
-  // Debounced DB sync
+  // Debounced DB sync — with safety guard to never overwrite good data with empty data
   const syncToDB = useCallback((trip) => {
     if (!isSupabaseConfigured) return;
+    // SAFETY: refuse to sync a trip that looks empty/corrupted
+    if (!trip.name && !trip.destination && (!trip.members || trip.members.length === 0)) {
+      console.warn('[syncToDB] BLOCKED — trip looks empty/corrupted, refusing to overwrite DB:', trip.id);
+      return;
+    }
     pendingSync.current[trip.id] = true;
     clearTimeout(syncTimers.current[trip.id]);
     syncTimers.current[trip.id] = setTimeout(async () => {
