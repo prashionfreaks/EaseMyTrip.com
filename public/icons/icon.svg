@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0ea5e9"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="120" fill="url(#bg)"/>
+  <!-- Compass rose -->
+  <circle cx="256" cy="256" r="130" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+  <circle cx="256" cy="256" r="20" fill="white" opacity="0.9"/>
+  <!-- North pointer -->
+  <polygon points="256,110 242,250 256,236 270,250" fill="white"/>
+  <!-- South pointer -->
+  <polygon points="256,402 270,262 256,276 242,262" fill="rgba(255,255,255,0.45)"/>
+  <!-- East pointer -->
+  <polygon points="402,256 262,242 276,256 262,270" fill="rgba(255,255,255,0.45)"/>
+  <!-- West pointer -->
+  <polygon points="110,256 250,270 236,256 250,242" fill="rgba(255,255,255,0.45)"/>
+  <!-- N label -->
+  <text x="256" y="96" text-anchor="middle" font-family="system-ui,sans-serif" font-size="36" font-weight="800" fill="white">N</text>
+</svg>

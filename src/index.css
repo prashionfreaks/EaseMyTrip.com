@@ -100,3 +100,59 @@ img { max-width: 100%; display: block; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-tertiary); }
+
+/* ── PWA / mobile globals ──────────────────────────────── */
+
+/* Use dynamic viewport height so bottom nav doesn't overlap content */
+html, body, #root {
+  min-height: 100dvh;
+}
+
+/* Prevent text size adjustment on orientation change */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Safe area support for fixed elements */
+.mobile-header {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* Smooth momentum scrolling everywhere on iOS */
+* {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Remove 300ms tap delay */
+a, button, [role="button"] {
+  touch-action: manipulation;
+}
+
+/* Global mobile layout tweaks */
+@media (max-width: 768px) {
+  /* Tighter headings */
+  h1 { font-size: 20px !important; }
+
+  /* Single column for all stat/summary grids inside page-body */
+  .page-body .grid-3,
+  .page-body .grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  /* Stat cards side-by-side on mobile (2-up) */
+  .stats-row {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  /* Compact trip cards */
+  .trip-card-cover { height: 110px !important; }
+
+  /* Make form modals sheet-style */
+  .modal { width: 100%; }
+
+  /* Avatar groups tighter */
+  .avatar-group .user-avatar { margin-left: -6px !important; }
+}

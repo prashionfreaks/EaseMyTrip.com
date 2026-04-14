@@ -13,7 +13,7 @@ import CalendarPage from './pages/CalendarPage';
 import ChatPage from './pages/ChatPage';
 import AuthPage from './pages/AuthPage';
 import LandingPage from './pages/LandingPage';
-import { Menu, Compass } from 'lucide-react';
+import { Menu, Compass, LayoutDashboard, Vote, Wallet, Map, MoreHorizontal, MessageCircle } from 'lucide-react';
 import './App.css';
 
 export default function App() {
@@ -148,9 +148,24 @@ export default function App() {
     return <LandingPage />;
   }
 
+  const { activeTrip } = useTrips();
+
+  // Bottom nav items — context-aware: show trip tabs when a trip is active
+  const bottomNavItems = activeTrip
+    ? [
+        { id: 'dashboard', icon: LayoutDashboard, label: 'Trips' },
+        { id: 'decisions', icon: Vote, label: 'Polls', badge: activeTrip.polls?.filter(p => p.status === 'active').length || null },
+        { id: 'budget', icon: Wallet, label: 'Budget' },
+        { id: 'itinerary', icon: Map, label: 'Plan' },
+        { id: 'chat', icon: MessageCircle, label: 'Chat' },
+      ]
+    : [
+        { id: 'dashboard', icon: LayoutDashboard, label: 'Trips' },
+      ];
+
   return (
     <div className="app-layout">
-      {/* Mobile header */}
+      {/* Mobile top header */}
       <div className="mobile-header">
         <button className="menu-toggle" onClick={() => setSidebarOpen(true)}>
           <Menu size={22} />
@@ -158,13 +173,22 @@ export default function App() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <div style={{
             width: 28, height: 28, borderRadius: 8,
-            background: 'linear-gradient(135deg, #2563eb, #7c3aed)',
+            background: 'linear-gradient(135deg, #0ea5e9, #7c3aed)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
             <Compass size={15} color="white" />
           </div>
-          <span className="logo-text">TripSync</span>
+          <span className="logo-text">LetsWander</span>
         </div>
+        {activeTrip && (
+          <span style={{
+            marginLeft: 'auto', fontSize: 12, fontWeight: 600,
+            color: '#38bdf8', maxWidth: 120,
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}>
+            {activeTrip.name}
+          </span>
+        )}
       </div>
 
       <Sidebar
@@ -177,6 +201,45 @@ export default function App() {
       <main className="main-content">
         {renderPage()}
       </main>
+
+      {/* Mobile bottom navigation */}
+      <nav className="bottom-nav">
+        <div className="bottom-nav-inner">
+          {bottomNavItems.map(item => {
+            const Icon = item.icon;
+            const isActive = currentPage === item.id;
+            return (
+              <button
+                key={item.id}
+                className={`bottom-nav-btn ${isActive ? 'active' : ''}`}
+                onClick={() => navigate(item.id)}
+              >
+                <div className="bnav-icon-wrap">
+                  <div className="bnav-icon">
+                    <Icon size={20} />
+                  </div>
+                  {item.badge > 0 && (
+                    <span className="bottom-nav-badge">{item.badge}</span>
+                  )}
+                </div>
+                {item.label}
+              </button>
+            );
+          })}
+          {/* More button — opens sidebar */}
+          <button
+            className="bottom-nav-btn"
+            onClick={() => setSidebarOpen(true)}
+          >
+            <div className="bnav-icon-wrap">
+              <div className="bnav-icon">
+                <MoreHorizontal size={20} />
+              </div>
+            </div>
+            More
+          </button>
+        </div>
+      </nav>
     </div>
   );
 }

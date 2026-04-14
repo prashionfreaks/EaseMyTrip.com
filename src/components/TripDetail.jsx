@@ -170,12 +170,38 @@ export default function TripDetail({ onInvite, defaultTab = 'chat' }) {
         </div>
       </div>
 
-      {/* Tab bar */}
-      <div style={{
-        display: 'flex', gap: 4, padding: '10px 16px 0',
+      {/* Tab bar — horizontally scrollable, no scrollbar */}
+      <style>{`
+        .trip-tab-bar { scrollbar-width: none; }
+        .trip-tab-bar::-webkit-scrollbar { display: none; }
+        .trip-tab-btn {
+          display: flex; align-items: center; gap: 5px;
+          padding: 8px 13px 10px;
+          font-size: 13px; font-weight: 500;
+          color: var(--text-secondary);
+          background: transparent; border: none;
+          border-bottom: 2px solid transparent;
+          border-radius: 10px 10px 0 0;
+          cursor: pointer; white-space: nowrap;
+          transition: all 0.15s; flex-shrink: 0;
+          -webkit-tap-highlight-color: transparent;
+          min-height: 44px;
+        }
+        .trip-tab-btn.active {
+          color: var(--brand); font-weight: 700;
+          background: var(--brand-light);
+          border-bottom-color: var(--brand);
+        }
+        @media (max-width: 768px) {
+          .trip-tab-btn { padding: 7px 10px 9px; font-size: 12px; gap: 4px; }
+          .trip-tab-btn svg { width: 13px; height: 13px; }
+        }
+      `}</style>
+      <div className="trip-tab-bar" style={{
+        display: 'flex', gap: 2, padding: '8px 12px 0',
         background: 'var(--bg-secondary)',
         borderBottom: '1px solid var(--border)',
-        overflowX: 'auto', scrollbarWidth: 'none',
+        overflowX: 'auto',
       }}>
         {TABS.map(tab => {
           const Icon = tab.icon;
@@ -184,30 +210,17 @@ export default function TripDetail({ onInvite, defaultTab = 'chat' }) {
           return (
             <button
               key={tab.id}
+              className={`trip-tab-btn ${isActive ? 'active' : ''}`}
               onClick={() => setActiveTab(tab.id)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                padding: '8px 14px 10px',
-                fontSize: 13, fontWeight: isActive ? 700 : 500,
-                color: isActive ? 'var(--brand)' : 'var(--text-secondary)',
-                background: isActive ? 'var(--brand-light)' : 'transparent',
-                border: 'none',
-                borderBottom: isActive ? '2px solid var(--brand)' : '2px solid transparent',
-                borderRadius: '10px 10px 0 0',
-                cursor: 'pointer', whiteSpace: 'nowrap',
-                transition: 'all 0.15s',
-                flexShrink: 0,
-              }}
-              onMouseOver={e => { if (!isActive) { e.currentTarget.style.background = 'var(--bg-tertiary)'; e.currentTarget.style.color = 'var(--text-primary)'; }}}
-              onMouseOut={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-secondary)'; }}}
             >
               <Icon size={14} />
               {tab.label}
-              {badge && (
+              {badge > 0 && (
                 <span style={{
                   background: 'linear-gradient(135deg, #0ea5e9, #6366f1)',
                   color: 'white', fontSize: 10, fontWeight: 700,
                   padding: '1px 6px', borderRadius: 999, lineHeight: 1.5,
+                  flexShrink: 0,
                 }}>
                   {badge}
                 </span>
