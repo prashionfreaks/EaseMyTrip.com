@@ -19,7 +19,7 @@ import './App.css';
 export default function App() {
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { setActiveTripId, trips, tripsLoaded, joinTripViaInvite } = useTrips();
+  const { setActiveTripId, trips, tripsLoaded, joinTripViaInvite, activeTrip } = useTrips();
   const { user, loading, isDemo } = useAuth();
   const [inviteProcessed, setInviteProcessed] = useState(false);
 
@@ -147,8 +147,6 @@ export default function App() {
   if (!user) {
     return <LandingPage />;
   }
-
-  const { activeTrip } = useTrips();
 
   // Bottom nav items — context-aware: show trip tabs when a trip is active
   const bottomNavItems = activeTrip

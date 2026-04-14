@@ -455,9 +455,7 @@ export default function Dashboard({ onNavigate }) {
 
         {/* Active trip workspace */}
         {activeTrip && (
-          <div style={{ animation: 'dashScaleIn 0.35s ease' }}>
-            <TripDetail onInvite={() => setShowInvite(true)} />
-          </div>
+          <TripDetail onInvite={() => setShowInvite(true)} />
         )}
 
         {/* Trip cards grid */}
