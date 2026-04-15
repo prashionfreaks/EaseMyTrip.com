@@ -692,7 +692,7 @@ select.form-input { cursor: pointer; }
   /* Chat height in trip workspace */
   .chat-container { height: calc(100dvh - 56px - 56px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); }
   .trip-workspace-chat,
-  .trip-workspace-chat .chat-container { height: 420px; }
+  .trip-workspace-chat .chat-container { height: 100%; min-height: 0; display: flex; flex-direction: column; }
 
   /* Tighter cards */
   .card-body { padding: 14px 16px; }
