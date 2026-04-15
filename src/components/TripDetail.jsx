@@ -1,9 +1,10 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useTrips } from '../context/TripContext';
 import {
   MessageCircle, Vote, Wallet, CalendarRange, Map,
   Route, Activity, ShieldAlert, MapPin, Calendar,
   UserPlus, Users, Clock, CheckCircle2, X, Globe, Camera, Trash2,
+  MoreHorizontal,
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import ChatPage from '../pages/ChatPage';
@@ -23,12 +24,15 @@ const statusConfig = {
   confirmed: { label: 'Confirmed', badge: 'badge-green',  icon: CheckCircle2 },
 };
 
-const TABS = [
+const PRIMARY_TABS = [
   { id: 'chat',      label: 'Chat',      icon: MessageCircle },
   { id: 'polls',     label: 'Polls',     icon: Vote },
   { id: 'budget',    label: 'Budget',    icon: Wallet },
-  { id: 'calendar',  label: 'Calendar',  icon: CalendarRange },
   { id: 'itinerary', label: 'Itinerary', icon: Map },
+];
+
+const MORE_TABS = [
+  { id: 'calendar',  label: 'Calendar',  icon: CalendarRange },
   { id: 'routes',    label: 'Routes',    icon: Route },
   { id: 'photos',    label: 'Photos',    icon: Camera },
   { id: 'about',     label: 'About',     icon: Globe },
@@ -36,10 +40,21 @@ const TABS = [
   { id: 'plans',     label: 'Plans',     icon: ShieldAlert },
 ];
 
+const TABS = [...PRIMARY_TABS, ...MORE_TABS];
+
 export default function TripDetail({ onInvite, defaultTab = 'chat' }) {
   const { activeTrip, setActiveTripId, removeTrip, currentUser } = useTrips();
   const [activeTab, setActiveTab] = useState(defaultTab);
   const [deleting, setDeleting] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const moreRef = useRef(null);
+
+  useEffect(() => {
+    if (!moreOpen) return;
+    const handler = (e) => { if (moreRef.current && !moreRef.current.contains(e.target)) setMoreOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [moreOpen]);
 
   const unreadMessages = useMemo(() => {
     if (!activeTrip || !currentUser) return 0;
@@ -233,9 +248,9 @@ export default function TripDetail({ onInvite, defaultTab = 'chat' }) {
           display: 'flex', gap: 0, padding: '0 12px',
           background: 'var(--bg-secondary)',
           borderBottom: '1px solid var(--border)',
-          overflowX: 'auto', flexShrink: 0,
+          flexShrink: 0, position: 'relative',
         }}>
-          {TABS.map(tab => {
+          {PRIMARY_TABS.map(tab => {
             const Icon = tab.icon;
             const badge = badges[tab.id];
             const isActive = activeTab === tab.id;
@@ -253,6 +268,53 @@ export default function TripDetail({ onInvite, defaultTab = 'chat' }) {
               </button>
             );
           })}
+
+          {/* More dropdown */}
+          <div ref={moreRef} style={{ position: 'relative', marginLeft: 'auto' }}>
+            {(() => {
+              const activeMore = MORE_TABS.find(t => t.id === activeTab);
+              const Icon = activeMore ? activeMore.icon : MoreHorizontal;
+              const isActive = !!activeMore;
+              return (
+                <button className={`trip-tab-btn ${isActive ? 'active' : ''}`} onClick={() => setMoreOpen(o => !o)}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Icon size={15} />
+                  </div>
+                  <span className="tab-label">{activeMore ? activeMore.label : 'More'}</span>
+                </button>
+              );
+            })()}
+            {moreOpen && (
+              <div style={{
+                position: 'absolute', top: '100%', right: 0,
+                marginTop: 4, minWidth: 180,
+                background: 'var(--bg-primary)',
+                border: '1px solid var(--border)',
+                borderRadius: 10,
+                boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                zIndex: 100, overflow: 'hidden',
+              }}>
+                {MORE_TABS.map(tab => {
+                  const Icon = tab.icon;
+                  const isActive = activeTab === tab.id;
+                  return (
+                    <button key={tab.id} onClick={() => { setActiveTab(tab.id); setMoreOpen(false); }}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 10,
+                        width: '100%', padding: '10px 14px',
+                        background: isActive ? 'var(--brand-light)' : 'transparent',
+                        color: isActive ? 'var(--brand)' : 'var(--text-primary)',
+                        border: 'none', cursor: 'pointer',
+                        fontSize: 13, fontWeight: isActive ? 700 : 500,
+                        textAlign: 'left',
+                      }}>
+                      <Icon size={15} /> {tab.label}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* ── Tab content ── */}
