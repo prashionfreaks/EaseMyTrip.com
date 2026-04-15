@@ -11,9 +11,11 @@ import ActivityFeed from './pages/ActivityFeed';
 import Contingency from './pages/Contingency';
 import CalendarPage from './pages/CalendarPage';
 import ChatPage from './pages/ChatPage';
+import Photos from './pages/Photos';
+import About from './pages/About';
 import AuthPage from './pages/AuthPage';
 import LandingPage from './pages/LandingPage';
-import { Compass, LayoutDashboard, Vote, Wallet, Map, MoreHorizontal, MessageCircle, LogOut, X as XIcon } from 'lucide-react';
+import { Compass, LayoutDashboard, Vote, Wallet, Map, MoreHorizontal, MessageCircle, LogOut, X as XIcon, Route as RouteIcon, Camera, Globe, Activity as ActivityIcon, CalendarRange, ShieldAlert } from 'lucide-react';
 import './App.css';
 
 export default function App() {
@@ -80,6 +82,8 @@ export default function App() {
       case 'contingency': return <Contingency />;
       case 'calendar':    return <CalendarPage />;
       case 'chat':        return <ChatPage />;
+      case 'photos':      return <Photos />;
+      case 'about':       return <About />;
       default:            return <Dashboard onNavigate={navigate} />;
     }
   }
@@ -255,12 +259,14 @@ export default function App() {
             }}
           />
           <div style={{
-            position: 'fixed', left: 0, right: 0, bottom: 0,
+            position: 'fixed', left: 0, right: 0,
+            bottom: 'calc(56px + env(safe-area-inset-bottom))',
             background: 'var(--bg-primary)',
             borderRadius: '16px 16px 0 0',
-            padding: '12px 16px calc(16px + env(safe-area-inset-bottom))',
+            padding: '12px 16px 16px',
             zIndex: 201,
             boxShadow: '0 -8px 30px rgba(0,0,0,0.25)',
+            maxHeight: '70dvh', overflowY: 'auto',
           }}>
             <div style={{ width: 40, height: 4, background: 'var(--border)', borderRadius: 2, margin: '0 auto 14px' }} />
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '4px 4px 14px', borderBottom: '1px solid var(--border)' }}>
@@ -281,12 +287,42 @@ export default function App() {
                 <XIcon size={16} />
               </button>
             </div>
+            {/* Trip-scoped extra destinations */}
+            {activeTrip && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, padding: '14px 0' }}>
+                {[
+                  { id: 'calendar', label: 'Calendar', Icon: CalendarRange },
+                  { id: 'routes',   label: 'Routes',   Icon: RouteIcon },
+                  { id: 'photos',   label: 'Photos',   Icon: Camera },
+                  { id: 'about',    label: 'About',    Icon: Globe },
+                  { id: 'activity', label: 'Activity', Icon: ActivityIcon },
+                  { id: 'contingency', label: 'Plans', Icon: ShieldAlert },
+                ].map(({ id, label, Icon }) => (
+                  <button
+                    key={id}
+                    onClick={() => { navigate(id); setAccountSheetOpen(false); }}
+                    style={{
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                      padding: '12px 8px',
+                      background: 'var(--bg-secondary)',
+                      border: '1px solid var(--border)', borderRadius: 12,
+                      color: 'var(--text-primary)',
+                      fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                    }}
+                  >
+                    <Icon size={20} color="var(--brand)" />
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
+
             {!isDemo && (
               <button
                 onClick={async () => { setSigningOut(true); try { await signOut(); } catch (e) { console.error(e); setSigningOut(false); } }}
                 disabled={signingOut}
                 style={{
-                  width: '100%', marginTop: 14, padding: '12px 14px',
+                  width: '100%', marginTop: activeTrip ? 4 : 14, padding: '12px 14px',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                   borderRadius: 10, border: '1px solid rgba(248,113,113,0.3)',
                   background: 'rgba(248,113,113,0.1)', color: '#ef4444',
