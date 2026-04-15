@@ -632,14 +632,8 @@ select.form-input { cursor: pointer; }
 }
 
 @media (max-width: 768px) {
-  /* Hide desktop sidebar, show mobile bottom nav */
-  .sidebar {
-    transform: translateX(-100%);
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-  .sidebar.open { transform: translateX(0); }
-  .sidebar-overlay.open { display: block; }
+  /* Hide sidebar entirely on mobile — bottom nav + account sheet replace it */
+  .sidebar, .sidebar-overlay { display: none !important; }
   .mobile-header { display: flex; }
   .bottom-nav { display: flex; flex-direction: column; }
 

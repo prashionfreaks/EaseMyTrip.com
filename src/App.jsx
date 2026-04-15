@@ -13,14 +13,16 @@ import CalendarPage from './pages/CalendarPage';
 import ChatPage from './pages/ChatPage';
 import AuthPage from './pages/AuthPage';
 import LandingPage from './pages/LandingPage';
-import { Menu, Compass, LayoutDashboard, Vote, Wallet, Map, MoreHorizontal, MessageCircle } from 'lucide-react';
+import { Compass, LayoutDashboard, Vote, Wallet, Map, MoreHorizontal, MessageCircle, LogOut, X as XIcon } from 'lucide-react';
 import './App.css';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { setActiveTripId, trips, tripsLoaded, joinTripViaInvite, activeTrip } = useTrips();
-  const { user, loading, isDemo } = useAuth();
+  const [accountSheetOpen, setAccountSheetOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
+  const { setActiveTripId, trips, tripsLoaded, joinTripViaInvite, activeTrip, currentUser } = useTrips();
+  const { user, loading, isDemo, displayName, initials, signOut } = useAuth();
   const [inviteProcessed, setInviteProcessed] = useState(false);
 
   // Handle join link in URL — save trip ID to localStorage (survives OAuth redirects)
@@ -165,9 +167,6 @@ export default function App() {
     <div className="app-layout">
       {/* Mobile top header */}
       <div className="mobile-header">
-        <button className="menu-toggle" onClick={() => setSidebarOpen(true)}>
-          <Menu size={22} />
-        </button>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <div style={{
             width: 28, height: 28, borderRadius: 8,
@@ -229,10 +228,10 @@ export default function App() {
               </button>
             );
           })}
-          {/* More button — opens sidebar */}
+          {/* More button — opens account sheet */}
           <button
             className="bottom-nav-btn"
-            onClick={() => setSidebarOpen(true)}
+            onClick={() => setAccountSheetOpen(true)}
           >
             <div className="bnav-icon-wrap">
               <div className="bnav-icon">
@@ -243,6 +242,64 @@ export default function App() {
           </button>
         </div>
       </nav>
+
+      {/* Account sheet (mobile) */}
+      {accountSheetOpen && (
+        <>
+          <div
+            onClick={() => setAccountSheetOpen(false)}
+            style={{
+              position: 'fixed', inset: 0,
+              background: 'rgba(0,0,0,0.5)',
+              zIndex: 200,
+            }}
+          />
+          <div style={{
+            position: 'fixed', left: 0, right: 0, bottom: 0,
+            background: 'var(--bg-primary)',
+            borderRadius: '16px 16px 0 0',
+            padding: '12px 16px calc(16px + env(safe-area-inset-bottom))',
+            zIndex: 201,
+            boxShadow: '0 -8px 30px rgba(0,0,0,0.25)',
+          }}>
+            <div style={{ width: 40, height: 4, background: 'var(--border)', borderRadius: 2, margin: '0 auto 14px' }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '4px 4px 14px', borderBottom: '1px solid var(--border)' }}>
+              <div className="user-avatar" style={{
+                background: 'linear-gradient(135deg, #2563eb, #7c3aed)',
+                width: 40, height: 40, fontSize: 15,
+              }}>{initials}</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: 700, fontSize: 15, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {currentUser?.email || 'Signed in'}
+                </div>
+              </div>
+              <button
+                onClick={() => setAccountSheetOpen(false)}
+                style={{ width: 32, height: 32, borderRadius: 8, border: 'none', background: 'var(--bg-accent)', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <XIcon size={16} />
+              </button>
+            </div>
+            {!isDemo && (
+              <button
+                onClick={async () => { setSigningOut(true); try { await signOut(); } catch (e) { console.error(e); setSigningOut(false); } }}
+                disabled={signingOut}
+                style={{
+                  width: '100%', marginTop: 14, padding: '12px 14px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  borderRadius: 10, border: '1px solid rgba(248,113,113,0.3)',
+                  background: 'rgba(248,113,113,0.1)', color: '#ef4444',
+                  fontSize: 14, fontWeight: 600, cursor: 'pointer',
+                  opacity: signingOut ? 0.6 : 1,
+                }}
+              >
+                <LogOut size={16} /> {signingOut ? 'Signing Out…' : 'Sign Out'}
+              </button>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }
