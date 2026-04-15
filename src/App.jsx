@@ -176,13 +176,15 @@ export default function App() {
           }}>
             <Compass size={15} color="white" />
           </div>
-          <span className="logo-text">LetsWander</span>
+          {!activeTrip && <span className="logo-text">LetsWander</span>}
         </div>
         {activeTrip && (
           <span style={{
-            marginLeft: 'auto', fontSize: 12, fontWeight: 600,
-            color: '#38bdf8', maxWidth: 120,
+            flex: 1, minWidth: 0,
+            fontSize: 15, fontWeight: 700,
+            color: '#38bdf8',
             overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            paddingLeft: 10,
           }}>
             {activeTrip.name}
           </span>
@@ -205,7 +207,10 @@ export default function App() {
         <div className="bottom-nav-inner">
           {bottomNavItems.map(item => {
             const Icon = item.icon;
-            const isActive = currentPage === item.id;
+            // When a trip is open at the dashboard, the chat tab renders by default —
+            // highlight Chat in the bottom nav to match.
+            const effectivePage = (activeTrip && currentPage === 'dashboard') ? 'chat' : currentPage;
+            const isActive = effectivePage === item.id;
             return (
               <button
                 key={item.id}

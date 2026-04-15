@@ -42,12 +42,7 @@ export default function ChatPage() {
     }
   }
 
-  function handleKeyDown(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  }
+  function handleKeyDown() { /* Enter inserts a newline — tap send button to submit */ }
 
   if (!activeTrip) {
     return (
@@ -315,7 +310,7 @@ export default function ChatPage() {
           </button>
         </div>
         <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 5, textAlign: 'center' }}>
-          Enter to send · Shift+Enter for new line
+          Tap send to post your message
         </p>
       </div>
     </div>
