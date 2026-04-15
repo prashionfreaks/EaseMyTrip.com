@@ -51,6 +51,24 @@ function loadLocalTrips() {
   return sampleTrips;
 }
 
+const TRIPS_CACHE_KEY = 'tripsync-trips-cache-v1';
+
+function loadCachedTrips(userId) {
+  try {
+    const s = localStorage.getItem(TRIPS_CACHE_KEY);
+    if (!s) return null;
+    const parsed = JSON.parse(s);
+    if (parsed.userId !== userId || !Array.isArray(parsed.trips)) return null;
+    return parsed.trips.map(normalizeTrip);
+  } catch { return null; }
+}
+
+function saveCachedTrips(userId, trips) {
+  try {
+    localStorage.setItem(TRIPS_CACHE_KEY, JSON.stringify({ userId, trips, savedAt: Date.now() }));
+  } catch { /* quota */ }
+}
+
 export function TripProvider({ children }) {
   const [trips, setTrips] = useState([]);
   const [activeTripId, setActiveTripId] = useState(null);
@@ -71,31 +89,33 @@ export function TripProvider({ children }) {
     catch { /* quota */ }
   }, [trips, tripsLoaded]);
 
+  // Supabase mode: keep trips cache in sync with local state
+  useEffect(() => {
+    if (!isSupabaseConfigured || !tripsLoaded || !dbUser) return;
+    saveCachedTrips(dbUser.id, trips);
+  }, [trips, tripsLoaded, dbUser]);
+
   // ── Supabase mode: DB + Realtime ─────────────────────────────────────────
   const fetchTrips = useCallback(async (userId) => {
     try {
-      console.log('[fetchTrips] loading for user:', userId);
-      const { data: memberRows, error: mErr } = await supabase
-        .from('trip_members').select('trip_id').eq('user_id', userId);
-      console.log('[fetchTrips] trip_members result:', memberRows?.length, 'rows, error:', mErr);
-      if (mErr) throw mErr;
-      if (!memberRows?.length) { setTrips([]); setTripsLoaded(true); return; }
+      // Single joined query replaces two serial round-trips
+      const { data: rows, error } = await supabase
+        .from('trip_members')
+        .select('trips!inner(id, data, updated_at, created_at)')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false, foreignTable: 'trips' });
+      if (error) throw error;
 
-      const tripIds = memberRows.map(r => r.trip_id);
-      console.log('[fetchTrips] fetching trips:', tripIds);
-      const { data: rows, error: tErr } = await supabase
-        .from('trips').select('id, data, updated_at')
-        .in('id', tripIds)
-        .order('created_at', { ascending: false });
-      console.log('[fetchTrips] trips result:', rows?.length, 'rows, error:', tErr);
-      if (tErr) throw tErr;
-
-      setTrips((rows || []).map(r => normalizeTrip({ ...(r.data || {}), id: r.id })));
+      const fetched = (rows || [])
+        .map(r => r.trips)
+        .filter(Boolean)
+        .map(t => normalizeTrip({ ...(t.data || {}), id: t.id }));
+      setTrips(fetched);
+      saveCachedTrips(userId, fetched);
     } catch (err) {
-      // AbortError = React re-render cancelled the request — ignore and retry
-      if (err?.name === 'AbortError') { console.log('[fetchTrips] aborted, will retry'); return; }
+      if (err?.name === 'AbortError') return;
       console.error('[fetchTrips] FAILED:', err);
-      setTrips([]);
+      // Keep any cached trips already in state rather than wiping to []
     } finally {
       setTripsLoaded(true);
     }
@@ -104,12 +124,30 @@ export function TripProvider({ children }) {
   useEffect(() => {
     if (!isSupabaseConfigured) return;
     let initialLoadDone = false;
+    let cancelled = false;
+
+    // Hydrate from cache IMMEDIATELY using stored session user id so trips
+    // appear before Supabase auth/network completes.
+    (async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (cancelled) return;
+        const userId = session?.user?.id;
+        if (userId) {
+          const cached = loadCachedTrips(userId);
+          if (cached?.length) {
+            setTrips(cached);
+            setTripsLoaded(true);
+          }
+        }
+      } catch { /* ignore */ }
+    })();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       const user = session?.user ?? null;
       setDbUser(user);
       if (user) { await fetchTrips(user.id); }
-      else { setTrips([]); setActiveTripId(null); setTripsLoaded(true); }
+      else { setTrips([]); setActiveTripId(null); setTripsLoaded(true); localStorage.removeItem(TRIPS_CACHE_KEY); }
       initialLoadDone = true;
     });
 
@@ -121,7 +159,7 @@ export function TripProvider({ children }) {
       else setTripsLoaded(true);
     }, 2000);
 
-    return () => { subscription.unsubscribe(); clearTimeout(fallback); };
+    return () => { cancelled = true; subscription.unsubscribe(); clearTimeout(fallback); };
   }, [fetchTrips]);
 
   // Track which trips have pending local changes (not yet synced to DB)
