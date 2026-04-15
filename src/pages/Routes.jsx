@@ -282,13 +282,13 @@ export default function Routes() {
                 <div key={route.id} className="card route-card" style={{ overflow: 'hidden' }}>
 
                   {/* Gradient header */}
-                  <div style={{
+                  <div className="route-card-header" style={{
                     background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
                     padding: '18px 20px',
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
                     flexWrap: 'wrap',
                   }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', flex: 1 }}>
+                    <div className="route-card-pills" style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', flex: 1 }}>
                       {/* From pill */}
                       <div style={{
                         display: 'flex', alignItems: 'center', gap: 6,
