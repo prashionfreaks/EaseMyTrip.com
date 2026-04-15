@@ -138,9 +138,8 @@ export default function TripDetail({ onInvite, defaultTab = 'chat' }) {
           .trip-cover-desktop { display: none !important; }
           .trip-cover-mobile  { display: flex !important; }
 
-          /* Tab icons only, no labels */
-          .trip-tab-btn { padding: 0; flex-direction: column; gap: 2px; flex: 1; font-size: 9px; font-weight: 600; border-radius: 0; border-bottom-width: 2px; min-height: 48px; justify-content: center; }
-          .trip-tab-btn .tab-label { display: block; }
+          /* Hide top tab bar on mobile — bottom nav handles navigation */
+          .trip-tab-bar { display: none !important; }
 
           /* Content fills remaining space and scrolls */
           .trip-tab-content { flex: 1 !important; overflow-y: auto !important; overflow-x: hidden !important; -webkit-overflow-scrolling: touch; }
