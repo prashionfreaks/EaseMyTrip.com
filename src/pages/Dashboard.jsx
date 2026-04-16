@@ -116,6 +116,22 @@ const DASH_STYLES = `
     0%, 100% { transform: translate(-50%, -50%) scale(1); }
     50% { transform: translate(-48%, -53%) scale(1.08); }
   }
+  @keyframes dashLeafFall {
+    0%   { transform: translate3d(0, -30px, 0) rotate(0deg); opacity: 0; }
+    8%   { opacity: var(--leaf-opacity, 0.55); }
+    85%  { opacity: var(--leaf-opacity, 0.55); }
+    100% { transform: translate3d(var(--leaf-drift, 60px), 640px, 0) rotate(var(--leaf-spin, 540deg)); opacity: 0; }
+  }
+  .dash-leaf {
+    position: absolute;
+    top: 0;
+    pointer-events: none;
+    user-select: none;
+    will-change: transform, opacity;
+    animation: dashLeafFall var(--leaf-duration, 14s) linear infinite;
+    animation-delay: var(--leaf-delay, 0s);
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25));
+  }
   @keyframes dashGlow {
     0%, 100% { box-shadow: 0 0 20px rgba(14,165,233,0.15); }
     50% { box-shadow: 0 0 30px rgba(14,165,233,0.3); }
@@ -588,22 +604,46 @@ export default function Dashboard({ onNavigate }) {
             padding: '36px 28px', position: 'relative',
             animation: 'dashFadeUp 0.6s ease 0.35s both',
           }}>
-            {/* Ambient glow effects */}
+            {/* Autumn ambient glows — amber, rust, harvest gold */}
             <div className="dash-orb-a" style={{
               position: 'absolute', top: -80, right: -60, width: 240, height: 240,
-              background: 'radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 65%)',
+              background: 'radial-gradient(circle, rgba(251,146,60,0.14) 0%, transparent 65%)',
               borderRadius: '50%', pointerEvents: 'none',
             }} />
             <div className="dash-orb-b" style={{
               position: 'absolute', bottom: -60, left: -40, width: 200, height: 200,
-              background: 'radial-gradient(circle, rgba(14,165,233,0.1) 0%, transparent 65%)',
+              background: 'radial-gradient(circle, rgba(220,38,38,0.10) 0%, transparent 65%)',
               borderRadius: '50%', pointerEvents: 'none',
             }} />
             <div className="dash-orb-c" style={{
               position: 'absolute', top: '40%', left: '50%', width: 300, height: 300,
-              background: 'radial-gradient(circle, rgba(139,92,246,0.05) 0%, transparent 60%)',
+              background: 'radial-gradient(circle, rgba(251,191,36,0.06) 0%, transparent 60%)',
               borderRadius: '50%', pointerEvents: 'none',
             }} />
+
+            {/* Drifting autumn leaves */}
+            {[
+              { emoji: '\u{1F342}', left: '6%',  delay: '0s',    duration: '16s', drift: '40px',  spin: '520deg', size: 22, opacity: 0.55 },
+              { emoji: '\u{1F341}', left: '18%', delay: '3.2s',  duration: '18s', drift: '-30px', spin: '-480deg', size: 18, opacity: 0.45 },
+              { emoji: '\u{1F342}', left: '32%', delay: '6.5s',  duration: '14s', drift: '55px',  spin: '640deg', size: 16, opacity: 0.5 },
+              { emoji: '\u{1F33E}', left: '44%', delay: '1.6s',  duration: '20s', drift: '-20px', spin: '-540deg', size: 20, opacity: 0.4 },
+              { emoji: '\u{1F341}', left: '58%', delay: '9s',    duration: '15s', drift: '35px',  spin: '500deg', size: 24, opacity: 0.55 },
+              { emoji: '\u{1F342}', left: '71%', delay: '4.8s',  duration: '17s', drift: '-45px', spin: '-600deg', size: 19, opacity: 0.5 },
+              { emoji: '\u{1F33E}', left: '84%', delay: '11.5s', duration: '19s', drift: '25px',  spin: '420deg', size: 17, opacity: 0.4 },
+              { emoji: '\u{1F341}', left: '94%', delay: '7.2s',  duration: '16s', drift: '-35px', spin: '-560deg', size: 21, opacity: 0.55 },
+            ].map((l, i) => (
+              <span key={i} className="dash-leaf" style={{
+                left: l.left,
+                fontSize: l.size,
+                '--leaf-delay': l.delay,
+                '--leaf-duration': l.duration,
+                '--leaf-drift': l.drift,
+                '--leaf-spin': l.spin,
+                '--leaf-opacity': l.opacity,
+              }}>
+                {l.emoji}
+              </span>
+            ))}
 
             <div style={{ position: 'relative', zIndex: 1 }}>
               {/* Section header */}
