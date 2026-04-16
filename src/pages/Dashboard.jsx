@@ -311,6 +311,37 @@ const DASH_STYLES = `
   }
   .dash-sparkle-rock { animation: dashSparkleRock 5s ease-in-out infinite; transform-origin: center; }
   .dash-stat-card .dash-float-icon { animation: dashFloat 4s ease-in-out infinite, dashIconBreath 3.2s ease-in-out infinite; }
+
+  /* Horizontal sweep across feature cards — staggered amber shimmer */
+  @keyframes dashFeatureSweep {
+    0%   { transform: translateX(-140%) skewX(-18deg); }
+    55%  { transform: translateX(240%)  skewX(-18deg); }
+    100% { transform: translateX(240%)  skewX(-18deg); }
+  }
+  .dash-feature-card {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .dash-feature-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      100deg,
+      transparent 0%,
+      rgba(251,191,36,0.08) 35%,
+      rgba(251,146,60,0.18) 50%,
+      rgba(251,191,36,0.08) 65%,
+      transparent 100%
+    );
+    animation: dashFeatureSweep 5.5s ease-in-out infinite;
+    animation-delay: var(--sweep-delay, 0s);
+    pointer-events: none;
+    z-index: 0;
+    mix-blend-mode: screen;
+  }
+  .dash-feature-card > * { position: relative; z-index: 1; }
 `;
 
 function getGreeting() {
@@ -758,6 +789,7 @@ export default function Dashboard({ onNavigate }) {
                     padding: '16px 14px', borderRadius: 14,
                     background: 'rgba(255,255,255,0.03)',
                     border: '1px solid rgba(255,255,255,0.05)',
+                    '--sweep-delay': `${i * 0.4}s`,
                   }}>
                     <div className="feature-emoji dash-float-emoji" style={{ fontSize: 22, marginBottom: 8, animationDelay: `${i * 0.35}s` }}>{f.emoji}</div>
                     <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.85)', marginBottom: 4, letterSpacing: '-0.1px' }}>{f.title}</div>
