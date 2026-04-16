@@ -15,6 +15,24 @@ import DestinationPicker from '../components/DestinationPicker';
 import { getDestinationImage } from '../lib/destinationImages';
 import { format, differenceInDays, parseISO } from 'date-fns';
 
+function CountUp({ target, prefix = '', suffix = '', decimals = 0, duration = 1600, style }) {
+  const [val, setVal] = useState(0);
+  useEffect(() => {
+    let raf;
+    const start = performance.now();
+    const tick = now => {
+      const p = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setVal(target * eased);
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, duration]);
+  const shown = decimals > 0 ? val.toFixed(decimals) : Math.round(val).toLocaleString();
+  return <span style={style}>{prefix}{shown}{suffix}</span>;
+}
+
 function countOutstandingDues(trips, currentUserId) {
   let count = 0;
   trips.forEach(trip => {
@@ -82,10 +100,31 @@ const DASH_STYLES = `
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-6px); }
   }
+  @keyframes dashFloatSoft {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-4px) rotate(-2deg); }
+  }
+  @keyframes dashOrbA {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(18px, -14px); }
+  }
+  @keyframes dashOrbB {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(-14px, 18px); }
+  }
+  @keyframes dashOrbC {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-48%, -53%) scale(1.08); }
+  }
   @keyframes dashGlow {
     0%, 100% { box-shadow: 0 0 20px rgba(14,165,233,0.15); }
     50% { box-shadow: 0 0 30px rgba(14,165,233,0.3); }
   }
+  .dash-float-icon { animation: dashFloat 4s ease-in-out infinite; }
+  .dash-float-emoji { animation: dashFloatSoft 3.6s ease-in-out infinite; display: inline-block; }
+  .dash-orb-a { animation: dashOrbA 9s ease-in-out infinite; }
+  .dash-orb-b { animation: dashOrbB 11s ease-in-out infinite; }
+  .dash-orb-c { animation: dashOrbC 13s ease-in-out infinite; }
 
   .dash-card {
     cursor: pointer;
@@ -544,20 +583,20 @@ export default function Dashboard({ onNavigate }) {
             animation: 'dashFadeUp 0.6s ease 0.35s both',
           }}>
             {/* Ambient glow effects */}
-            <div style={{
+            <div className="dash-orb-a" style={{
               position: 'absolute', top: -80, right: -60, width: 240, height: 240,
               background: 'radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 65%)',
               borderRadius: '50%', pointerEvents: 'none',
             }} />
-            <div style={{
+            <div className="dash-orb-b" style={{
               position: 'absolute', bottom: -60, left: -40, width: 200, height: 200,
               background: 'radial-gradient(circle, rgba(14,165,233,0.1) 0%, transparent 65%)',
               borderRadius: '50%', pointerEvents: 'none',
             }} />
-            <div style={{
+            <div className="dash-orb-c" style={{
               position: 'absolute', top: '40%', left: '50%', width: 300, height: 300,
               background: 'radial-gradient(circle, rgba(139,92,246,0.05) 0%, transparent 60%)',
-              borderRadius: '50%', pointerEvents: 'none', transform: 'translate(-50%, -50%)',
+              borderRadius: '50%', pointerEvents: 'none',
             }} />
 
             <div style={{ position: 'relative', zIndex: 1 }}>
@@ -600,10 +639,11 @@ export default function Dashboard({ onNavigate }) {
                     border: '1px solid rgba(255,255,255,0.06)',
                     textAlign: 'center', backdropFilter: 'blur(8px)',
                   }}>
-                    <div style={{
+                    <div className="dash-float-icon" style={{
                       width: 36, height: 36, borderRadius: 10,
                       background: s.glow, margin: '0 auto 10px',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      animationDelay: `${i * 0.6}s`,
                     }}>
                       <s.icon size={17} style={{ color: s.color }} />
                     </div>
@@ -611,7 +651,9 @@ export default function Dashboard({ onNavigate }) {
                       fontSize: s.isText ? 20 : 30, fontWeight: 900, color: 'white',
                       letterSpacing: '-0.5px', lineHeight: 1.1,
                     }}>
-                      {s.isText ? s.value : s.value.toLocaleString()}
+                      {s.isText
+                        ? s.value
+                        : <CountUp target={s.value} duration={1600 + i * 200} />}
                     </div>
                     <div style={{ fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.4)', marginTop: 6, letterSpacing: '0.3px' }}>
                       {s.label}
@@ -623,10 +665,10 @@ export default function Dashboard({ onNavigate }) {
               {/* Activity pills */}
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 28 }}>
                 {[
-                  { stat: '12,400+', label: 'Messages', color: '#818cf8' },
-                  { stat: '8,720', label: 'Polls voted', color: '#34d399' },
-                  { stat: '₹2.4Cr', label: 'Tracked', color: '#fbbf24' },
-                  { stat: '94%', label: 'Settled up', color: '#f472b6' },
+                  { target: 12400, suffix: '+',  label: 'Messages',   color: '#818cf8' },
+                  { target: 8720,                label: 'Polls voted', color: '#34d399' },
+                  { target: 2.4, prefix: '₹', suffix: 'Cr', decimals: 1, label: 'Tracked', color: '#fbbf24' },
+                  { target: 94,  suffix: '%', label: 'Settled up',  color: '#f472b6' },
                 ].map((item, i) => (
                   <div key={i} className="dash-pill" style={{
                     display: 'flex', alignItems: 'center', gap: 8,
@@ -634,7 +676,14 @@ export default function Dashboard({ onNavigate }) {
                     background: 'rgba(255,255,255,0.05)',
                     border: '1px solid rgba(255,255,255,0.07)',
                   }}>
-                    <span style={{ fontSize: 13.5, fontWeight: 800, color: item.color }}>{item.stat}</span>
+                    <CountUp
+                      target={item.target}
+                      prefix={item.prefix || ''}
+                      suffix={item.suffix || ''}
+                      decimals={item.decimals || 0}
+                      duration={1400 + i * 150}
+                      style={{ fontSize: 13.5, fontWeight: 800, color: item.color }}
+                    />
                     <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', fontWeight: 500 }}>{item.label}</span>
                   </div>
                 ))}
@@ -669,7 +718,7 @@ export default function Dashboard({ onNavigate }) {
                     background: 'rgba(255,255,255,0.03)',
                     border: '1px solid rgba(255,255,255,0.05)',
                   }}>
-                    <div className="feature-emoji" style={{ fontSize: 22, marginBottom: 8, display: 'inline-block' }}>{f.emoji}</div>
+                    <div className="feature-emoji dash-float-emoji" style={{ fontSize: 22, marginBottom: 8, animationDelay: `${i * 0.35}s` }}>{f.emoji}</div>
                     <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.85)', marginBottom: 4, letterSpacing: '-0.1px' }}>{f.title}</div>
                     <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', lineHeight: 1.5 }}>{f.desc}</div>
                   </div>
