@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTrips } from '../context/TripContext';
-import { Send, MessageCircle, Users } from 'lucide-react';
+import { Send, MessageCircle } from 'lucide-react';
 import { format, parseISO, isToday, isYesterday, differenceInMinutes } from 'date-fns';
 
 function dateSeparatorLabel(dateStr) {
@@ -91,36 +91,6 @@ export default function ChatPage() {
 
   return (
     <div className="chat-container">
-      {/* Header */}
-      <div style={{
-        padding: '16px 24px',
-        borderBottom: '1px solid var(--border)',
-        background: 'var(--bg-secondary)',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        flexShrink: 0,
-      }}>
-        <div>
-          <h1 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-0.3px' }}>Group Chat</h1>
-          <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 2, display: 'flex', alignItems: 'center', gap: 5 }}>
-            <Users size={13} />
-            {activeTrip.name} · {members.length} member{members.length !== 1 ? 's' : ''}
-          </p>
-        </div>
-        <div className="avatar-group">
-          {members.slice(0, 5).map(m => (
-            <div key={m.id} className="user-avatar" title={m.name}
-              style={{ background: m.color, width: 30, height: 30, fontSize: 11 }}>
-              {m.name[0]}
-            </div>
-          ))}
-          {members.length > 5 && (
-            <div className="user-avatar" style={{ background: '#e5e7eb', color: '#6b7280', width: 30, height: 30, fontSize: 10 }}>
-              +{members.length - 5}
-            </div>
-          )}
-        </div>
-      </div>
-
       {/* Messages */}
       <div style={{
         flex: 1,
