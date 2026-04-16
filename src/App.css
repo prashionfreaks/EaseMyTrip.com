@@ -626,9 +626,18 @@ select.form-input { cursor: pointer; }
   position: relative;
 }
 
+/* Calendar page — two-column on desktop, stacked on mobile */
+.calendar-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 20px;
+  align-items: start;
+}
+
 /* ─── Responsive ──────────────────────────────────────── */
 @media (max-width: 1024px) {
   .grid-3 { grid-template-columns: repeat(2, 1fr); }
+  .calendar-layout { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 768px) {

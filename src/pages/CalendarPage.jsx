@@ -320,7 +320,7 @@ export default function CalendarPage() {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 280px', gap: 20, alignItems: 'start' }}>
+        <div className="calendar-layout">
           {/* Calendar */}
           <div className="card">
             {/* Month navigation */}
