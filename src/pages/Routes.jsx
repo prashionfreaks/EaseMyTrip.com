@@ -424,7 +424,7 @@ export default function Routes() {
                       </p>
                     ) : (
                       <>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
+                        <div className="transport-grid">
                           {available.map(opt => {
                             const cfg = MODE_CONFIG[opt.mode] || MODE_CONFIG.car;
                             const Icon = cfg.icon;
@@ -566,7 +566,7 @@ export default function Routes() {
                             No travel options found for this return route.
                           </p>
                         ) : (
-                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
+                          <div className="transport-grid">
                             {retAvailable.map(opt => {
                               const cfg = MODE_CONFIG[opt.mode] || MODE_CONFIG.car;
                               const Icon = cfg.icon;

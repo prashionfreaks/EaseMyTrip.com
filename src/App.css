@@ -634,6 +634,13 @@ select.form-input { cursor: pointer; }
   align-items: start;
 }
 
+/* Route planner transport options grid */
+.transport-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
 /* ─── Responsive ──────────────────────────────────────── */
 @media (max-width: 1024px) {
   .grid-3 { grid-template-columns: repeat(2, 1fr); }
@@ -700,9 +707,13 @@ select.form-input { cursor: pointer; }
 
   /* Compact route card header on mobile */
   .route-card-header { padding: 12px 14px !important; gap: 8px !important; }
-  .route-card-pills { flex-wrap: nowrap !important; gap: 6px !important; min-width: 0; overflow: hidden; }
+  .route-card-pills { flex-wrap: wrap !important; gap: 6px !important; min-width: 0; }
   .route-card-pills > div { padding: 4px 8px !important; min-width: 0; }
-  .route-card-pills > div > span { font-size: 13px !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .route-card-pills > div > span { font-size: 13px !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 140px; }
+
+  /* Transport mode cards — 2 columns on mobile instead of 1 wide column */
+  .transport-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .transport-grid .mode-card { padding: 12px; }
 
   /* Tighter cards */
   .card-body { padding: 14px 16px; }
