@@ -15,6 +15,40 @@ import DestinationPicker from '../components/DestinationPicker';
 import { getDestinationImage } from '../lib/destinationImages';
 import { format, differenceInDays, parseISO } from 'date-fns';
 
+function InsightsFeatureCard({ emoji, title, desc, index }) {
+  const ref = useRef(null);
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setInView(true);
+        obs.disconnect();
+      }
+    }, { threshold: 0.18, rootMargin: '0px 0px -40px 0px' });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+  return (
+    <div
+      ref={ref}
+      className={`dash-feature-card ${inView ? 'sweep-in' : ''}`}
+      style={{
+        padding: '16px 14px', borderRadius: 14,
+        background: 'rgba(255,255,255,0.03)',
+        border: '1px solid rgba(255,255,255,0.05)',
+        '--sweep-delay': `${index * 0.4}s`,
+        transitionDelay: `${index * 0.09}s`,
+      }}
+    >
+      <div className="feature-emoji dash-float-emoji" style={{ fontSize: 22, marginBottom: 8, animationDelay: `${index * 0.35}s` }}>{emoji}</div>
+      <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.85)', marginBottom: 4, letterSpacing: '-0.1px' }}>{title}</div>
+      <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', lineHeight: 1.5 }}>{desc}</div>
+    </div>
+  );
+}
+
 function CountUp({ target, prefix = '', suffix = '', decimals = 0, duration = 1600, style }) {
   const [val, setVal] = useState(0);
   useEffect(() => {
@@ -322,6 +356,15 @@ const DASH_STYLES = `
     position: relative;
     overflow: hidden;
     isolation: isolate;
+    opacity: 0;
+    transform: translateX(-70px) scale(0.96);
+    transition:
+      opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.85s cubic-bezier(0.2, 0.9, 0.25, 1.08);
+  }
+  .dash-feature-card.sweep-in {
+    opacity: 1;
+    transform: translateX(0) scale(1);
   }
   .dash-feature-card::after {
     content: '';
@@ -785,16 +828,7 @@ export default function Dashboard({ onNavigate }) {
                   { emoji: '\u{1F697}', title: 'Route Planner', desc: 'Compare transport options' },
                   { emoji: '\u{1F4F8}', title: 'Photo Wall', desc: 'Shared trip memories' },
                 ].map((f, i) => (
-                  <div key={i} className="dash-feature-card" style={{
-                    padding: '16px 14px', borderRadius: 14,
-                    background: 'rgba(255,255,255,0.03)',
-                    border: '1px solid rgba(255,255,255,0.05)',
-                    '--sweep-delay': `${i * 0.4}s`,
-                  }}>
-                    <div className="feature-emoji dash-float-emoji" style={{ fontSize: 22, marginBottom: 8, animationDelay: `${i * 0.35}s` }}>{f.emoji}</div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.85)', marginBottom: 4, letterSpacing: '-0.1px' }}>{f.title}</div>
-                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', lineHeight: 1.5 }}>{f.desc}</div>
-                  </div>
+                  <InsightsFeatureCard key={i} index={i} emoji={f.emoji} title={f.title} desc={f.desc} />
                 ))}
               </div>
             </div>
