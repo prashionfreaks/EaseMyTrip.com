@@ -135,47 +135,24 @@ const DASH_STYLES = `
     transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
                 box-shadow 0.35s ease;
   }
-  .dash-card:hover {
-    transform: translateY(-8px) scale(1.01);
-    box-shadow: 0 20px 40px rgba(15, 28, 46, 0.15),
-                0 0 0 1px rgba(14,165,233,0.1);
-  }
   .dash-card:active {
     transform: translateY(-3px) scale(0.995);
   }
-
   .dash-card .card-cover img {
     transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
   }
-  .dash-card:hover .card-cover img {
-    transform: scale(1.08);
-  }
-
   .dash-card .card-cover .cover-overlay {
     transition: opacity 0.4s ease;
   }
-  .dash-card:hover .card-cover .cover-overlay {
-    opacity: 0.7;
-  }
-
   .dash-card .card-delete {
     opacity: 0;
     transition: opacity 0.2s ease, transform 0.2s ease;
     transform: scale(0.85);
   }
-  .dash-card:hover .card-delete {
-    opacity: 1;
-    transform: scale(1);
-  }
-
   .dash-card .card-arrow {
     opacity: 0;
     transform: translateX(-8px);
     transition: opacity 0.3s ease, transform 0.3s ease;
-  }
-  .dash-card:hover .card-arrow {
-    opacity: 1;
-    transform: translateX(0);
   }
 
   .dash-create-card {
@@ -197,63 +174,63 @@ const DASH_STYLES = `
     opacity: 0;
     transition: opacity 0.3s ease;
   }
-  .dash-create-card:hover::before { opacity: 1; }
-  .dash-create-card:hover {
-    border-color: var(--brand);
-    transform: translateY(-8px) scale(1.01);
-    box-shadow: 0 20px 40px rgba(14,165,233,0.12);
-  }
   .dash-create-card:active {
     transform: translateY(-3px) scale(0.995);
   }
-
   .dash-create-icon {
     transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
-  .dash-create-card:hover .dash-create-icon {
-    transform: rotate(90deg) scale(1.1);
-  }
 
   .dash-stat-card {
-    transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+    transition: background 0.3s ease, border-color 0.3s ease;
     cursor: default;
   }
-  .dash-stat-card:hover {
-    transform: translateY(-4px);
-    background: rgba(255,255,255,0.1) !important;
-    border-color: rgba(255,255,255,0.15) !important;
-  }
-
   .dash-feature-card {
-    transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+    transition: background 0.3s ease;
     cursor: default;
-  }
-  .dash-feature-card:hover {
-    transform: translateY(-3px);
-    background: rgba(255,255,255,0.08) !important;
-  }
-  .dash-feature-card:hover .feature-emoji {
-    transform: scale(1.2);
   }
   .feature-emoji {
     transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
-
   .dash-pill {
-    transition: all 0.2s ease;
     cursor: default;
   }
-  .dash-pill:hover {
-    transform: scale(1.05);
-  }
-
   .dash-dues-banner {
     animation: dashSlideDown 0.4s ease;
-    transition: all 0.2s ease;
   }
-  .dash-dues-banner:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(220,38,38,0.12);
+
+  /* Hover effects — only on devices that actually support hovering.
+     Prevents mobile tap from triggering lift/scale/shadow states. */
+  @media (hover: hover) and (pointer: fine) {
+    .dash-card { transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease; }
+    .dash-card:hover {
+      transform: translateY(-8px) scale(1.01);
+      box-shadow: 0 20px 40px rgba(15, 28, 46, 0.15),
+                  0 0 0 1px rgba(14,165,233,0.1);
+    }
+    .dash-card:hover .card-cover img { transform: scale(1.08); }
+    .dash-card:hover .card-cover .cover-overlay { opacity: 0.7; }
+    .dash-card:hover .card-delete { opacity: 1; transform: scale(1); }
+    .dash-card:hover .card-arrow { opacity: 1; transform: translateX(0); }
+
+    .dash-create-card:hover::before { opacity: 1; }
+    .dash-create-card:hover {
+      border-color: var(--brand);
+      transform: translateY(-8px) scale(1.01);
+      box-shadow: 0 20px 40px rgba(14,165,233,0.12);
+    }
+    .dash-create-card:hover .dash-create-icon { transform: rotate(90deg) scale(1.1); }
+
+    .dash-stat-card:hover {
+      transform: translateY(-4px);
+      background: rgba(255,255,255,0.1) !important;
+      border-color: rgba(255,255,255,0.15) !important;
+    }
+    .dash-feature-card:hover { transform: translateY(-3px); background: rgba(255,255,255,0.08) !important; }
+    .dash-feature-card:hover .feature-emoji { transform: scale(1.2); }
+    .dash-pill:hover { transform: scale(1.05); }
+    .dash-dues-banner:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(220,38,38,0.12); }
+    .dash-header-btn:hover { transform: translateY(-2px); }
   }
 
   .dash-progress {
@@ -283,12 +260,41 @@ const DASH_STYLES = `
   .dash-header-btn {
     transition: all 0.25s cubic-bezier(0.23, 1, 0.32, 1);
   }
-  .dash-header-btn:hover {
-    transform: translateY(-2px);
-  }
   .dash-header-btn:active {
     transform: translateY(0) scale(0.97);
   }
+
+  /* Ambient motion for the Insights section (continuous, not interaction-triggered) */
+  @keyframes dashShimmerText {
+    0%   { background-position: 200% 50%; }
+    100% { background-position: -200% 50%; }
+  }
+  @keyframes dashIconBreath {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+    50%      { box-shadow: 0 0 24px 4px rgba(255,255,255,0.08); }
+  }
+  @keyframes dashSparkleRock {
+    0%, 100% { transform: rotate(0deg) scale(1); }
+    25%      { transform: rotate(10deg) scale(1.05); }
+    75%      { transform: rotate(-10deg) scale(1.05); }
+  }
+  .dash-insights-title {
+    background: linear-gradient(
+      90deg,
+      #e2e8f0 0%,
+      #f8fafc 30%,
+      #a78bfa 50%,
+      #f8fafc 70%,
+      #e2e8f0 100%
+    );
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: dashShimmerText 6s linear infinite;
+  }
+  .dash-sparkle-rock { animation: dashSparkleRock 5s ease-in-out infinite; transform-origin: center; }
+  .dash-stat-card .dash-float-icon { animation: dashFloat 4s ease-in-out infinite, dashIconBreath 3.2s ease-in-out infinite; }
 `;
 
 function getGreeting() {
@@ -609,15 +615,10 @@ export default function Dashboard({ onNavigate }) {
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   backdropFilter: 'blur(8px)',
                 }}>
-                  <Sparkles size={18} color="#a78bfa" />
+                  <Sparkles size={18} color="#a78bfa" className="dash-sparkle-rock" />
                 </div>
                 <div>
-                  <h2 style={{
-                    fontSize: 18, fontWeight: 800, letterSpacing: '-0.4px',
-                    background: 'linear-gradient(135deg, #e2e8f0, #f8fafc)',
-                    WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                  }}>
+                  <h2 className="dash-insights-title" style={{ fontSize: 18, fontWeight: 800, letterSpacing: '-0.4px' }}>
                     LetsWander Insights
                   </h2>
                   <p style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.35)', marginTop: 2, fontWeight: 500 }}>
