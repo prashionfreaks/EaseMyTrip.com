@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTrips } from '../context/TripContext';
 import {
   Route, Train, Plane, Bus, Car, ArrowRight,
-  Clock, Plus, MapPin, Zap, Wallet, Ruler, Trash2, Navigation,
+  Clock, Plus, MapPin, Zap, Wallet, Ruler, Trash2, Navigation, ExternalLink,
 } from 'lucide-react';
 import { getDestinationCurrency } from '../lib/itinerary';
 
@@ -35,6 +35,29 @@ const MODE_CONFIG = {
   train:  { icon: Train,  color: '#0ea5e9', bg: '#e0f2fe', label: 'Train'      },
   bus:    { icon: Bus,    color: '#10b981', bg: '#d1fae5', label: 'Bus'        },
   car:    { icon: Car,    color: '#f97316', bg: '#ffedd5', label: 'Self Drive' },
+};
+
+function citySlug(city) {
+  return city.toLowerCase().trim().replace(/\s+/g, '-');
+}
+
+const BOOKING_PLATFORMS = {
+  flight: [
+    { name: 'MakeMyTrip',  buildUrl: (f, t) => `https://www.makemytrip.com/flights/${citySlug(f)}-${citySlug(t)}-cheap-flights.html` },
+    { name: 'Cleartrip',   buildUrl: (f, t) => `https://www.cleartrip.com/flights/${citySlug(f)}-to-${citySlug(t)}` },
+  ],
+  train: [
+    { name: 'IRCTC',       buildUrl: () => 'https://www.irctc.co.in/nget/train-search' },
+    { name: 'ConfirmTkt',  buildUrl: (f, t) => `https://www.confirmtkt.com/trains/${citySlug(f)}-to-${citySlug(t)}` },
+  ],
+  bus: [
+    { name: 'RedBus',      buildUrl: (f, t) => `https://www.redbus.in/bus-tickets/${citySlug(f)}-to-${citySlug(t)}` },
+    { name: 'AbhiBus',     buildUrl: (f, t) => `https://www.abhibus.com/bus-tickets/${citySlug(f)}-to-${citySlug(t)}` },
+  ],
+  car: [
+    { name: 'Savaari',     buildUrl: (f, t) => `https://www.savaari.com/cab/${citySlug(f)}-to-${citySlug(t)}` },
+    { name: 'Zoomcar',     buildUrl: () => 'https://www.zoomcar.com/' },
+  ],
 };
 
 function getRouteKey(a, b) {
@@ -501,6 +524,32 @@ export default function Routes() {
                                 <p style={{ fontSize: 11, color: 'var(--text-tertiary)', lineHeight: 1.5, borderTop: '1px solid rgba(0,0,0,0.06)', paddingTop: 8, marginTop: 2 }}>
                                   {opt.note}
                                 </p>
+
+                                {/* Booking links */}
+                                {(BOOKING_PLATFORMS[opt.mode] || []).length > 0 && (
+                                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 10 }}>
+                                    {BOOKING_PLATFORMS[opt.mode].map(p => (
+                                      <a
+                                        key={p.name}
+                                        href={p.buildUrl(route.from, route.to)}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        style={{
+                                          fontSize: 10, fontWeight: 700,
+                                          padding: '5px 10px', borderRadius: 8,
+                                          background: cfg.color + '15',
+                                          color: cfg.color,
+                                          border: `1px solid ${cfg.color}30`,
+                                          textDecoration: 'none',
+                                          display: 'inline-flex', alignItems: 'center', gap: 4,
+                                          transition: 'all 0.15s',
+                                        }}
+                                      >
+                                        <ExternalLink size={9} /> {p.name}
+                                      </a>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
                             );
                           })}
@@ -625,6 +674,32 @@ export default function Routes() {
                                   <p style={{ fontSize: 11, color: 'var(--text-tertiary)', lineHeight: 1.5, borderTop: '1px solid rgba(0,0,0,0.06)', paddingTop: 8, marginTop: 2 }}>
                                     {opt.note}
                                   </p>
+
+                                  {/* Booking links */}
+                                  {(BOOKING_PLATFORMS[opt.mode] || []).length > 0 && (
+                                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 10 }}>
+                                      {BOOKING_PLATFORMS[opt.mode].map(p => (
+                                        <a
+                                          key={p.name}
+                                          href={p.buildUrl(route.to, route.returnTo)}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          style={{
+                                            fontSize: 10, fontWeight: 700,
+                                            padding: '5px 10px', borderRadius: 8,
+                                            background: cfg.color + '15',
+                                            color: cfg.color,
+                                            border: `1px solid ${cfg.color}30`,
+                                            textDecoration: 'none',
+                                            display: 'inline-flex', alignItems: 'center', gap: 4,
+                                            transition: 'all 0.15s',
+                                          }}
+                                        >
+                                          <ExternalLink size={9} /> {p.name}
+                                        </a>
+                                      ))}
+                                    </div>
+                                  )}
                                 </div>
                               );
                             })}
