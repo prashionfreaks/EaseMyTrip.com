@@ -179,12 +179,24 @@ export default function Photos() {
     });
   }
 
-  // Download photo
+  // Download photo — only allow http(s) / data / blob URLs so a tampered
+  // photo.url (e.g. `javascript:…`) cannot execute on click.
   function downloadPhoto(photo) {
+    if (!isSafeMediaUrl(photo.url)) return;
     const a = document.createElement('a');
     a.href = photo.url;
     a.download = photo.filename || `photo-${photo.id}.jpg`;
+    a.rel = 'noopener noreferrer';
     a.click();
+  }
+
+  function isSafeMediaUrl(url) {
+    if (typeof url !== 'string' || !url) return false;
+    if (url.startsWith('data:image/') || url.startsWith('blob:')) return true;
+    try {
+      const u = new URL(url, window.location.origin);
+      return u.protocol === 'https:' || u.protocol === 'http:';
+    } catch { return false; }
   }
 
   // Group photos by uploader

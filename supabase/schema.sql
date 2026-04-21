@@ -148,7 +148,7 @@ begin
   );
   return new;
 end;
-$$ language plpgsql security definer;
+$$ language plpgsql security definer set search_path = public, pg_temp;
 
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
@@ -227,12 +227,20 @@ begin
 
   return v_trip_id;
 end;
-$$ language plpgsql security definer;
+$$ language plpgsql security definer set search_path = public, pg_temp;
 
--- Allow any authenticated user to look up an invite by code (needed to accept it)
+-- Invite SELECT is restricted to trip members (already defined above). The
+-- previous "any authenticated user can read all invites" policy leaked the
+-- list of invited emails — DROP it and rely on accept_invite (SECURITY
+-- DEFINER) to validate invite codes for non-members.
 drop policy if exists "Authenticated users can look up invites by code" on public.trip_invites;
-create policy "Authenticated users can look up invites by code"
-  on public.trip_invites for select using (auth.uid() is not null);
+
+-- Also harden update_updated_at — it's not SECURITY DEFINER, but pinning the
+-- search_path removes a whole class of trigger-hijack tricks.
+create or replace function public.update_updated_at()
+returns trigger as $$
+begin new.updated_at = now(); return new; end;
+$$ language plpgsql set search_path = public, pg_temp;
 
 -- ─── Step 9: Enable Realtime ─────────────────────────────────────────────────
 

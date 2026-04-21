@@ -1,7 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { MapPin, Loader2 } from 'lucide-react';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+// Autocomplete proxies through the `places-autocomplete` Edge Function so the
+// Gemini API key never ships to the browser. Disabled in demo mode.
+const AUTOCOMPLETE_ENABLED = isSupabaseConfigured;
 
 export default function PlacesAutocomplete({ value, onChange, placeholder }) {
   const [query, setQuery] = useState(value || '');
@@ -25,40 +28,22 @@ export default function PlacesAutocomplete({ value, onChange, placeholder }) {
   }, []);
 
   async function fetchSuggestions(input) {
-    if (!API_KEY || !input.trim() || input.trim().length < 2) {
+    if (!AUTOCOMPLETE_ENABLED || !input.trim() || input.trim().length < 2) {
       setSuggestions([]);
       return;
     }
 
     setLoading(true);
     try {
-      const prompt = `Given the partial search "${input}", suggest up to 5 real travel destinations (cities/places) that match. Return ONLY a JSON array of objects with "name" (city/place name) and "region" (state/country). No explanation, no markdown, just the JSON array. Example: [{"name":"Tokyo","region":"Japan"},{"name":"Toronto","region":"Canada"}]`;
-
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { temperature: 0.1, maxOutputTokens: 300 },
-          }),
-        }
-      );
-
-      const data = await res.json();
-      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-      // Extract JSON array from response
-      const jsonMatch = text.match(/\[[\s\S]*\]/);
-      if (jsonMatch) {
-        const places = JSON.parse(jsonMatch[0]);
-        setSuggestions(places.slice(0, 5));
-        setShowDropdown(true);
-      } else {
-        setSuggestions([]);
-      }
+      const { data, error } = await supabase.functions.invoke('places-autocomplete', {
+        body: { input: input.trim() },
+      });
+      if (error) throw error;
+      const places = Array.isArray(data?.places) ? data.places.slice(0, 5) : [];
+      setSuggestions(places);
+      setShowDropdown(places.length > 0);
     } catch (err) {
-      console.error('[places] Gemini error:', err);
+      console.error('[places] autocomplete error:', err);
       setSuggestions([]);
     } finally {
       setLoading(false);
@@ -82,8 +67,8 @@ export default function PlacesAutocomplete({ value, onChange, placeholder }) {
     setShowDropdown(false);
   }
 
-  // No API key — plain input
-  if (!API_KEY) {
+  // Autocomplete disabled (demo mode) — plain input
+  if (!AUTOCOMPLETE_ENABLED) {
     return (
       <input
         className="form-input"

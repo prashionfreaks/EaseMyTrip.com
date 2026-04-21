@@ -1,44 +1,33 @@
 import { format, addDays, parseISO } from 'date-fns';
+import { supabase, isSupabaseConfigured } from './supabase';
 
-const ANTHROPIC_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY;
-
-export function hasAIKey() { return !!ANTHROPIC_KEY; }
+// AI generation is proxied through the `generate-itinerary` Edge Function —
+// the Anthropic API key stays server-side. When Supabase isn't configured
+// (demo mode), we fall back to the built-in templates.
+export function hasAIKey() { return isSupabaseConfigured; }
 
 export async function generateItinerary(destination, startDate, endDate) {
   const start = parseISO(startDate);
   const numDays = Math.max(1, Math.round((parseISO(endDate) - start) / 86400000) + 1);
   const { key } = matchDestination(destination);
   const currency = INDIAN_DEST_KEYS.has(key) ? 'INR' : 'USD';
-  if (ANTHROPIC_KEY) {
+  if (isSupabaseConfigured) {
     try {
       const days = await generateWithClaude(destination, startDate, endDate, numDays, start);
       return { days, currency };
     }
-    catch (err) { console.warn('Claude API failed, using built-in:', err.message); }
+    catch (err) { console.warn('Itinerary AI failed, using built-in:', err.message); }
   }
   return generateBuiltIn(destination, startDate, numDays, start);
 }
 
 async function generateWithClaude(destination, startDate, endDate, numDays, startDateObj) {
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      'x-api-key': ANTHROPIC_KEY,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true',
-    },
-    body: JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 4096,
-      messages: [{ role: 'user', content: `Create a day-by-day travel itinerary for ${destination} from ${startDate} to ${endDate} (${numDays} days). Return ONLY a valid JSON array — no markdown. Structure: [{"date":"YYYY-MM-DD","location":"area","items":[{"time":"09:00","title":"...","type":"activity","duration":120,"notes":"tip","cost":20}]}]. Types: activity|transport|accommodation|food. 4–6 items/day. Realistic USD costs. time is 24h HH:MM. For food type items, include the eatery/restaurant name in the title (e.g. "Lunch at Café XYZ") and add per-person rate in notes (e.g. "~$12 per person · try the signature dish").` }],
-    }),
+  const { data, error } = await supabase.functions.invoke('generate-itinerary', {
+    body: { destination, startDate, endDate, numDays },
   });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const data = await res.json();
-  const raw = data.content[0].text.trim().replace(/^```json\s*/i, '').replace(/\s*```$/, '').trim();
-  const days = JSON.parse(raw);
-  return days.map((day, i) => ({
+  if (error) throw new Error(error.message || 'Edge function error');
+  if (!Array.isArray(data?.days)) throw new Error('Invalid response');
+  return data.days.map((day, i) => ({
     id: 'day' + (Date.now() + i),
     date: day.date || format(addDays(startDateObj, i), 'yyyy-MM-dd'),
     location: day.location || destination,

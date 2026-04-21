@@ -4,6 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1" />
 
+    <!-- Content Security Policy -->
+    <!-- `img-src` needs `data:` for the photo-compression canvas preview and `blob:` for runtime.
+         `connect-src` covers Supabase auth/storage/functions/realtime (wss) and Unsplash hero images.
+         `style-src 'unsafe-inline'` is required because the app uses inline style props extensively.
+         `script-src` stays strict ('self' only) — no inline or eval scripts. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://*.supabase.co https://images.unsplash.com https://lh3.googleusercontent.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.resend.com https://images.unsplash.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+
     <!-- PWA / Mobile -->
     <meta name="theme-color" content="#0c1a2e" />
     <meta name="mobile-web-app-capable" content="yes" />

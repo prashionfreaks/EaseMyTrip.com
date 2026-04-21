@@ -1,28 +1,63 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { corsHeadersFor, escapeHtml, requireUser } from '../_shared/cors.ts';
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 const FROM_EMAIL = 'LetsWander <noreply@letswander.space>';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+const ALLOWED_LINK_HOSTS = new Set([
+  'letswander.space',
+  'www.letswander.space',
+  'localhost',
+]);
+
+// RFC5322-lite — permissive enough for real addresses, strict enough to block
+// header injection attempts like "foo\r\nBcc: attacker@x".
+const EMAIL_RE = /^[^\s<>"'\\,;()]+@[^\s<>"'\\,;()@]+\.[^\s<>"'\\,;()@]+$/;
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+  const cors = corsHeadersFor(req);
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
+
+  if (!RESEND_API_KEY) {
+    return json({ error: 'Email not configured' }, 503, cors);
   }
 
+  const user = await requireUser(req);
+  if (!user) return json({ error: 'Unauthorized' }, 401, cors);
+
+  let email = '';
+  let tripName = '';
+  let inviterName = '';
+  let inviteLink = '';
   try {
-    const { email, tripName, inviterName, inviteLink } = await req.json();
+    const body = await req.json();
+    email = String(body?.email ?? '').trim().slice(0, 254);
+    tripName = String(body?.tripName ?? '').trim().slice(0, 120);
+    inviterName = String(body?.inviterName ?? '').trim().slice(0, 80);
+    inviteLink = String(body?.inviteLink ?? '').trim().slice(0, 500);
+  } catch {
+    return json({ error: 'Invalid JSON' }, 400, cors);
+  }
 
-    if (!email || !tripName || !inviterName || !inviteLink) {
-      return new Response(JSON.stringify({ error: 'Missing required fields' }), {
-        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+  if (!email || !tripName || !inviterName || !inviteLink) {
+    return json({ error: 'Missing required fields' }, 400, cors);
+  }
+  if (!EMAIL_RE.test(email)) {
+    return json({ error: 'Invalid email address' }, 400, cors);
+  }
+  if (!isAllowedLink(inviteLink)) {
+    return json({ error: 'Invite link must point to letswander.space' }, 400, cors);
+  }
 
-    const html = `
+  const safeTripName = escapeHtml(tripName);
+  const safeInviterName = escapeHtml(inviterName);
+  const safeInviteLink = escapeHtml(inviteLink);
+  // Plain-text fields used in the Resend subject line — stripped of control chars
+  // to prevent header injection.
+  const subjectTripName = tripName.replace(/[\r\n\t]/g, ' ');
+  const subjectInviter = inviterName.replace(/[\r\n\t]/g, ' ');
+
+  const html = `
 <!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
@@ -50,13 +85,13 @@ serve(async (req) => {
               You're invited! ✈️
             </h2>
             <p style="font-size:15px;color:#475569;line-height:1.7;margin:0 0 24px;">
-              <strong style="color:#0f172a;">${inviterName}</strong> has invited you to join the trip
-              <strong style="color:#2563eb;">"${tripName}"</strong> on LetsWander — where groups plan trips together effortlessly.
+              <strong style="color:#0f172a;">${safeInviterName}</strong> has invited you to join the trip
+              <strong style="color:#2563eb;">"${safeTripName}"</strong> on LetsWander — where groups plan trips together effortlessly.
             </p>
 
             <!-- CTA Button -->
             <div style="text-align:center;margin:32px 0;">
-              <a href="${inviteLink}"
+              <a href="${safeInviteLink}"
                 style="display:inline-block;padding:14px 36px;background:linear-gradient(135deg,#2563eb,#7c3aed);color:white;text-decoration:none;border-radius:12px;font-size:16px;font-weight:700;letter-spacing:0.1px;">
                 Join the Trip →
               </a>
@@ -64,7 +99,7 @@ serve(async (req) => {
 
             <p style="font-size:13px;color:#94a3b8;line-height:1.6;margin:0;">
               Or copy and paste this link into your browser:<br>
-              <a href="${inviteLink}" style="color:#2563eb;word-break:break-all;">${inviteLink}</a>
+              <a href="${safeInviteLink}" style="color:#2563eb;word-break:break-all;">${safeInviteLink}</a>
             </p>
           </td>
         </tr>
@@ -101,7 +136,7 @@ serve(async (req) => {
         <tr>
           <td style="background:#f8fafc;padding:20px 40px;border-top:1px solid #f1f5f9;">
             <p style="font-size:12px;color:#94a3b8;margin:0;text-align:center;">
-              This invite was sent by ${inviterName} via LetsWander.<br>
+              This invite was sent by ${safeInviterName} via LetsWander.<br>
               If you didn't expect this, you can safely ignore this email.
             </p>
           </td>
@@ -113,6 +148,7 @@ serve(async (req) => {
 </body>
 </html>`;
 
+  try {
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -122,22 +158,36 @@ serve(async (req) => {
       body: JSON.stringify({
         from: FROM_EMAIL,
         to: [email],
-        subject: `${inviterName} invited you to join "${tripName}" on LetsWander ✈️`,
+        subject: `${subjectInviter} invited you to join "${subjectTripName}" on LetsWander ✈️`,
         html,
       }),
     });
 
-    const data = await res.json();
-
-    return new Response(JSON.stringify(data), {
-      status: res.ok ? 200 : 400,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-
-  } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    // Resend's response may leak rate-limit or account detail — return a
+    // minimal body instead of forwarding verbatim.
+    if (!res.ok) {
+      return json({ error: 'Failed to send invite' }, 502, cors);
+    }
+    return json({ ok: true }, 200, cors);
+  } catch (_err) {
+    return json({ error: 'Failed to send invite' }, 500, cors);
   }
 });
+
+function isAllowedLink(link: string): boolean {
+  try {
+    const u = new URL(link);
+    if (u.protocol !== 'https:' && u.protocol !== 'http:') return false;
+    if (u.protocol === 'http:' && u.hostname !== 'localhost') return false;
+    return ALLOWED_LINK_HOSTS.has(u.hostname);
+  } catch {
+    return false;
+  }
+}
+
+function json(body: unknown, status: number, cors: Record<string, string>) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...cors, 'Content-Type': 'application/json' },
+  });
+}
