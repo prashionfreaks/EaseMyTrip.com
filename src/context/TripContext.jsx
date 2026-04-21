@@ -1,6 +1,7 @@
-import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { sampleTrips, currentUser as demoUser } from '../data/sampleData';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { toast } from '../lib/toast';
 
 const TripContext = createContext(null);
 
@@ -83,10 +84,15 @@ export function TripProvider({ children }) {
     setTripsLoaded(true);
   }, []);
 
+  // Debounced so typing / rapid updates don't re-serialize the whole trips array
+  // on every keystroke.
   useEffect(() => {
     if (isSupabaseConfigured || !tripsLoaded) return;
-    try { localStorage.setItem('tripsync-trips', JSON.stringify(trips)); }
-    catch { /* quota */ }
+    const handle = setTimeout(() => {
+      try { localStorage.setItem('tripsync-trips', JSON.stringify(trips)); }
+      catch { /* quota */ }
+    }, 400);
+    return () => clearTimeout(handle);
   }, [trips, tripsLoaded]);
 
   // Supabase mode: keep trips cache in sync with local state
@@ -219,17 +225,23 @@ export function TripProvider({ children }) {
   }, []);
 
   // ── currentUser ──────────────────────────────────────────────────────────
-  const currentUser = (isSupabaseConfigured && dbUser)
-    ? {
+  const currentUser = useMemo(() => {
+    if (isSupabaseConfigured && dbUser) {
+      return {
         id: dbUser.id,
         name: dbUser.user_metadata?.full_name || dbUser.email?.split('@')[0] || 'User',
         email: dbUser.email,
         color: colorFromId(dbUser.id),
         role: 'organizer',
-      }
-    : demoUser;
+      };
+    }
+    return demoUser;
+  }, [dbUser]);
 
-  const activeTrip = trips.find(t => t.id === activeTripId) || null;
+  const activeTrip = useMemo(
+    () => trips.find(t => t.id === activeTripId) || null,
+    [trips, activeTripId]
+  );
 
   // ── Core mutations ───────────────────────────────────────────────────────
   const updateTrip = useCallback((tripId, updater) => {
@@ -284,7 +296,7 @@ export function TripProvider({ children }) {
         .from('trips')
         .insert({ id: tripId, name: tripData.name, destination: tripData.destination, status: 'planning', data: fullTripData, created_by: dbUser.id });
 
-      if (tripErr) { console.error('[addTrip] insert error:', tripErr); alert('Failed to create trip: ' + tripErr.message); return; }
+      if (tripErr) { console.error('[addTrip] insert error:', tripErr); toast.error('Failed to create trip: ' + tripErr.message); return; }
       console.log('[addTrip] trip inserted OK');
 
       // Insert trip member
@@ -302,7 +314,7 @@ export function TripProvider({ children }) {
       console.log('[addTrip] done, trip active:', tripId);
     } catch (err) {
       console.error('[addTrip] exception:', err);
-      alert('Failed to create trip: ' + (err.message || err));
+      toast.error('Failed to create trip: ' + (err.message || err));
     }
   }, [dbUser]);
 
@@ -417,7 +429,7 @@ export function TripProvider({ children }) {
           .from('trip_members')
           .insert({ trip_id: tripId, user_id: dbUser.id, role: 'member', color: memberColor });
 
-        if (memErr) { console.error('[join] member insert error:', memErr); alert('Failed to join trip.'); return null; }
+        if (memErr) { console.error('[join] member insert error:', memErr); toast.error('Failed to join trip.'); return null; }
         console.log('[join] inserted into trip_members');
 
         // Add user to trip's data.members JSON
@@ -447,21 +459,24 @@ export function TripProvider({ children }) {
       return tripId;
     } catch (err) {
       console.error('[join] error:', err);
-      alert('Failed to join trip. Please try again.');
+      toast.error('Failed to join trip. Please try again.');
       return null;
     }
   }, [dbUser, fetchTrips]);
 
-  return (
-    <TripContext.Provider value={{
-      trips, activeTrip, activeTripId, currentUser, tripsLoaded,
-      setActiveTripId, updateTrip, addTrip, removeTrip,
-      vote, addPoll, addExpense, addItineraryItem, addContingency, markSettlementPaid,
-      sendMessage, markChatRead, addPhoto, deletePhoto, joinTripViaInvite,
-    }}>
-      {children}
-    </TripContext.Provider>
-  );
+  const value = useMemo(() => ({
+    trips, activeTrip, activeTripId, currentUser, tripsLoaded,
+    setActiveTripId, updateTrip, addTrip, removeTrip,
+    vote, addPoll, addExpense, addItineraryItem, addContingency, markSettlementPaid,
+    sendMessage, markChatRead, addPhoto, deletePhoto, joinTripViaInvite,
+  }), [
+    trips, activeTrip, activeTripId, currentUser, tripsLoaded,
+    updateTrip, addTrip, removeTrip,
+    vote, addPoll, addExpense, addItineraryItem, addContingency, markSettlementPaid,
+    sendMessage, markChatRead, addPhoto, deletePhoto, joinTripViaInvite,
+  ]);
+
+  return <TripContext.Provider value={value}>{children}</TripContext.Provider>;
 }
 
 export function useTrips() {

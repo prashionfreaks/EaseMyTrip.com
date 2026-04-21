@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect, useRef, lazy, Suspense } from 'react';
 import { useTrips } from '../context/TripContext';
 import {
   MessageCircle, Vote, Wallet, CalendarRange, Map,
@@ -7,16 +7,28 @@ import {
   MoreHorizontal,
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
-import ChatPage from '../pages/ChatPage';
-import Decisions from '../pages/Decisions';
-import Budget from '../pages/Budget';
-import CalendarPage from '../pages/CalendarPage';
-import Itinerary from '../pages/Itinerary';
-import Routes from '../pages/Routes';
-import ActivityFeed from '../pages/ActivityFeed';
-import Contingency from '../pages/Contingency';
-import About from '../pages/About';
-import Photos from '../pages/Photos';
+
+// Lazy-load tab content so each trip page lives in its own chunk.
+const ChatPage     = lazy(() => import('../pages/ChatPage'));
+const Decisions    = lazy(() => import('../pages/Decisions'));
+const Budget       = lazy(() => import('../pages/Budget'));
+const CalendarPage = lazy(() => import('../pages/CalendarPage'));
+const Itinerary    = lazy(() => import('../pages/Itinerary'));
+const Routes       = lazy(() => import('../pages/Routes'));
+const ActivityFeed = lazy(() => import('../pages/ActivityFeed'));
+const Contingency  = lazy(() => import('../pages/Contingency'));
+const About        = lazy(() => import('../pages/About'));
+const Photos       = lazy(() => import('../pages/Photos'));
+
+function TabFallback() {
+  return (
+    <div style={{
+      minHeight: 280, display: 'flex', alignItems: 'center', justifyContent: 'center',
+    }}>
+      <div className="spinner spinner-dark" style={{ width: 22, height: 22 }} />
+    </div>
+  );
+}
 
 const statusConfig = {
   planning:  { label: 'Planning',  badge: 'badge-blue',   icon: Clock },
@@ -318,7 +330,7 @@ export default function TripDetail({ onInvite, defaultTab = 'chat' }) {
 
         {/* ── Tab content ── */}
         <div className="trip-tab-content" style={{ background: 'var(--bg-primary)', borderRadius: '0 0 14px 14px' }}>
-          {renderContent()}
+          <Suspense fallback={<TabFallback />}>{renderContent()}</Suspense>
         </div>
       </div>
     </>

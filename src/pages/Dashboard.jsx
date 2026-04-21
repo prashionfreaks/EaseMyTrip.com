@@ -13,6 +13,7 @@ import {
 import { getDestinationCurrency } from '../lib/itinerary';
 import DestinationPicker from '../components/DestinationPicker';
 import { getDestinationImage } from '../lib/destinationImages';
+import { TripCardSkeleton, SkeletonStyles } from '../components/Skeleton';
 import { format, differenceInDays, parseISO } from 'date-fns';
 
 function InsightsFeatureCard({ emoji, title, desc, index }) {
@@ -394,7 +395,7 @@ function getGreeting() {
   return 'Good evening';
 }
 
-export default function Dashboard({ onNavigate }) {
+export default function Dashboard() {
   const { trips: allTrips, setActiveTripId, activeTrip, addTrip, removeTrip, currentUser, tripsLoaded } = useTrips();
   const trips = allTrips.filter(t => (t.members || []).some(m => m.id === currentUser?.id));
   const [showCreate, setShowCreate] = useState(false);
@@ -441,39 +442,16 @@ export default function Dashboard({ onNavigate }) {
 
   const firstName = currentUser?.name?.split(' ')[0] || 'there';
 
+  // Only show skeletons on a truly cold load (no cached trips yet). When cached
+  // trips are already present, render them immediately and refresh in the background.
+  const showSkeletons = !tripsLoaded && trips.length === 0;
+
   return (
     <>
       <style>{DASH_STYLES}</style>
+      <SkeletonStyles />
 
-      {/* Loading overlay */}
-      {!tripsLoaded && (
-        <div style={{
-          position: 'fixed', inset: 0, zIndex: 50,
-          background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(12px)',
-          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-          gap: 20,
-        }}>
-          <div style={{
-            width: 60, height: 60, borderRadius: 18,
-            background: 'linear-gradient(135deg, #0ea5e9, #6366f1)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 12px 32px rgba(14,165,233,0.3)',
-            animation: 'tripPulse 1.5s ease-in-out infinite, dashFloat 2s ease-in-out infinite',
-          }}>
-            <Globe size={28} color="white" />
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <p style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.3px' }}>Loading your trips</p>
-            <p style={{ fontSize: 12, color: '#94a3b8', marginTop: 6 }}>Setting up your workspace...</p>
-          </div>
-        </div>
-      )}
-
-      <div style={{
-        opacity: tripsLoaded ? 1 : 0.3,
-        filter: tripsLoaded ? 'none' : 'blur(4px)',
-        transition: 'opacity 0.5s ease, filter 0.5s ease',
-      }}>
+      <div>
 
       {/* Header */}
       <div className="page-header" style={{
@@ -594,7 +572,15 @@ export default function Dashboard({ onNavigate }) {
         )}
 
         {/* Trip cards grid */}
-        {!activeTrip && <div style={{ marginBottom: 8 }}>
+        {!activeTrip && showSkeletons && (
+          <div style={{ marginBottom: 8 }}>
+            <div className="grid-3">
+              {Array.from({ length: 3 }).map((_, i) => <TripCardSkeleton key={i} />)}
+            </div>
+          </div>
+        )}
+
+        {!activeTrip && !showSkeletons && <div style={{ marginBottom: 8 }}>
           <div className="grid-3">
             {trips.map((trip, idx) => (
               <TripCard

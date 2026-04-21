@@ -1,25 +1,57 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense, useCallback } from 'react';
+import { Routes, Route, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { useTrips } from './context/TripContext';
 import { useAuth } from './context/AuthContext';
 import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
-import Decisions from './pages/Decisions';
-import Budget from './pages/Budget';
-import Itinerary from './pages/Itinerary';
-import Routes from './pages/Routes';
-import ActivityFeed from './pages/ActivityFeed';
-import Contingency from './pages/Contingency';
-import CalendarPage from './pages/CalendarPage';
-import ChatPage from './pages/ChatPage';
-import Photos from './pages/Photos';
-import About from './pages/About';
-import AuthPage from './pages/AuthPage';
 import LandingPage from './pages/LandingPage';
-import { Compass, LayoutDashboard, Vote, Wallet, Map, MoreHorizontal, MessageCircle, LogOut, X as XIcon, Route as RouteIcon, Camera, Globe, Activity as ActivityIcon, CalendarRange, ShieldAlert } from 'lucide-react';
+import {
+  Compass, LayoutDashboard, Vote, Wallet, Map, MoreHorizontal, MessageCircle,
+  LogOut, X as XIcon, Route as RouteIcon, Camera, Globe, Activity as ActivityIcon,
+  CalendarRange, ShieldAlert,
+} from 'lucide-react';
 import './App.css';
 
+// Lazy-load everything that isn't the default route
+const Decisions    = lazy(() => import('./pages/Decisions'));
+const Budget       = lazy(() => import('./pages/Budget'));
+const Itinerary    = lazy(() => import('./pages/Itinerary'));
+const RoutesPage   = lazy(() => import('./pages/Routes'));
+const ActivityFeed = lazy(() => import('./pages/ActivityFeed'));
+const Contingency  = lazy(() => import('./pages/Contingency'));
+const CalendarPage = lazy(() => import('./pages/CalendarPage'));
+const ChatPage     = lazy(() => import('./pages/ChatPage'));
+const Photos       = lazy(() => import('./pages/Photos'));
+const About        = lazy(() => import('./pages/About'));
+
+// Map path → logical "page id" for bottom-nav highlighting.
+// Keep in sync with the <Route> list below.
+const PATH_TO_PAGE = {
+  '/':            'dashboard',
+  '/decisions':   'decisions',
+  '/budget':      'budget',
+  '/itinerary':   'itinerary',
+  '/routes':      'routes',
+  '/activity':    'activity',
+  '/contingency': 'contingency',
+  '/calendar':    'calendar',
+  '/chat':        'chat',
+  '/photos':      'photos',
+  '/about':       'about',
+};
+
+function PageFallback() {
+  return (
+    <div style={{
+      minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+      color: 'var(--text-tertiary)',
+    }}>
+      <div className="spinner spinner-dark" style={{ width: 22, height: 22 }} />
+    </div>
+  );
+}
+
 export default function App() {
-  const [currentPage, setCurrentPage] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [accountSheetOpen, setAccountSheetOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
@@ -27,12 +59,15 @@ export default function App() {
   const { user, loading, isDemo, displayName, initials, signOut } = useAuth();
   const [inviteProcessed, setInviteProcessed] = useState(false);
 
+  const location = useLocation();
+  const routerNavigate = useNavigate();
+  const currentPage = PATH_TO_PAGE[location.pathname] || 'dashboard';
+
   // Handle join link in URL — save trip ID to localStorage (survives OAuth redirects)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const joinTripId = params.get('join') || params.get('invite');
     if (joinTripId) {
-      console.log('[join] saved trip ID from URL:', joinTripId);
       localStorage.setItem('pendingJoinTrip', joinTripId);
       window.history.replaceState({}, '', window.location.pathname);
     }
@@ -44,49 +79,27 @@ export default function App() {
     const pendingTripId = localStorage.getItem('pendingJoinTrip');
     if (!pendingTripId) return;
 
-    console.log('[join] processing join for trip:', pendingTripId, 'user:', user.id);
     localStorage.removeItem('pendingJoinTrip');
     setInviteProcessed(true);
 
     if (joinTripViaInvite) {
       joinTripViaInvite(pendingTripId).then(tripId => {
-        console.log('[join] result:', tripId);
-        if (tripId) { setActiveTripId(tripId); setCurrentPage('dashboard'); }
+        if (tripId) { setActiveTripId(tripId); routerNavigate('/'); }
       });
     } else {
-      // Demo mode
       const match = trips.find(t => t.id === pendingTripId);
-      if (match) { setActiveTripId(match.id); setCurrentPage('dashboard'); }
+      if (match) { setActiveTripId(match.id); routerNavigate('/'); }
     }
-  }, [user, tripsLoaded, trips, inviteProcessed, setActiveTripId, joinTripViaInvite]);
+  }, [user, tripsLoaded, trips, inviteProcessed, setActiveTripId, joinTripViaInvite, routerNavigate]);
 
-  function navigate(page, tripId) {
-    setCurrentPage(page);
-    if (tripId) {
-      setActiveTripId(tripId);
-    } else if (page === 'dashboard') {
-      setActiveTripId(null); // return to trips grid
-    }
+  const navigate = useCallback((page, tripId) => {
+    if (tripId) setActiveTripId(tripId);
+    else if (page === 'dashboard') setActiveTripId(null);
+    const path = Object.keys(PATH_TO_PAGE).find(p => PATH_TO_PAGE[p] === page) || '/';
+    routerNavigate(path);
     window.scrollTo(0, 0);
     setSidebarOpen(false);
-  }
-
-  function renderPage() {
-    switch (currentPage) {
-      case 'dashboard':   return <Dashboard onNavigate={navigate} />;
-      case 'decisions':   return <Decisions />;
-      case 'budget':      return <Budget />;
-      case 'itinerary':   return <Itinerary />;
-      case 'routes':      return <Routes />;
-      case 'activity':    return <ActivityFeed />;
-      case 'contingency': return <Contingency />;
-      case 'calendar':    return <CalendarPage />;
-      case 'chat':        return <ChatPage />;
-      case 'photos':      return <Photos />;
-      case 'about':       return <About />;
-      default:            return <Dashboard onNavigate={navigate} />;
-    }
-  }
+  }, [routerNavigate, setActiveTripId]);
 
   if (loading) {
     return (
@@ -97,7 +110,6 @@ export default function App() {
         flexDirection: 'column', gap: 24,
         overflow: 'hidden',
       }}>
-        {/* Animated rings */}
         <div style={{ position: 'relative', width: 90, height: 90 }}>
           <div style={{
             position: 'absolute', inset: 0,
@@ -202,7 +214,22 @@ export default function App() {
       />
 
       <main className="main-content">
-        {renderPage()}
+        <Suspense fallback={<PageFallback />}>
+          <Routes>
+            <Route path="/"            element={<Dashboard />} />
+            <Route path="/decisions"   element={<Decisions />} />
+            <Route path="/budget"      element={<Budget />} />
+            <Route path="/itinerary"   element={<Itinerary />} />
+            <Route path="/routes"      element={<RoutesPage />} />
+            <Route path="/activity"    element={<ActivityFeed />} />
+            <Route path="/contingency" element={<Contingency />} />
+            <Route path="/calendar"    element={<CalendarPage />} />
+            <Route path="/chat"        element={<ChatPage />} />
+            <Route path="/photos"      element={<Photos />} />
+            <Route path="/about"       element={<About />} />
+            <Route path="*"            element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
       </main>
 
       {/* Mobile bottom navigation */}
