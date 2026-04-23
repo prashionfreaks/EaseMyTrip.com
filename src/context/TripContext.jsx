@@ -391,6 +391,18 @@ export function TripProvider({ children }) {
     }));
   }, [updateTrip]);
 
+  const likeMessage = useCallback((tripId, messageId, userId) => {
+    updateTrip(tripId, trip => ({
+      ...trip,
+      messages: (trip.messages || []).map(msg => {
+        if (msg.id !== messageId) return msg;
+        const likes = msg.likes || [];
+        const hasLiked = likes.includes(userId);
+        return { ...msg, likes: hasLiked ? likes.filter(id => id !== userId) : [...likes, userId] };
+      }),
+    }));
+  }, [updateTrip]);
+
   const markSettlementPaid = useCallback((tripId, from, to) => {
     updateTrip(tripId, trip => ({
       ...trip,
@@ -506,13 +518,13 @@ export function TripProvider({ children }) {
     trips, activeTrip, activeTripId, currentUser, tripsLoaded,
     setActiveTripId, updateTrip, addTrip, removeTrip,
     vote, addPoll, addExpense, addItineraryItem, addContingency, markSettlementPaid,
-    sendMessage, markChatRead, addPhoto, deletePhoto, joinTripViaInvite,
+    sendMessage, markChatRead, likeMessage, addPhoto, deletePhoto, joinTripViaInvite,
     addChecklistItem, toggleChecklistItem, deleteChecklistItem, updateChecklistItem,
   }), [
     trips, activeTrip, activeTripId, currentUser, tripsLoaded,
     updateTrip, addTrip, removeTrip,
     vote, addPoll, addExpense, addItineraryItem, addContingency, markSettlementPaid,
-    sendMessage, markChatRead, addPhoto, deletePhoto, joinTripViaInvite,
+    sendMessage, markChatRead, likeMessage, addPhoto, deletePhoto, joinTripViaInvite,
     addChecklistItem, toggleChecklistItem, deleteChecklistItem, updateChecklistItem,
   ]);
 

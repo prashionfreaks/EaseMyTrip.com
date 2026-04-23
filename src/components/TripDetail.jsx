@@ -6,6 +6,7 @@ import {
   UserPlus, Users, Clock, CheckCircle2, X, Globe, Camera, Trash2,
   MoreHorizontal, ListChecks,
 } from 'lucide-react';
+
 import { format, parseISO } from 'date-fns';
 
 // Lazy-load tab content so each trip page lives in its own chunk.
@@ -20,6 +21,7 @@ const Contingency  = lazy(() => import('../pages/Contingency'));
 const About        = lazy(() => import('../pages/About'));
 const Photos       = lazy(() => import('../pages/Photos'));
 const Checklist    = lazy(() => import('../pages/Checklist'));
+const Members      = lazy(() => import('../pages/Members'));
 
 function TabFallback() {
   return (
@@ -49,7 +51,7 @@ const MORE_TABS = [
   { id: 'routes',    label: 'Routes',    icon: Route },
   { id: 'photos',    label: 'Photos',    icon: Camera },
   { id: 'about',     label: 'About',     icon: Globe },
-  { id: 'checklist', label: 'Checklist', icon: ListChecks },
+  { id: 'members',   label: 'Members',   icon: Users },
   { id: 'plans',     label: 'Plans',     icon: ShieldAlert },
 ];
 
@@ -97,6 +99,7 @@ export default function TripDetail({ onInvite, defaultTab = 'chat' }) {
       case 'routes':    return <Routes />;
       case 'photos':     return <Photos />;
       case 'about':      return <About />;
+      case 'members':    return <Members />;
       case 'checklist':  return <Checklist />;
       case 'activity':  return <ActivityFeed />;
       case 'plans':     return <Contingency />;
