@@ -138,6 +138,15 @@ export const sampleTrips = [
       { id: 'msg11', userId: 'u1', text: 'Let me look at the itinerary — I think day 4 could work! Will update the plan.', timestamp: '2026-03-30T09:00:00Z' },
       { id: 'msg12', userId: 'u3', text: 'This trip is going to be absolutely incredible 🙌', timestamp: '2026-03-31T20:00:00Z' },
     ],
+    checklist: [
+      { id: 'ck1', text: 'Book flights (Tokyo return)', done: true,  ownerId: 'u1', doneAt: '2026-03-20T10:00:00Z', createdAt: '2026-03-10T10:00:00Z' },
+      { id: 'ck2', text: 'Buy JR Pass (7-day)',         done: true,  ownerId: 'u2', doneAt: '2026-03-22T14:00:00Z', createdAt: '2026-03-10T10:00:00Z' },
+      { id: 'ck3', text: 'Book ryokan in Kyoto',        done: false, ownerId: 'u1', createdAt: '2026-03-25T09:30:00Z' },
+      { id: 'ck4', text: 'Sort travel insurance',       done: false, ownerId: 'u3', createdAt: '2026-03-25T10:02:00Z' },
+      { id: 'ck5', text: 'Book Nara day trip transport', done: false, ownerId: 'u4', createdAt: '2026-03-30T09:00:00Z' },
+      { id: 'ck6', text: 'Reserve tea ceremony in Kyoto', done: false, ownerId: 'u3', createdAt: '2026-03-30T08:00:00Z' },
+      { id: 'ck7', text: 'Share packing list in group',  done: false, ownerId: null, createdAt: '2026-04-01T08:00:00Z' },
+    ],
   },
   {
     id: '2',

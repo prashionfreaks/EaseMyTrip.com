@@ -4,7 +4,7 @@ import {
   MessageCircle, Vote, Wallet, CalendarRange, Map,
   Route, Activity, ShieldAlert, MapPin, Calendar,
   UserPlus, Users, Clock, CheckCircle2, X, Globe, Camera, Trash2,
-  MoreHorizontal,
+  MoreHorizontal, ListChecks,
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 
@@ -19,6 +19,7 @@ const ActivityFeed = lazy(() => import('../pages/ActivityFeed'));
 const Contingency  = lazy(() => import('../pages/Contingency'));
 const About        = lazy(() => import('../pages/About'));
 const Photos       = lazy(() => import('../pages/Photos'));
+const Checklist    = lazy(() => import('../pages/Checklist'));
 
 function TabFallback() {
   return (
@@ -41,6 +42,7 @@ const PRIMARY_TABS = [
   { id: 'polls',     label: 'Polls',     icon: Vote },
   { id: 'budget',    label: 'Budget',    icon: Wallet },
   { id: 'itinerary', label: 'Itinerary', icon: Map },
+  { id: 'checklist', label: 'Checklist', icon: ListChecks },
 ];
 
 const MORE_TABS = [
@@ -94,8 +96,9 @@ export default function TripDetail({ onInvite, defaultTab = 'chat' }) {
       case 'calendar':  return <CalendarPage />;
       case 'itinerary': return <Itinerary />;
       case 'routes':    return <Routes />;
-      case 'photos':    return <Photos />;
-      case 'about':     return <About />;
+      case 'photos':     return <Photos />;
+      case 'about':      return <About />;
+      case 'checklist':  return <Checklist />;
       case 'activity':  return <ActivityFeed />;
       case 'plans':     return <Contingency />;
       default:          return null;

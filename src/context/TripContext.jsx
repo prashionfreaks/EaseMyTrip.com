@@ -36,7 +36,7 @@ function colorFromId(id) {
 function normalizeTrip(trip) {
   const t = { ...trip };
   const arrayFields = ['members', 'polls', 'expenses', 'itinerary', 'routes',
-    'activity', 'contingencies', 'messages', 'photos', 'paidSettlements'];
+    'activity', 'contingencies', 'messages', 'photos', 'paidSettlements', 'checklist'];
   for (const f of arrayFields) {
     if (!Array.isArray(t[f])) t[f] = [];
   }
@@ -406,6 +406,44 @@ export function TripProvider({ children }) {
     updateTrip(tripId, trip => ({ ...trip, photos: (trip.photos || []).filter(p => p.id !== photoId) }));
   }, [updateTrip]);
 
+  // ── Checklist helpers ────────────────────────────────────────────────────
+  const addChecklistItem = useCallback((tripId, item) => {
+    updateTrip(tripId, trip => ({
+      ...trip,
+      checklist: [...(trip.checklist || []), {
+        ...item,
+        id: 'ck' + Date.now(),
+        done: false,
+        createdAt: new Date().toISOString(),
+      }],
+    }));
+  }, [updateTrip]);
+
+  const toggleChecklistItem = useCallback((tripId, itemId) => {
+    updateTrip(tripId, trip => ({
+      ...trip,
+      checklist: (trip.checklist || []).map(it =>
+        it.id === itemId ? { ...it, done: !it.done, doneAt: !it.done ? new Date().toISOString() : null } : it
+      ),
+    }));
+  }, [updateTrip]);
+
+  const deleteChecklistItem = useCallback((tripId, itemId) => {
+    updateTrip(tripId, trip => ({
+      ...trip,
+      checklist: (trip.checklist || []).filter(it => it.id !== itemId),
+    }));
+  }, [updateTrip]);
+
+  const updateChecklistItem = useCallback((tripId, itemId, patch) => {
+    updateTrip(tripId, trip => ({
+      ...trip,
+      checklist: (trip.checklist || []).map(it =>
+        it.id === itemId ? { ...it, ...patch } : it
+      ),
+    }));
+  }, [updateTrip]);
+
   const joinTripViaInvite = useCallback(async (tripId) => {
     console.log('[join] called, tripId:', tripId, 'dbUser:', dbUser?.id);
     if (!isSupabaseConfigured || !dbUser) { console.warn('[join] no supabase or dbUser'); return null; }
@@ -469,11 +507,13 @@ export function TripProvider({ children }) {
     setActiveTripId, updateTrip, addTrip, removeTrip,
     vote, addPoll, addExpense, addItineraryItem, addContingency, markSettlementPaid,
     sendMessage, markChatRead, addPhoto, deletePhoto, joinTripViaInvite,
+    addChecklistItem, toggleChecklistItem, deleteChecklistItem, updateChecklistItem,
   }), [
     trips, activeTrip, activeTripId, currentUser, tripsLoaded,
     updateTrip, addTrip, removeTrip,
     vote, addPoll, addExpense, addItineraryItem, addContingency, markSettlementPaid,
     sendMessage, markChatRead, addPhoto, deletePhoto, joinTripViaInvite,
+    addChecklistItem, toggleChecklistItem, deleteChecklistItem, updateChecklistItem,
   ]);
 
   return <TripContext.Provider value={value}>{children}</TripContext.Provider>;
