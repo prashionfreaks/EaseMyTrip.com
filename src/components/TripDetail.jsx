@@ -42,7 +42,6 @@ const PRIMARY_TABS = [
   { id: 'polls',     label: 'Polls',     icon: Vote },
   { id: 'budget',    label: 'Budget',    icon: Wallet },
   { id: 'itinerary', label: 'Itinerary', icon: Map },
-  { id: 'checklist', label: 'Checklist', icon: ListChecks },
 ];
 
 const MORE_TABS = [
@@ -50,7 +49,7 @@ const MORE_TABS = [
   { id: 'routes',    label: 'Routes',    icon: Route },
   { id: 'photos',    label: 'Photos',    icon: Camera },
   { id: 'about',     label: 'About',     icon: Globe },
-  { id: 'activity',  label: 'Activity',  icon: Activity },
+  { id: 'checklist', label: 'Checklist', icon: ListChecks },
   { id: 'plans',     label: 'Plans',     icon: ShieldAlert },
 ];
 
