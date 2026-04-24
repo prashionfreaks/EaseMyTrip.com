@@ -8,7 +8,7 @@ import LandingPage from './pages/LandingPage';
 import {
   Compass, LayoutDashboard, Vote, Wallet, Map, MoreHorizontal, MessageCircle,
   LogOut, X as XIcon, Route as RouteIcon, Camera, Globe, Activity as ActivityIcon,
-  CalendarRange, ShieldAlert,
+  CalendarRange, ShieldAlert, Users,
 } from 'lucide-react';
 import './App.css';
 
@@ -23,6 +23,7 @@ const CalendarPage = lazy(() => import('./pages/CalendarPage'));
 const ChatPage     = lazy(() => import('./pages/ChatPage'));
 const Photos       = lazy(() => import('./pages/Photos'));
 const About        = lazy(() => import('./pages/About'));
+const Members      = lazy(() => import('./pages/Members'));
 
 // Map path → logical "page id" for bottom-nav highlighting.
 // Keep in sync with the <Route> list below.
@@ -38,6 +39,7 @@ const PATH_TO_PAGE = {
   '/chat':        'chat',
   '/photos':      'photos',
   '/about':       'about',
+  '/members':     'members',
 };
 
 function PageFallback() {
@@ -227,6 +229,7 @@ export default function App() {
             <Route path="/chat"        element={<ChatPage />} />
             <Route path="/photos"      element={<Photos />} />
             <Route path="/about"       element={<About />} />
+            <Route path="/members"     element={<Members />} />
             <Route path="*"            element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>
@@ -321,6 +324,7 @@ export default function App() {
                   { id: 'calendar', label: 'Calendar', Icon: CalendarRange },
                   { id: 'routes',   label: 'Routes',   Icon: RouteIcon },
                   { id: 'photos',   label: 'Photos',   Icon: Camera },
+                  { id: 'members',  label: 'Members',  Icon: Users },
                   { id: 'about',    label: 'About',    Icon: Globe },
                   { id: 'activity', label: 'Activity', Icon: ActivityIcon },
                   { id: 'contingency', label: 'Plans', Icon: ShieldAlert },

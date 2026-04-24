@@ -178,14 +178,17 @@ export default function ChatPage() {
     <div className="chat-container">
       <style>{`
         .chat-msg-wrap { position: relative; }
+        .chat-meta-row {
+          display: flex; align-items: center; gap: 6px;
+          margin-top: 3px;
+        }
         .chat-like-btn {
-          position: absolute; bottom: 20px;
-          display: flex; align-items: center; gap: 3px;
+          display: inline-flex; align-items: center; gap: 3px;
           background: var(--bg-secondary); border: 1px solid var(--border);
-          border-radius: 99px; padding: 3px 7px;
+          border-radius: 99px; padding: 2px 7px;
           font-size: 11px; font-weight: 600; cursor: pointer;
           color: var(--text-secondary); line-height: 1;
-          box-shadow: var(--shadow-sm); transition: all 0.15s;
+          box-shadow: var(--shadow-sm); transition: opacity 0.15s, background 0.15s, color 0.15s, border-color 0.15s;
           opacity: 0; pointer-events: none;
           white-space: nowrap;
         }
@@ -275,7 +278,6 @@ export default function ChatPage() {
                     alignItems: 'flex-end',
                     gap: 8,
                     marginTop: grouped ? 2 : 12,
-                    paddingBottom: likes.length > 0 ? 14 : 0,
                   }}
                 >
                   {/* Avatar */}
@@ -327,24 +329,27 @@ export default function ChatPage() {
                       <MessageText text={msg.text} members={members} self={self} />
                     </div>
 
-                    {/* Time */}
-                    <span style={{
-                      fontSize: 10, color: 'var(--text-tertiary)', marginTop: 3,
-                      paddingLeft: self ? 0 : 4, paddingRight: self ? 4 : 0,
-                    }}>
-                      {format(parseISO(msg.timestamp), 'h:mm a')}
-                    </span>
-
-                    {/* Like button — floats below the bubble */}
-                    <button
-                      className={`chat-like-btn${liked ? ' liked' : ''}${likes.length > 0 ? ' has-likes' : ''}`}
-                      style={{ [self ? 'right' : 'left']: 8 }}
-                      onClick={() => likeMessage(activeTrip.id, msg.id, currentUser.id)}
-                      title={liked ? 'Unlike' : 'Like'}
+                    {/* Meta row: time + like button, ordered so like sits on the outer edge */}
+                    <div
+                      className="chat-meta-row"
+                      style={{
+                        flexDirection: self ? 'row-reverse' : 'row',
+                        paddingLeft: self ? 0 : 4,
+                        paddingRight: self ? 4 : 0,
+                      }}
                     >
-                      <Heart size={11} style={{ fill: liked ? 'currentColor' : 'none' }} />
-                      {likes.length > 0 && <span>{likes.length}</span>}
-                    </button>
+                      <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>
+                        {format(parseISO(msg.timestamp), 'h:mm a')}
+                      </span>
+                      <button
+                        className={`chat-like-btn${liked ? ' liked' : ''}${likes.length > 0 ? ' has-likes' : ''}`}
+                        onClick={() => likeMessage(activeTrip.id, msg.id, currentUser.id)}
+                        title={liked ? 'Unlike' : 'Like'}
+                      >
+                        <Heart size={11} style={{ fill: liked ? 'currentColor' : 'none' }} />
+                        {likes.length > 0 && <span>{likes.length}</span>}
+                      </button>
+                    </div>
                   </div>
                 </div>
               );

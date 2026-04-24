@@ -21,6 +21,12 @@ export const DESTINATION_INFO = {
     bestTime: { period: 'March–May & Oct–Nov', reason: 'Spring brings the legendary cherry blossoms; autumn delivers vivid red and gold foliage across the country.' },
     quickFacts: { language: 'Japanese', currency: 'Japanese Yen (¥)', capital: 'Tokyo', knownAs: 'Land of the Rising Sun', timezone: 'JST (UTC+9)' },
     cuisine: ['Sushi & Sashimi', 'Ramen', 'Tempura', 'Wagyu Beef', 'Takoyaki', 'Matcha Desserts', 'Yakitori'],
+    eateries: [
+      { name: 'Ichiran Ramen Shibuya', area: 'Shibuya, Tokyo', rating: 4.5, reviews: 18420, type: 'Ramen', price: '¥¥', mustTry: 'Signature Tonkotsu (solo booth)' },
+      { name: 'Sushi Dai', area: 'Toyosu Market, Tokyo', rating: 4.7, reviews: 3180, type: 'Sushi', price: '¥¥¥', mustTry: 'Omakase Nigiri Set' },
+      { name: 'Gyukatsu Motomura', area: 'Shibuya, Tokyo', rating: 4.6, reviews: 6420, type: 'Beef Cutlet', price: '¥¥', mustTry: 'Gyukatsu Teishoku' },
+      { name: 'Afuri Ramen', area: 'Harajuku, Tokyo', rating: 4.5, reviews: 8910, type: 'Yuzu Ramen', price: '¥¥', mustTry: 'Yuzu Shio Ramen' },
+    ],
   },
 
   bali: {
@@ -42,6 +48,12 @@ export const DESTINATION_INFO = {
     bestTime: { period: 'April–October', reason: 'Dry season with low humidity and sunshine. July–August is peak; April–June and September–October offer the best value.' },
     quickFacts: { language: 'Balinese & Indonesian', currency: 'Indonesian Rupiah (IDR)', capital: 'Denpasar', knownAs: 'Island of the Gods', timezone: 'WITA (UTC+8)' },
     cuisine: ['Nasi Goreng', 'Babi Guling (Suckling Pig)', 'Satay Lilit', 'Lawar', 'Black Rice Pudding', 'Fresh Coconut'],
+    eateries: [
+      { name: 'Locavore NXT', area: 'Ubud', rating: 4.8, reviews: 2140, type: 'Modern Indonesian Fine Dining', price: '$$$$', mustTry: 'Seasonal Tasting Menu' },
+      { name: 'Warung Babi Guling Ibu Oka', area: 'Ubud', rating: 4.4, reviews: 8760, type: 'Balinese', price: '$', mustTry: 'Babi Guling Platter' },
+      { name: 'La Brisa', area: 'Canggu', rating: 4.6, reviews: 12300, type: 'Beach Club / Mediterranean', price: '$$$', mustTry: 'Wood-Fired Pizza + Sunset' },
+      { name: "Naughty Nuri's Warung", area: 'Ubud', rating: 4.5, reviews: 9450, type: 'BBQ Ribs', price: '$$', mustTry: 'Pork Ribs + Martini' },
+    ],
   },
 
   paris: {
@@ -63,6 +75,12 @@ export const DESTINATION_INFO = {
     bestTime: { period: 'April–June & Sep–Oct', reason: 'Mild weather, blooming chestnut trees, fewer crowds than summer. July–August is peak season with intense heat and tourist density.' },
     quickFacts: { language: 'French', currency: 'Euro (€)', capital: 'Paris', knownAs: 'City of Light', timezone: 'CET (UTC+1)' },
     cuisine: ['Croissants & Pain au Chocolat', 'French Onion Soup', 'Crêpes', 'Steak Frites', 'Macarons', 'Crème Brûlée', 'Escargot'],
+    eateries: [
+      { name: 'Septime', area: '11th arrondissement', rating: 4.6, reviews: 2890, type: 'Modern French (Michelin)', price: '€€€€', mustTry: 'Tasting Menu with Natural Wines' },
+      { name: 'Du Pain et des Idées', area: '10th arrondissement', rating: 4.7, reviews: 4210, type: 'Bakery', price: '€', mustTry: 'Escargot Pistachio-Chocolat' },
+      { name: 'Bouillon Pigalle', area: 'Pigalle', rating: 4.4, reviews: 18720, type: 'Classic Bistro', price: '€€', mustTry: 'Bœuf Bourguignon' },
+      { name: "L'Ami Jean", area: '7th arrondissement', rating: 4.6, reviews: 2340, type: 'Basque / French', price: '€€€', mustTry: 'Rice Pudding (Riz au Lait)' },
+    ],
   },
 
   london: {
@@ -84,6 +102,12 @@ export const DESTINATION_INFO = {
     bestTime: { period: 'May–September', reason: 'Longest days and warmest temperatures. Summer brings festivals and outdoor events, though it\'s also peak tourist season.' },
     quickFacts: { language: 'English', currency: 'British Pound (£)', capital: 'London', knownAs: 'The Big Smoke', timezone: 'GMT (UTC+0)' },
     cuisine: ['Fish & Chips', 'Full English Breakfast', 'Chicken Tikka Masala', 'Sunday Roast', 'Scotch Eggs', 'Eton Mess', 'Cornish Pasty'],
+    eateries: [
+      { name: 'Dishoom Covent Garden', area: 'Covent Garden', rating: 4.7, reviews: 25300, type: 'Bombay Irani Café', price: '££', mustTry: 'Bacon Naan Roll + House Chai' },
+      { name: 'The Ledbury', area: 'Notting Hill', rating: 4.6, reviews: 1880, type: '3-Michelin-Star', price: '££££', mustTry: 'Seasonal Tasting Menu' },
+      { name: 'Poppies Fish & Chips', area: 'Spitalfields', rating: 4.5, reviews: 9140, type: 'Fish & Chips', price: '££', mustTry: 'Cod & Chips with Mushy Peas' },
+      { name: 'Sketch (The Gallery)', area: 'Mayfair', rating: 4.3, reviews: 8200, type: 'Afternoon Tea', price: '£££', mustTry: 'Pink Room Afternoon Tea' },
+    ],
   },
 
   dubai: {
@@ -105,6 +129,12 @@ export const DESTINATION_INFO = {
     bestTime: { period: 'November–March', reason: 'Pleasantly warm (25–30°C) with low humidity. Summer months (June–August) reach 45°C+ with extreme humidity.' },
     quickFacts: { language: 'Arabic (English widely spoken)', currency: 'UAE Dirham (AED)', capital: 'Abu Dhabi', knownAs: 'City of Gold', timezone: 'GST (UTC+4)' },
     cuisine: ['Al Harees', 'Shawarma', 'Luqaimat (honey dumplings)', 'Machboos (spiced rice)', 'Camel Milk Ice Cream', 'Fresh Dates'],
+    eateries: [
+      { name: 'Al Ustad Special Kabab', area: 'Meena Bazaar', rating: 4.6, reviews: 6420, type: 'Persian', price: 'AED', mustTry: 'Special Mixed Kebab Platter' },
+      { name: 'Ravi Restaurant', area: 'Satwa', rating: 4.5, reviews: 14200, type: 'Pakistani', price: 'AED', mustTry: 'Chicken Karahi + Fresh Naan' },
+      { name: 'Pierchic', area: 'Madinat Jumeirah', rating: 4.5, reviews: 3950, type: 'Seafood on a Pier', price: 'AED AED AED AED', mustTry: 'Lobster Thermidor with Burj Al Arab Views' },
+      { name: 'Zuma Dubai', area: 'DIFC', rating: 4.6, reviews: 4720, type: 'Modern Japanese', price: 'AED AED AED AED', mustTry: 'Black Cod Miso' },
+    ],
   },
 
   singapore: {
@@ -147,6 +177,12 @@ export const DESTINATION_INFO = {
     bestTime: { period: 'November–February', reason: 'Cool and dry season with temperatures of 25–30°C. March–May is brutally hot; June–October brings monsoon rains.' },
     quickFacts: { language: 'Thai', currency: 'Thai Baht (฿)', capital: 'Bangkok', knownAs: 'Land of Smiles', timezone: 'ICT (UTC+7)' },
     cuisine: ['Pad Thai', 'Tom Yum Soup', 'Green/Red Curry', 'Som Tum (Papaya Salad)', 'Mango Sticky Rice', 'Massaman Curry'],
+    eateries: [
+      { name: 'Jay Fai', area: 'Old City, Bangkok', rating: 4.4, reviews: 8860, type: 'Michelin Street Food', price: '฿฿฿', mustTry: 'Drunken Noodles & Crab Omelette' },
+      { name: 'Thip Samai', area: 'Phra Nakhon, Bangkok', rating: 4.4, reviews: 12300, type: 'Pad Thai Institution', price: '฿', mustTry: 'Pad Thai Haw Kai (egg wrap)' },
+      { name: 'Nahm', area: 'Sathorn, Bangkok', rating: 4.5, reviews: 2180, type: 'Thai Fine Dining', price: '฿฿฿฿', mustTry: 'Chef David Thompson Tasting Menu' },
+      { name: "Rock's Restaurant", area: 'Chiang Mai', rating: 4.5, reviews: 3420, type: 'Northern Thai', price: '฿฿', mustTry: 'Khao Soi with Braised Chicken' },
+    ],
   },
 
   goa: {
@@ -168,6 +204,12 @@ export const DESTINATION_INFO = {
     bestTime: { period: 'November–February', reason: 'Perfect beach weather at 28–32°C with low humidity. Pre-Christmas and NYE see peak crowds; monsoon (Jun–Sep) is lush but beaches are rough.' },
     quickFacts: { language: 'Konkani, English, Portuguese (heritage)', currency: 'Indian Rupee (₹)', capital: 'Panaji', knownAs: 'Pearl of the Orient', timezone: 'IST (UTC+5:30)' },
     cuisine: ['Fish Curry Rice', 'Prawn Balchão', 'Chicken Xacuti', 'Bebinca (layered dessert)', 'Feni (cashew liquor)', 'Sorpotel'],
+    eateries: [
+      { name: 'Gunpowder', area: 'Assagao, North Goa', rating: 4.5, reviews: 3420, type: 'South Indian Coastal', price: '₹₹', mustTry: 'Fish Mappas with Appam' },
+      { name: 'Vinayak Family Restaurant', area: 'Assagao, North Goa', rating: 4.4, reviews: 2910, type: 'Goan Thali', price: '₹₹', mustTry: 'Pomfret Rava Fry Thali' },
+      { name: 'Thalassa', area: 'Vagator', rating: 4.3, reviews: 8720, type: 'Greek with Cliff Views', price: '₹₹₹', mustTry: 'Moussaka + Sunset Seating' },
+      { name: "Fisherman's Wharf", area: 'Cavelossim', rating: 4.4, reviews: 6140, type: 'Goan Seafood', price: '₹₹', mustTry: 'Goan Prawn Curry Rice' },
+    ],
   },
 
   mumbai: {
@@ -189,6 +231,12 @@ export const DESTINATION_INFO = {
     bestTime: { period: 'November–February', reason: 'Cool, dry, and comfortable at 22–32°C. Monsoon (June–September) brings torrential rain that floods streets but makes the city lush and dramatic.' },
     quickFacts: { language: 'Marathi, Hindi, English', currency: 'Indian Rupee (₹)', capital: 'Financial capital of India', knownAs: 'City of Dreams', timezone: 'IST (UTC+5:30)' },
     cuisine: ['Vada Pav', 'Pav Bhaji', 'Bhel Puri', 'Misal Pav', 'Thalipeeth', 'Modak', 'Solkadhi'],
+    eateries: [
+      { name: 'Britannia & Co.', area: 'Ballard Estate', rating: 4.5, reviews: 7820, type: 'Parsi Café (since 1923)', price: '₹₹', mustTry: 'Berry Pulao + Raspberry Soda' },
+      { name: 'Bademiya', area: 'Colaba', rating: 4.3, reviews: 12400, type: 'Late-Night Kebabs', price: '₹', mustTry: 'Chicken Tikka Roll' },
+      { name: 'Trishna', area: 'Fort', rating: 4.5, reviews: 4820, type: 'Seafood', price: '₹₹₹', mustTry: 'Hyderabadi Butter Pepper Garlic Crab' },
+      { name: 'The Bombay Canteen', area: 'Lower Parel', rating: 4.5, reviews: 5480, type: 'Modern Indian', price: '₹₹₹', mustTry: 'Kejriwal Toast + Eggs Kejriwal' },
+    ],
   },
 
   hyderabad: {
@@ -210,6 +258,12 @@ export const DESTINATION_INFO = {
     bestTime: { period: 'October–February', reason: 'Cool and pleasant weather between 15–28°C. Pre-monsoon (March–May) is extremely hot; the monsoon arrives in June.' },
     quickFacts: { language: 'Telugu, Urdu, Hindi', currency: 'Indian Rupee (₹)', capital: 'Capital of Telangana', knownAs: 'City of Pearls', timezone: 'IST (UTC+5:30)' },
     cuisine: ['Hyderabadi Biryani', 'Haleem', 'Mirchi ka Salan', 'Lukhmi', 'Irani Chai', 'Double ka Meetha (bread pudding)', 'Kubani ka Meetha'],
+    eateries: [
+      { name: 'Paradise Biryani', area: 'Secunderabad', rating: 4.3, reviews: 68400, type: 'Biryani', price: '₹₹', mustTry: 'Hyderabadi Chicken Dum Biryani' },
+      { name: 'Shah Ghouse', area: 'Shah Ali Banda', rating: 4.4, reviews: 28600, type: 'Biryani & Haleem', price: '₹', mustTry: 'Haleem (Ramzan Special)' },
+      { name: 'Bawarchi', area: 'RTC X Roads', rating: 4.3, reviews: 41200, type: 'Biryani', price: '₹', mustTry: 'Mutton Biryani Jumbo' },
+      { name: 'Nimrah Café & Bakery', area: 'Charminar', rating: 4.4, reviews: 9300, type: 'Irani Chai & Bakes', price: '₹', mustTry: 'Osmania Biscuit + Irani Chai' },
+    ],
   },
 
   udaipur: {
@@ -273,6 +327,12 @@ export const DESTINATION_INFO = {
     bestTime: { period: 'September–March', reason: 'Post-monsoon brings lush greenery without rain. December–January is ideal for backwaters. Avoid June–August (heavy monsoon, though Ayurveda season).' },
     quickFacts: { language: 'Malayalam', currency: 'Indian Rupee (₹)', capital: 'Thiruvananthapuram', knownAs: "God's Own Country", timezone: 'IST (UTC+5:30)' },
     cuisine: ['Kerala Sadya (banana leaf feast)', 'Appam with Stew', 'Kerala Fish Curry', 'Prawn Moilee', 'Puttu & Kadala Curry', 'Payasam'],
+    eateries: [
+      { name: 'Dhe Puttu', area: 'Kochi', rating: 4.4, reviews: 7850, type: 'Kerala Breakfast', price: '₹₹', mustTry: 'Puttu Varieties with Beef Fry' },
+      { name: 'Fort House', area: 'Fort Kochi', rating: 4.4, reviews: 3120, type: 'Waterfront Seafood', price: '₹₹', mustTry: 'Karimeen Pollichathu' },
+      { name: 'Kayees Biryani', area: 'Mattancherry, Kochi', rating: 4.5, reviews: 5460, type: 'Biryani (since 1957)', price: '₹', mustTry: 'Mutton Biryani' },
+      { name: "Paragon Restaurant", area: 'Kozhikode', rating: 4.5, reviews: 16200, type: 'Malabar', price: '₹₹', mustTry: 'Malabar Fish Biryani' },
+    ],
   },
 
   shimla: {
