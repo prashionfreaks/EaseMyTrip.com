@@ -7,7 +7,9 @@ import {
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 
-// Compress + resize image to base64 (max 1200px wide, quality 0.82)
+// Compress + resize image to a Blob (max 1200px wide, quality 0.82).
+// Returning a Blob (not a data URL) avoids `fetch(dataUrl)` later, which
+// the app's `connect-src` CSP blocks with a generic "Failed to fetch".
 function compressImage(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -21,13 +23,27 @@ function compressImage(file) {
         canvas.width = width;
         canvas.height = height;
         canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/jpeg', 0.82));
+        canvas.toBlob(
+          blob => blob ? resolve(blob) : reject(new Error('Failed to compress image')),
+          'image/jpeg', 0.82,
+        );
       };
       img.onerror = reject;
       img.src = e.target.result;
     };
     reader.onerror = reject;
     reader.readAsDataURL(file);
+  });
+}
+
+// Read a Blob as a base64 data URL (used by demo mode, where photos are
+// persisted to localStorage and need to survive page refresh).
+function blobToDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
   });
 }
 
@@ -63,10 +79,23 @@ export default function Photos() {
     const imageFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
     if (!imageFiles.length) return;
     const previews = await Promise.all(
-      imageFiles.map(async f => ({ file: f, preview: await compressImage(f), caption: '' }))
+      imageFiles.map(async f => {
+        const blob = await compressImage(f);
+        return { file: f, blob, preview: URL.createObjectURL(blob), caption: '' };
+      })
     );
     setPendingFiles(previews);
     setShowCaptionModal(true);
+  }
+
+  // Revoke object URLs to release memory once the modal is dismissed
+  function clearPending() {
+    pendingFiles.forEach(pf => {
+      if (pf.preview?.startsWith('blob:')) {
+        try { URL.revokeObjectURL(pf.preview); } catch { /* ignore */ }
+      }
+    });
+    setPendingFiles([]);
   }
 
   // Commit uploads — uses Supabase Storage when configured, else stores base64
@@ -86,8 +115,7 @@ export default function Photos() {
           // Upload to Supabase Storage — never fall back to base64 in DB mode
           // (base64 in the trip JSON would exceed Supabase row/request limits)
           try {
-            const res = await fetch(pf.preview);
-            const blob = await res.blob();
+            const blob = pf.blob;
             const safeName = pf.file.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 80);
             const path = `${activeTrip.id}/${Date.now()}-${Math.random().toString(36).slice(2, 6)}-${safeName}`;
             const { data: uploadData, error } = await supabase.storage
@@ -121,8 +149,9 @@ export default function Photos() {
             continue;
           }
         } else {
-          // Demo/local mode — safe to use base64 since it only goes to localStorage
-          url = pf.preview;
+          // Demo/local mode — convert blob to base64 so it survives a page
+          // refresh (object URLs don't outlive the JS runtime that made them).
+          url = await blobToDataUrl(pf.blob);
         }
 
         if (url) {
@@ -147,7 +176,7 @@ export default function Photos() {
         lastError = err.message || 'Upload failed unexpectedly';
       }
     } finally {
-      setPendingFiles([]);
+      clearPending();
       setUploading(false);
       if (lastError && successCount < pendingFiles.length) {
         setUploadError(
@@ -406,14 +435,14 @@ export default function Photos() {
 
       {/* Caption modal for pending uploads */}
       {showCaptionModal && pendingFiles.length > 0 && (
-        <div className="modal-overlay" onClick={() => { setShowCaptionModal(false); setPendingFiles([]); }}>
+        <div className="modal-overlay" onClick={() => { setShowCaptionModal(false); clearPending(); }}>
           <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 520 }}>
             <div className="modal-header">
               <h2 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <Camera size={18} style={{ color: 'var(--brand)' }} />
                 Add {pendingFiles.length} Photo{pendingFiles.length !== 1 ? 's' : ''}
               </h2>
-              <button className="btn-ghost" onClick={() => { setShowCaptionModal(false); setPendingFiles([]); }} style={{ padding: 4 }}>
+              <button className="btn-ghost" onClick={() => { setShowCaptionModal(false); clearPending(); }} style={{ padding: 4 }}>
                 <span style={{ fontSize: 18 }}>&times;</span>
               </button>
             </div>
@@ -438,7 +467,13 @@ export default function Photos() {
                     />
                   </div>
                   <button
-                    onClick={() => setPendingFiles(prev => prev.filter((_, j) => j !== i))}
+                    onClick={() => setPendingFiles(prev => {
+                      const target = prev[i];
+                      if (target?.preview?.startsWith('blob:')) {
+                        try { URL.revokeObjectURL(target.preview); } catch { /* ignore */ }
+                      }
+                      return prev.filter((_, j) => j !== i);
+                    })}
                     style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', padding: 4, flexShrink: 0 }}
                   >
                     <X size={14} />
@@ -447,7 +482,7 @@ export default function Photos() {
               ))}
             </div>
             <div className="modal-footer">
-              <button className="btn btn-secondary" onClick={() => { setShowCaptionModal(false); setPendingFiles([]); }}>Cancel</button>
+              <button className="btn btn-secondary" onClick={() => { setShowCaptionModal(false); clearPending(); }}>Cancel</button>
               <button className="btn btn-primary" onClick={commitUpload} disabled={pendingFiles.length === 0}>
                 <Upload size={14} /> Upload {pendingFiles.length} Photo{pendingFiles.length !== 1 ? 's' : ''}
               </button>

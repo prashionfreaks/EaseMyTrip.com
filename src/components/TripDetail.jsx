@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useRef, lazy, Suspense } from 'react';
 import { useTrips } from '../context/TripContext';
 import {
   MessageCircle, Vote, Wallet, CalendarRange, Map,
-  Route, Activity, ShieldAlert, MapPin, Calendar,
+  Route, ShieldAlert, MapPin, Calendar,
   UserPlus, Users, Clock, CheckCircle2, X, Globe, Camera, Trash2,
   MoreHorizontal,
 } from 'lucide-react';
@@ -16,7 +16,6 @@ const Budget       = lazy(() => import('../pages/Budget'));
 const CalendarPage = lazy(() => import('../pages/CalendarPage'));
 const Itinerary    = lazy(() => import('../pages/Itinerary'));
 const Routes       = lazy(() => import('../pages/Routes'));
-const ActivityFeed = lazy(() => import('../pages/ActivityFeed'));
 const Contingency  = lazy(() => import('../pages/Contingency'));
 const About        = lazy(() => import('../pages/About'));
 const Photos       = lazy(() => import('../pages/Photos'));
@@ -99,7 +98,6 @@ export default function TripDetail({ onInvite, defaultTab = 'chat' }) {
       case 'photos':     return <Photos />;
       case 'about':      return <About />;
       case 'members':    return <Members />;
-      case 'activity':  return <ActivityFeed />;
       case 'plans':     return <Contingency />;
       default:          return null;
     }

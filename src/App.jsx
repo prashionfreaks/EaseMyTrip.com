@@ -7,7 +7,7 @@ import Dashboard from './pages/Dashboard';
 import LandingPage from './pages/LandingPage';
 import {
   Compass, LayoutDashboard, Vote, Wallet, Map, MoreHorizontal, MessageCircle,
-  LogOut, X as XIcon, Route as RouteIcon, Camera, Globe, Activity as ActivityIcon,
+  LogOut, X as XIcon, Route as RouteIcon, Camera, Globe,
   CalendarRange, ShieldAlert, Users,
 } from 'lucide-react';
 import './App.css';
@@ -17,7 +17,6 @@ const PlanAndPolls = lazy(() => import('./pages/PlanAndPolls'));
 const Budget       = lazy(() => import('./pages/Budget'));
 const Itinerary    = lazy(() => import('./pages/Itinerary'));
 const RoutesPage   = lazy(() => import('./pages/Routes'));
-const ActivityFeed = lazy(() => import('./pages/ActivityFeed'));
 const Contingency  = lazy(() => import('./pages/Contingency'));
 const CalendarPage = lazy(() => import('./pages/CalendarPage'));
 const ChatPage     = lazy(() => import('./pages/ChatPage'));
@@ -33,7 +32,6 @@ const PATH_TO_PAGE = {
   '/budget':      'budget',
   '/itinerary':   'itinerary',
   '/routes':      'routes',
-  '/activity':    'activity',
   '/contingency': 'contingency',
   '/calendar':    'calendar',
   '/chat':        'chat',
@@ -223,7 +221,6 @@ export default function App() {
             <Route path="/budget"      element={<Budget />} />
             <Route path="/itinerary"   element={<Itinerary />} />
             <Route path="/routes"      element={<RoutesPage />} />
-            <Route path="/activity"    element={<ActivityFeed />} />
             <Route path="/contingency" element={<Contingency />} />
             <Route path="/calendar"    element={<CalendarPage />} />
             <Route path="/chat"        element={<ChatPage />} />
@@ -326,7 +323,6 @@ export default function App() {
                   { id: 'photos',   label: 'Photos',   Icon: Camera },
                   { id: 'members',  label: 'Members',  Icon: Users },
                   { id: 'about',    label: 'About',    Icon: Globe },
-                  { id: 'activity', label: 'Activity', Icon: ActivityIcon },
                   { id: 'contingency', label: 'Plans', Icon: ShieldAlert },
                 ].map(({ id, label, Icon }) => (
                   <button
