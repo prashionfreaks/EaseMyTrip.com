@@ -4,14 +4,14 @@ import {
   MessageCircle, Vote, Wallet, CalendarRange, Map,
   Route, Activity, ShieldAlert, MapPin, Calendar,
   UserPlus, Users, Clock, CheckCircle2, X, Globe, Camera, Trash2,
-  MoreHorizontal, ListChecks,
+  MoreHorizontal,
 } from 'lucide-react';
 
 import { format, parseISO } from 'date-fns';
 
 // Lazy-load tab content so each trip page lives in its own chunk.
 const ChatPage     = lazy(() => import('../pages/ChatPage'));
-const Decisions    = lazy(() => import('../pages/Decisions'));
+const PlanAndPolls = lazy(() => import('../pages/PlanAndPolls'));
 const Budget       = lazy(() => import('../pages/Budget'));
 const CalendarPage = lazy(() => import('../pages/CalendarPage'));
 const Itinerary    = lazy(() => import('../pages/Itinerary'));
@@ -20,7 +20,6 @@ const ActivityFeed = lazy(() => import('../pages/ActivityFeed'));
 const Contingency  = lazy(() => import('../pages/Contingency'));
 const About        = lazy(() => import('../pages/About'));
 const Photos       = lazy(() => import('../pages/Photos'));
-const Checklist    = lazy(() => import('../pages/Checklist'));
 const Members      = lazy(() => import('../pages/Members'));
 
 function TabFallback() {
@@ -92,7 +91,7 @@ export default function TripDetail({ onInvite, defaultTab = 'chat' }) {
   function renderContent() {
     switch (activeTab) {
       case 'chat':      return <div className="trip-workspace-chat"><ChatPage /></div>;
-      case 'polls':     return <Decisions />;
+      case 'polls':     return <PlanAndPolls />;
       case 'budget':    return <Budget />;
       case 'calendar':  return <CalendarPage />;
       case 'itinerary': return <Itinerary />;
@@ -100,7 +99,6 @@ export default function TripDetail({ onInvite, defaultTab = 'chat' }) {
       case 'photos':     return <Photos />;
       case 'about':      return <About />;
       case 'members':    return <Members />;
-      case 'checklist':  return <Checklist />;
       case 'activity':  return <ActivityFeed />;
       case 'plans':     return <Contingency />;
       default:          return null;
@@ -256,6 +254,14 @@ export default function TripDetail({ onInvite, defaultTab = 'chat' }) {
           <button className="btn btn-sm" onClick={onInvite}
             style={{ background: 'rgba(14,165,233,0.25)', color: '#38bdf8', border: '1px solid rgba(14,165,233,0.3)', flexShrink: 0, padding: '5px 10px' }}>
             <UserPlus size={13} />
+          </button>
+          {/* Delete trip */}
+          <button
+            onClick={async () => { if (deleting) return; if (!window.confirm(`Delete "${activeTrip.name}"?`)) return; setDeleting(true); await removeTrip(activeTrip.id); setDeleting(false); }}
+            disabled={deleting}
+            title="Delete trip"
+            style={{ width: 32, height: 32, borderRadius: 8, border: '1px solid rgba(248,113,113,0.3)', background: 'rgba(248,113,113,0.18)', color: '#fca5a5', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, cursor: deleting ? 'wait' : 'pointer' }}>
+            {deleting ? <div className="spinner spinner-sm" /> : <Trash2 size={14} />}
           </button>
         </div>
 

@@ -13,7 +13,7 @@ import {
 import './App.css';
 
 // Lazy-load everything that isn't the default route
-const Decisions    = lazy(() => import('./pages/Decisions'));
+const PlanAndPolls = lazy(() => import('./pages/PlanAndPolls'));
 const Budget       = lazy(() => import('./pages/Budget'));
 const Itinerary    = lazy(() => import('./pages/Itinerary'));
 const RoutesPage   = lazy(() => import('./pages/Routes'));
@@ -219,7 +219,7 @@ export default function App() {
         <Suspense fallback={<PageFallback />}>
           <Routes>
             <Route path="/"            element={<Dashboard />} />
-            <Route path="/decisions"   element={<Decisions />} />
+            <Route path="/decisions"   element={<PlanAndPolls />} />
             <Route path="/budget"      element={<Budget />} />
             <Route path="/itinerary"   element={<Itinerary />} />
             <Route path="/routes"      element={<RoutesPage />} />

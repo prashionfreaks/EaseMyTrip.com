@@ -81,12 +81,30 @@ export function AuthProvider({ children }) {
     setUser(null);
     try {
       if (isSupabaseConfigured) {
-        await supabase.auth.signOut({ scope: 'local' });
+        // Default (global) scope revokes the refresh token server-side so the
+        // session can't be resurrected from a lingering local copy.
+        await supabase.auth.signOut();
       }
     } catch (err) {
-      // Ignore lock errors — user is already signed out locally
+      // Ignore lock / network errors — the manual scrub below still runs
       console.warn('[auth] signOut cleanup:', err.message);
     }
+    // Belt-and-suspenders: the SDK sometimes leaves `sb-*` keys behind in
+    // PWA + sessionStorage setups, causing the next refresh to rehydrate the
+    // "signed-out" user. Nuke anything Supabase-ish from both storages.
+    try {
+      const scrub = (storage) => {
+        if (!storage) return;
+        const keys = [];
+        for (let i = 0; i < storage.length; i++) {
+          const k = storage.key(i);
+          if (k && (k.startsWith('sb-') || k.includes('supabase'))) keys.push(k);
+        }
+        keys.forEach(k => storage.removeItem(k));
+      };
+      scrub(window.sessionStorage);
+      scrub(window.localStorage);
+    } catch { /* ignore */ }
   }
 
   // ── Inactivity auto-logout ──

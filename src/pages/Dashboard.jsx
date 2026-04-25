@@ -1,72 +1,19 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useTrips } from '../context/TripContext';
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import Modal from '../components/Modal';
 import InviteModal from '../components/InviteModal';
 import NotificationPanel from '../components/NotificationPanel';
 import TripDetail from '../components/TripDetail';
 import {
   Plus, MapPin, Calendar, Vote, Wallet,
-  Clock, CheckCircle2, Trash2, Bell, Users, Globe, TrendingUp,
-  ArrowRight, Sparkles, Map,
+  Clock, CheckCircle2, Trash2, Bell,
+  ArrowRight, Map,
 } from 'lucide-react';
 import { getDestinationCurrency } from '../lib/itinerary';
 import DestinationPicker from '../components/DestinationPicker';
 import { getDestinationImage } from '../lib/destinationImages';
 import { TripCardSkeleton, SkeletonStyles } from '../components/Skeleton';
 import { format, differenceInDays, parseISO } from 'date-fns';
-
-function InsightsFeatureCard({ emoji, title, desc, index }) {
-  const ref = useRef(null);
-  const [inView, setInView] = useState(false);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
-        setInView(true);
-        obs.disconnect();
-      }
-    }, { threshold: 0.18, rootMargin: '0px 0px -40px 0px' });
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-  return (
-    <div
-      ref={ref}
-      className={`dash-feature-card ${inView ? 'sweep-in' : ''}`}
-      style={{
-        padding: '16px 14px', borderRadius: 14,
-        background: 'rgba(255,255,255,0.03)',
-        border: '1px solid rgba(255,255,255,0.05)',
-        '--sweep-delay': `${index * 0.4}s`,
-        transitionDelay: `${index * 0.09}s`,
-      }}
-    >
-      <div className="feature-emoji dash-float-emoji" style={{ fontSize: 22, marginBottom: 8, animationDelay: `${index * 0.35}s` }}>{emoji}</div>
-      <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.85)', marginBottom: 4, letterSpacing: '-0.1px' }}>{title}</div>
-      <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', lineHeight: 1.5 }}>{desc}</div>
-    </div>
-  );
-}
-
-function CountUp({ target, prefix = '', suffix = '', decimals = 0, duration = 1600, style }) {
-  const [val, setVal] = useState(0);
-  useEffect(() => {
-    let raf;
-    const start = performance.now();
-    const tick = now => {
-      const p = Math.min(1, (now - start) / duration);
-      const eased = 1 - Math.pow(1 - p, 3);
-      setVal(target * eased);
-      if (p < 1) raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [target, duration]);
-  const shown = decimals > 0 ? val.toFixed(decimals) : Math.round(val).toLocaleString();
-  return <span style={style}>{prefix}{shown}{suffix}</span>;
-}
 
 function countOutstandingDues(trips, currentUserId) {
   let count = 0;
@@ -199,6 +146,10 @@ const DASH_STYLES = `
     opacity: 0;
     transition: opacity 0.2s ease, transform 0.2s ease;
     transform: scale(0.85);
+  }
+  /* Touch devices can't hover — keep delete visible so trips can still be removed */
+  @media (hover: none), (pointer: coarse) {
+    .dash-card .card-delete { opacity: 1; transform: scale(1); }
   }
   .dash-card .card-arrow {
     opacity: 0;
@@ -404,15 +355,7 @@ export default function Dashboard() {
   const [newTrip, setNewTrip] = useState({ name: '', destination: '', startDate: '', endDate: '', budget: '', currency: 'INR' });
   const [creating, setCreating] = useState(false);
   const [deleting, setDeleting] = useState(null);
-  const [platformStats, setPlatformStats] = useState(null);
   const dueCount = useMemo(() => countOutstandingDues(trips, currentUser?.id), [trips, currentUser?.id]);
-
-  useEffect(() => {
-    if (!isSupabaseConfigured) return;
-    supabase.rpc('get_platform_stats').then(({ data, error }) => {
-      if (data && !error) setPlatformStats(data);
-    }).catch(() => {});
-  }, []);
 
   async function handleCreate() {
     if (!newTrip.name.trim() || !newTrip.destination.trim()) return;
@@ -657,168 +600,6 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* ── Insights section ── */}
-          <div style={{
-            marginTop: 32, borderRadius: 24, overflow: 'hidden',
-            background: 'linear-gradient(145deg, #0c1524 0%, #162033 40%, #0f1b2d 100%)',
-            padding: '36px 28px', position: 'relative',
-            animation: 'dashFadeUp 0.6s ease 0.35s both',
-          }}>
-            {/* Autumn ambient glows — amber, rust, harvest gold */}
-            <div className="dash-orb-a" style={{
-              position: 'absolute', top: -80, right: -60, width: 240, height: 240,
-              background: 'radial-gradient(circle, rgba(251,146,60,0.14) 0%, transparent 65%)',
-              borderRadius: '50%', pointerEvents: 'none',
-            }} />
-            <div className="dash-orb-b" style={{
-              position: 'absolute', bottom: -60, left: -40, width: 200, height: 200,
-              background: 'radial-gradient(circle, rgba(220,38,38,0.10) 0%, transparent 65%)',
-              borderRadius: '50%', pointerEvents: 'none',
-            }} />
-            <div className="dash-orb-c" style={{
-              position: 'absolute', top: '40%', left: '50%', width: 300, height: 300,
-              background: 'radial-gradient(circle, rgba(251,191,36,0.06) 0%, transparent 60%)',
-              borderRadius: '50%', pointerEvents: 'none',
-            }} />
-
-            {/* Drifting autumn leaves */}
-            {[
-              { emoji: '\u{1F342}', left: '6%',  delay: '0s',    duration: '16s', drift: '40px',  spin: '520deg', size: 22, opacity: 0.55 },
-              { emoji: '\u{1F341}', left: '18%', delay: '3.2s',  duration: '18s', drift: '-30px', spin: '-480deg', size: 18, opacity: 0.45 },
-              { emoji: '\u{1F342}', left: '32%', delay: '6.5s',  duration: '14s', drift: '55px',  spin: '640deg', size: 16, opacity: 0.5 },
-              { emoji: '\u{1F33E}', left: '44%', delay: '1.6s',  duration: '20s', drift: '-20px', spin: '-540deg', size: 20, opacity: 0.4 },
-              { emoji: '\u{1F341}', left: '58%', delay: '9s',    duration: '15s', drift: '35px',  spin: '500deg', size: 24, opacity: 0.55 },
-              { emoji: '\u{1F342}', left: '71%', delay: '4.8s',  duration: '17s', drift: '-45px', spin: '-600deg', size: 19, opacity: 0.5 },
-              { emoji: '\u{1F33E}', left: '84%', delay: '11.5s', duration: '19s', drift: '25px',  spin: '420deg', size: 17, opacity: 0.4 },
-              { emoji: '\u{1F341}', left: '94%', delay: '7.2s',  duration: '16s', drift: '-35px', spin: '-560deg', size: 21, opacity: 0.55 },
-            ].map((l, i) => (
-              <span key={i} className="dash-leaf" style={{
-                left: l.left,
-                fontSize: l.size,
-                '--leaf-delay': l.delay,
-                '--leaf-duration': l.duration,
-                '--leaf-drift': l.drift,
-                '--leaf-spin': l.spin,
-                '--leaf-opacity': l.opacity,
-              }}>
-                {l.emoji}
-              </span>
-            ))}
-
-            <div style={{ position: 'relative', zIndex: 1 }}>
-              {/* Section header */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
-                <div style={{
-                  width: 40, height: 40, borderRadius: 12,
-                  background: 'linear-gradient(135deg, rgba(99,102,241,0.3), rgba(139,92,246,0.3))',
-                  border: '1px solid rgba(99,102,241,0.2)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  backdropFilter: 'blur(8px)',
-                }}>
-                  <Sparkles size={18} color="#a78bfa" className="dash-sparkle-rock" />
-                </div>
-                <div>
-                  <h2 className="dash-insights-title" style={{ fontSize: 18, fontWeight: 800, letterSpacing: '-0.4px' }}>
-                    LetsWander Insights
-                  </h2>
-                  <p style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.35)', marginTop: 2, fontWeight: 500 }}>
-                    What the community is up to
-                  </p>
-                </div>
-              </div>
-
-              {/* Stats */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginBottom: 24 }}>
-                {[
-                  { value: platformStats?.trips || 1247, label: 'Trips Created', icon: Globe, color: '#60a5fa', glow: 'rgba(96,165,250,0.15)' },
-                  { value: platformStats?.users || 3891, label: 'Wanderers', icon: Users, color: '#34d399', glow: 'rgba(52,211,153,0.15)' },
-                  { value: (platformStats?.topDestinations || [{ destination: 'Goa' }])[0]?.destination || 'Goa', label: '#1 Destination', icon: MapPin, color: '#fbbf24', glow: 'rgba(251,191,36,0.15)', isText: true },
-                ].map((s, i) => (
-                  <div key={i} className="dash-stat-card" style={{
-                    background: 'rgba(255,255,255,0.04)',
-                    borderRadius: 16, padding: '22px 16px',
-                    border: '1px solid rgba(255,255,255,0.06)',
-                    textAlign: 'center', backdropFilter: 'blur(8px)',
-                  }}>
-                    <div className="dash-float-icon" style={{
-                      width: 36, height: 36, borderRadius: 10,
-                      background: s.glow, margin: '0 auto 10px',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      animationDelay: `${i * 0.6}s`,
-                    }}>
-                      <s.icon size={17} style={{ color: s.color }} />
-                    </div>
-                    <div style={{
-                      fontSize: s.isText ? 20 : 30, fontWeight: 900, color: 'white',
-                      letterSpacing: '-0.5px', lineHeight: 1.1,
-                    }}>
-                      {s.isText
-                        ? s.value
-                        : <CountUp target={s.value} duration={1600 + i * 200} />}
-                    </div>
-                    <div style={{ fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.4)', marginTop: 6, letterSpacing: '0.3px' }}>
-                      {s.label}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Activity pills */}
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 28 }}>
-                {[
-                  { target: 12400, suffix: '+',  label: 'Messages',   color: '#818cf8' },
-                  { target: 8720,                label: 'Polls voted', color: '#34d399' },
-                  { target: 2.4, prefix: '₹', suffix: 'Cr', decimals: 1, label: 'Tracked', color: '#fbbf24' },
-                  { target: 94,  suffix: '%', label: 'Settled up',  color: '#f472b6' },
-                ].map((item, i) => (
-                  <div key={i} className="dash-pill" style={{
-                    display: 'flex', alignItems: 'center', gap: 8,
-                    padding: '8px 16px', borderRadius: 999,
-                    background: 'rgba(255,255,255,0.05)',
-                    border: '1px solid rgba(255,255,255,0.07)',
-                  }}>
-                    <CountUp
-                      target={item.target}
-                      prefix={item.prefix || ''}
-                      suffix={item.suffix || ''}
-                      decimals={item.decimals || 0}
-                      duration={1400 + i * 150}
-                      style={{ fontSize: 13.5, fontWeight: 800, color: item.color }}
-                    />
-                    <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', fontWeight: 500 }}>{item.label}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Divider */}
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18,
-              }}>
-                <div style={{ height: 1, flex: 1, background: 'rgba(255,255,255,0.06)' }} />
-                <span style={{
-                  fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.25)',
-                  textTransform: 'uppercase', letterSpacing: '1.2px',
-                }}>
-                  Features
-                </span>
-                <div style={{ height: 1, flex: 1, background: 'rgba(255,255,255,0.06)' }} />
-              </div>
-
-              {/* Feature grid */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 10 }}>
-                {[
-                  { emoji: '\u{1F5F3}\u{FE0F}', title: 'Group Polls', desc: 'Vote and decide together' },
-                  { emoji: '\u{1F4B0}', title: 'Split Expenses', desc: 'Track every rupee spent' },
-                  { emoji: '\u{1F4CB}', title: 'Itinerary', desc: 'Day-by-day trip plans' },
-                  { emoji: '\u{1F4AC}', title: 'Trip Chat', desc: 'All conversations, one place' },
-                  { emoji: '\u{1F697}', title: 'Route Planner', desc: 'Compare transport options' },
-                  { emoji: '\u{1F4F8}', title: 'Photo Wall', desc: 'Shared trip memories' },
-                ].map((f, i) => (
-                  <InsightsFeatureCard key={i} index={i} emoji={f.emoji} title={f.title} desc={f.desc} />
-                ))}
-              </div>
-            </div>
-          </div>
         </div>}
       </div>
 
