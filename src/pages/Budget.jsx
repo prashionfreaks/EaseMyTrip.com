@@ -5,10 +5,13 @@ import { getMemberById } from '../data/sampleData';
 import {
   Plus, Wallet, Users, ArrowRight,
   Plane, Hotel, UtensilsCrossed, Ticket, ShoppingBag, Receipt,
-  PieChart, CheckCircle2, AlertCircle,
+  PieChart, CheckCircle2, AlertCircle, Pencil, Trash2,
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
-import { getDestinationCurrency } from '../lib/itinerary';
+import { getTripCurrencySymbol } from '../lib/itinerary';
+
+const initial = '?';
+const safeInitial = (s) => (s && s.length ? s[0] : initial);
 
 const categories = [
   { id: 'transport', label: 'Transport', icon: Plane, color: 'var(--brand)' },
@@ -20,8 +23,9 @@ const categories = [
 ];
 
 export default function Budget() {
-  const { activeTrip, addExpense, markSettlementPaid, updateTrip, currentUser } = useTrips();
+  const { activeTrip, addExpense, updateExpense, deleteExpense, markSettlementPaid, updateTrip, currentUser } = useTrips();
   const [showAdd, setShowAdd] = useState(false);
+  const [editingExpenseId, setEditingExpenseId] = useState(null); // id of expense being edited (or null)
   const [view, setView] = useState('overview');
   const [editingBudget, setEditingBudget] = useState(false);
   const [budgetInput, setBudgetInput] = useState('');
@@ -48,7 +52,7 @@ export default function Budget() {
   const budget = activeTrip.budget || { total: 0, spent: 0, currency: 'INR' };
   const expenses = activeTrip.expenses || [];
   const members = activeTrip.members || [];
-  const sym = getDestinationCurrency(activeTrip.destination) === 'INR' ? '₹' : '$';
+  const sym = getTripCurrencySymbol(activeTrip);
   const totalSpent = expenses.reduce((sum, e) => sum + e.amount, 0);
   const remaining = budget.total - totalSpent;
   const pct = budget.total > 0 ? (totalSpent / budget.total) * 100 : 0;
@@ -106,16 +110,47 @@ export default function Budget() {
     return breakdown;
   }, [expenses]);
 
-  function handleAddExpense() {
-    if (!newExpense.title || !newExpense.amount) return;
-    const splitAmong = newExpense.splitAmong.length > 0 ? newExpense.splitAmong : members.map(m => m.id);
-    addExpense(activeTrip.id, {
-      ...newExpense,
-      amount: Number(newExpense.amount),
-      splitAmong,
+  function resetExpenseForm() {
+    setNewExpense({
+      title: '', amount: '', category: 'transport',
+      paidBy: currentUser?.id || '', splitAmong: [],
+      date: new Date().toISOString().split('T')[0],
     });
-    setNewExpense({ title: '', amount: '', category: 'transport', paidBy: currentUser?.id || '', splitAmong: [], date: new Date().toISOString().split('T')[0] });
+    setEditingExpenseId(null);
+  }
+
+  function openEditExpense(exp) {
+    setNewExpense({
+      title: exp.title || '',
+      amount: String(exp.amount ?? ''),
+      category: exp.category || 'transport',
+      paidBy: exp.paidBy || currentUser?.id || '',
+      splitAmong: Array.isArray(exp.splitAmong) ? [...exp.splitAmong] : [],
+      date: exp.date || new Date().toISOString().split('T')[0],
+    });
+    setEditingExpenseId(exp.id);
+    setShowAdd(true);
+  }
+
+  function handleSaveExpense() {
+    if (!newExpense.title || !newExpense.amount) return;
+    const amount = Number(newExpense.amount);
+    if (!Number.isFinite(amount) || amount <= 0) return;
+    const splitAmong = newExpense.splitAmong.length > 0 ? newExpense.splitAmong : members.map(m => m.id);
+    const payload = { ...newExpense, amount, splitAmong };
+
+    if (editingExpenseId) {
+      updateExpense(activeTrip.id, editingExpenseId, payload);
+    } else {
+      addExpense(activeTrip.id, payload);
+    }
+    resetExpenseForm();
     setShowAdd(false);
+  }
+
+  function handleDeleteExpense(exp) {
+    if (!window.confirm(`Delete "${exp.title}"? This can't be undone.`)) return;
+    deleteExpense(activeTrip.id, exp.id);
   }
 
   return (
@@ -201,7 +236,7 @@ export default function Budget() {
                     {sym}{remaining.toLocaleString()}
                   </p>
                   <p style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
-                    {sym}{(remaining / members.length).toLocaleString()} per person left
+                    {sym}{members.length > 0 ? (remaining / members.length).toLocaleString() : 0} per person left
                   </p>
                 </div>
               </div>
@@ -215,7 +250,7 @@ export default function Budget() {
               <div className="card-body">
                 {categories.map(cat => {
                   const amount = categoryBreakdown[cat.id] || 0;
-                  const catPct = budget.spent > 0 ? (amount / budget.spent) * 100 : 0;
+                  const catPct = totalSpent > 0 ? (amount / totalSpent) * 100 : 0;
                   const Icon = cat.icon;
                   if (amount === 0) return null;
                   return (
@@ -404,6 +439,32 @@ export default function Budget() {
                         </p>
                       </div>
                       <span style={{ fontWeight: 700, fontSize: 15 }}>{sym}{exp.amount.toLocaleString()}</span>
+                      <div style={{ display: 'flex', gap: 4 }}>
+                        <button
+                          onClick={() => openEditExpense(exp)}
+                          title="Edit expense"
+                          style={{
+                            width: 30, height: 30, borderRadius: 8, border: '1px solid var(--border)',
+                            background: 'var(--bg-secondary)', color: 'var(--text-secondary)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <Pencil size={13} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteExpense(exp)}
+                          title="Delete expense"
+                          style={{
+                            width: 30, height: 30, borderRadius: 8, border: '1px solid rgba(220,38,38,0.25)',
+                            background: 'rgba(254,242,242,1)', color: '#dc2626',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
                     </div>
                   );
                 })
@@ -428,9 +489,14 @@ export default function Budget() {
                 settlements.map((s, i) => {
                   const from = getMemberById(activeTrip, s.from);
                   const to = getMemberById(activeTrip, s.to);
-                  const isPaid = (activeTrip.paidSettlements || []).some(
-                    p => p.from === s.from && p.to === s.to
-                  );
+                  // Sum of payments recorded for this exact (from→to) pair.
+                  // Older entries with no `amount` (pre-fix) are counted as
+                  // covering whatever debt existed when they were marked, so
+                  // we treat them as fully settling the pair.
+                  const payments = (activeTrip.paidSettlements || []).filter(p => p.from === s.from && p.to === s.to);
+                  const hasLegacyPayment = payments.some(p => p.amount == null);
+                  const paidAmount = payments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+                  const isPaid = hasLegacyPayment || paidAmount + 0.01 >= s.amount;
                   return (
                     <div key={i} style={{
                       display: 'flex', alignItems: 'center', gap: 12,
@@ -438,11 +504,11 @@ export default function Budget() {
                       borderBottom: i < settlements.length - 1 ? '1px solid var(--border-light)' : 'none',
                       opacity: isPaid ? 0.55 : 1,
                     }}>
-                      <div className="user-avatar" style={{ background: from?.color }}>{from?.name[0]}</div>
-                      <span style={{ fontWeight: 500, fontSize: 14, textDecoration: isPaid ? 'line-through' : 'none' }}>{from?.name}</span>
+                      <div className="user-avatar" style={{ background: from?.color }}>{safeInitial(from?.name)}</div>
+                      <span style={{ fontWeight: 500, fontSize: 14, textDecoration: isPaid ? 'line-through' : 'none' }}>{from?.name || 'Removed member'}</span>
                       <ArrowRight size={16} style={{ color: 'var(--text-tertiary)' }} />
-                      <div className="user-avatar" style={{ background: to?.color }}>{to?.name[0]}</div>
-                      <span style={{ fontWeight: 500, fontSize: 14, textDecoration: isPaid ? 'line-through' : 'none' }}>{to?.name}</span>
+                      <div className="user-avatar" style={{ background: to?.color }}>{safeInitial(to?.name)}</div>
+                      <span style={{ fontWeight: 500, fontSize: 14, textDecoration: isPaid ? 'line-through' : 'none' }}>{to?.name || 'Removed member'}</span>
                       <span style={{
                         fontWeight: 700, fontSize: 16,
                         color: isPaid ? 'var(--success)' : 'var(--danger)',
@@ -451,7 +517,7 @@ export default function Budget() {
                         {sym}{s.amount.toFixed(0)}
                       </span>
                       <button
-                        onClick={() => !isPaid && markSettlementPaid(activeTrip.id, s.from, s.to)}
+                        onClick={() => !isPaid && markSettlementPaid(activeTrip.id, s.from, s.to, s.amount)}
                         style={{
                           marginLeft: 'auto',
                           display: 'flex', alignItems: 'center', gap: 5,
@@ -477,15 +543,17 @@ export default function Budget() {
         )}
       </div>
 
-      {/* Add expense modal */}
+      {/* Add / Edit expense modal */}
       {showAdd && (
         <Modal
-          title="Add Expense"
-          onClose={() => setShowAdd(false)}
+          title={editingExpenseId ? 'Edit Expense' : 'Add Expense'}
+          onClose={() => { setShowAdd(false); resetExpenseForm(); }}
           footer={
             <>
-              <button className="btn btn-secondary" onClick={() => setShowAdd(false)}>Cancel</button>
-              <button className="btn btn-primary" onClick={handleAddExpense}>Add Expense</button>
+              <button className="btn btn-secondary" onClick={() => { setShowAdd(false); resetExpenseForm(); }}>Cancel</button>
+              <button className="btn btn-primary" onClick={handleSaveExpense}>
+                {editingExpenseId ? 'Save Changes' : 'Add Expense'}
+              </button>
             </>
           }
         >
@@ -496,7 +564,7 @@ export default function Budget() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div className="form-group">
-              <label className="form-label">Amount ({getDestinationCurrency(activeTrip.destination)})</label>
+              <label className="form-label">Amount ({activeTrip.budget?.currency || 'USD'})</label>
               <input className="form-input" type="number" placeholder="0.00" value={newExpense.amount}
                 onChange={e => setNewExpense(p => ({ ...p, amount: e.target.value }))} />
             </div>

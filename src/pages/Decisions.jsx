@@ -29,7 +29,21 @@ export default function Decisions() {
     );
   }
 
-  const polls = (activeTrip.polls || []).filter(p => filter === 'all' || p.status === filter);
+  // Effective status: a poll past its deadline is treated as closed even if
+  // it was never explicitly closed. Keeps filters/votes honest.
+  const effectiveStatus = (p) => {
+    if (p.status === 'closed') return 'closed';
+    if (p.deadline && isPast(parseISO(p.deadline))) return 'closed';
+    return 'active';
+  };
+
+  const allPolls = (activeTrip.polls || []);
+  const polls = allPolls.filter(p => filter === 'all' || effectiveStatus(p) === filter);
+  const counts = {
+    all: allPolls.length,
+    active: allPolls.filter(p => effectiveStatus(p) === 'active').length,
+    closed: allPolls.filter(p => effectiveStatus(p) === 'closed').length,
+  };
 
   function handleCreate() {
     const validOptions = newPoll.options.filter(o => o.trim());
@@ -66,9 +80,9 @@ export default function Decisions() {
       {/* Filters */}
       <div className="tab-nav">
         {[
-          { id: 'all', label: 'All', count: (activeTrip.polls || []).length },
-          { id: 'active', label: 'Active', count: (activeTrip.polls || []).filter(p => p.status === 'active').length },
-          { id: 'closed', label: 'Closed', count: (activeTrip.polls || []).filter(p => p.status === 'closed').length },
+          { id: 'all', label: 'All', count: counts.all },
+          { id: 'active', label: 'Active', count: counts.active },
+          { id: 'closed', label: 'Closed', count: counts.closed },
         ].map(tab => (
           <button
             key={tab.id}
@@ -171,8 +185,10 @@ function PollCard({ poll, trip, currentUser, onVote, onClose }) {
   const totalVoters = (trip.members || []).length;
   const totalVotes = new Set((poll.options || []).flatMap(o => o.votes || [])).size;
   const maxVotes = Math.max(...(poll.options || []).map(o => (o.votes || []).length), 1);
-  const isActive = poll.status === 'active';
   const expired = poll.deadline && isPast(parseISO(poll.deadline));
+  // A poll past its deadline is effectively closed — vote action should be
+  // disabled, even if the explicit status is still "active".
+  const isActive = poll.status === 'active' && !expired;
 
   return (
     <div className="card">

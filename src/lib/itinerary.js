@@ -780,6 +780,23 @@ export function getDestinationCurrency(destination) {
   return 'USD';
 }
 
+const CURRENCY_SYMBOLS = {
+  INR: '₹', USD: '$', EUR: '€', GBP: '£',
+  JPY: '¥', SGD: 'S$', AED: 'د.إ',
+};
+
+/** Return the symbol for a currency code (fallback: the code itself, then $). */
+export function getCurrencySymbol(code) {
+  if (!code) return '$';
+  return CURRENCY_SYMBOLS[code] || code;
+}
+
+/** Resolve the right symbol for a trip — prefers the currency the user picked
+ *  at trip creation, falls back to destination heuristic for older trips. */
+export function getTripCurrencySymbol(trip) {
+  return getCurrencySymbol(trip?.budget?.currency || getDestinationCurrency(trip?.destination));
+}
+
 function matchDestination(destination) {
   const lower = destination.toLowerCase();
   for (const [key, val] of Object.entries(DEST_ALIASES)) {

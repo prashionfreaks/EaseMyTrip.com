@@ -9,7 +9,7 @@ import {
   Clock, CheckCircle2, Trash2, Bell,
   ArrowRight, Map,
 } from 'lucide-react';
-import { getDestinationCurrency } from '../lib/itinerary';
+import { getTripCurrencySymbol } from '../lib/itinerary';
 import DestinationPicker from '../components/DestinationPicker';
 import { getDestinationImage } from '../lib/destinationImages';
 import { TripCardSkeleton, SkeletonStyles } from '../components/Skeleton';
@@ -690,7 +690,7 @@ function TripCard({ trip, index, isActive, onSelect, onDelete, isDeleting }) {
   const totalSpent = (trip.expenses || []).reduce((sum, e) => sum + e.amount, 0);
   const budgetTotal = trip.budget?.total || 0;
   const budgetPct = budgetTotal > 0 ? Math.min(100, (totalSpent / budgetTotal) * 100) : 0;
-  const sym = getDestinationCurrency(trip.destination) === 'INR' ? '₹' : '$';
+  const sym = getTripCurrencySymbol(trip);
 
   return (
     <div

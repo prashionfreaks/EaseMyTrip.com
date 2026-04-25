@@ -289,7 +289,7 @@ export default function NotificationPanel({ onClose }) {
                         amountColor="#dc2626"
                         action={
                           <button
-                            onClick={() => markSettlementPaid(due.trip.id, due.from, due.to)}
+                            onClick={() => markSettlementPaid(due.trip.id, due.from, due.to, due.amount)}
                             className="btn btn-sm"
                             style={{ background: '#dcfce7', color: '#16a34a', border: 'none', fontSize: 11, padding: '4px 10px' }}
                           >
@@ -344,7 +344,7 @@ export default function NotificationPanel({ onClose }) {
                               {sent ? 'Sent!' : 'Send Reminder'}
                             </button>
                             <button
-                              onClick={() => markSettlementPaid(due.trip.id, due.from, due.to)}
+                              onClick={() => markSettlementPaid(due.trip.id, due.from, due.to, due.amount)}
                               className="btn btn-sm"
                               style={{ background: '#dcfce7', color: '#16a34a', border: 'none', fontSize: 11, padding: '4px 10px' }}
                             >

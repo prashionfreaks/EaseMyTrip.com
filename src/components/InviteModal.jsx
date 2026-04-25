@@ -4,7 +4,7 @@ import Modal from './Modal';
 import { Copy, Users, Check, X, Link2, UserPlus, Crown, MessageCircle } from 'lucide-react';
 
 export default function InviteModal({ onClose }) {
-  const { activeTrip, updateTrip, currentUser } = useTrips();
+  const { activeTrip, updateTrip, removeMember, currentUser } = useTrips();
   const [copied, setCopied] = useState(false);
   const [tab, setTab] = useState('invite');
 
@@ -28,11 +28,10 @@ export default function InviteModal({ onClose }) {
     setTimeout(() => setCopied(false), 2500);
   }
 
-  function removeMember(memberId) {
-    updateTrip(activeTrip.id, trip => ({
-      ...trip,
-      members: (trip.members || []).filter(m => m.id !== memberId),
-    }));
+  async function handleRemove(memberId) {
+    const member = (activeTrip.members || []).find(m => m.id === memberId);
+    if (!window.confirm(`Remove ${member?.name || 'this member'} from the trip?`)) return;
+    await removeMember(activeTrip.id, memberId);
   }
 
   function setRole(memberId, role) {
@@ -165,7 +164,7 @@ export default function InviteModal({ onClose }) {
                 Organizers
               </p>
               {organizers.map(m => (
-                <MemberRow key={m.id} member={m} onSetRole={setRole} onRemove={removeMember} isOwner={m.id === currentUser?.id} />
+                <MemberRow key={m.id} member={m} onSetRole={setRole} onRemove={handleRemove} isOwner={m.id === currentUser?.id} />
               ))}
             </div>
           )}
@@ -176,7 +175,7 @@ export default function InviteModal({ onClose }) {
                 Members
               </p>
               {members.map(m => (
-                <MemberRow key={m.id} member={m} onSetRole={setRole} onRemove={removeMember} isOwner={m.id === currentUser?.id} />
+                <MemberRow key={m.id} member={m} onSetRole={setRole} onRemove={handleRemove} isOwner={m.id === currentUser?.id} />
               ))}
             </div>
           ) : (

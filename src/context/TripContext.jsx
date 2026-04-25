@@ -352,6 +352,25 @@ export function TripProvider({ children }) {
     }
   }, [dbUser]);
 
+  const removeMember = useCallback(async (tripId, userId) => {
+    // Drop the trip_members row first so the user's RLS access is revoked
+    // even if the JSON write later fails. updateTrip handles the JSON side.
+    if (isSupabaseConfigured) {
+      if (await ensureSession()) {
+        const { error } = await supabase
+          .from('trip_members')
+          .delete()
+          .eq('trip_id', tripId)
+          .eq('user_id', userId);
+        if (error) console.error('[removeMember] trip_members delete error:', error);
+      }
+    }
+    updateTrip(tripId, trip => ({
+      ...trip,
+      members: (trip.members || []).filter(m => m.id !== userId),
+    }));
+  }, [updateTrip]);
+
   const removeTrip = useCallback(async (tripId) => {
     if (isSupabaseConfigured) {
       if (!(await ensureSession())) return;
@@ -390,10 +409,25 @@ export function TripProvider({ children }) {
   }, [updateTrip]);
 
   const addExpense = useCallback((tripId, expense) => {
+    // budget.spent is intentionally NOT tracked here — it would drift on
+    // edit/delete. All "spent" totals are derived from expenses.reduce().
     updateTrip(tripId, trip => ({
       ...trip,
       expenses: [...(trip.expenses || []), { ...expense, id: 'e' + Date.now() }],
-      budget: { ...(trip.budget || {}), spent: ((trip.budget || {}).spent || 0) + expense.amount },
+    }));
+  }, [updateTrip]);
+
+  const updateExpense = useCallback((tripId, expenseId, patch) => {
+    updateTrip(tripId, trip => ({
+      ...trip,
+      expenses: (trip.expenses || []).map(e => e.id === expenseId ? { ...e, ...patch } : e),
+    }));
+  }, [updateTrip]);
+
+  const deleteExpense = useCallback((tripId, expenseId) => {
+    updateTrip(tripId, trip => ({
+      ...trip,
+      expenses: (trip.expenses || []).filter(e => e.id !== expenseId),
     }));
   }, [updateTrip]);
 
@@ -437,27 +471,42 @@ export function TripProvider({ children }) {
     }));
   }, [updateTrip]);
 
-  const markSettlementPaid = useCallback((tripId, from, to) => {
+  const markSettlementPaid = useCallback((tripId, from, to, amount) => {
     updateTrip(tripId, trip => ({
       ...trip,
-      paidSettlements: [...(trip.paidSettlements || []), { from, to, paidAt: new Date().toISOString() }],
+      paidSettlements: [
+        ...(trip.paidSettlements || []),
+        { from, to, amount: Number(amount) || 0, paidAt: new Date().toISOString() },
+      ],
+      // The creditor's reminder to the debtor is now obsolete; drop it.
+      dueReminders: (trip.dueReminders || []).filter(r =>
+        !(r.fromUserId === to && r.toUserId === from)
+      ),
     }));
   }, [updateTrip]);
 
   const sendDueReminder = useCallback((tripId, { fromUserId, toUserId, fromName, amount, currency }) => {
-    updateTrip(tripId, trip => ({
-      ...trip,
-      dueReminders: [
-        ...(trip.dueReminders || []),
-        {
-          id: 'dr' + Date.now() + Math.random().toString(36).slice(2, 6),
-          fromUserId, toUserId, fromName, amount,
-          currency: currency || trip.budget?.currency || 'INR',
-          sentAt: new Date().toISOString(),
-          seenAt: null,
-        },
-      ],
-    }));
+    updateTrip(tripId, trip => {
+      // De-dup: only one live reminder per (sender → recipient) pair.
+      // Re-clicking "Send Reminder" refreshes the existing entry instead of
+      // letting the array grow unbounded.
+      const others = (trip.dueReminders || []).filter(r =>
+        !(r.fromUserId === fromUserId && r.toUserId === toUserId)
+      );
+      return {
+        ...trip,
+        dueReminders: [
+          ...others,
+          {
+            id: 'dr' + Date.now() + Math.random().toString(36).slice(2, 6),
+            fromUserId, toUserId, fromName, amount,
+            currency: currency || trip.budget?.currency || 'INR',
+            sentAt: new Date().toISOString(),
+            seenAt: null,
+          },
+        ],
+      };
+    });
   }, [updateTrip]);
 
   const markRemindersSeen = useCallback((tripId, reminderIds) => {
@@ -578,15 +627,19 @@ export function TripProvider({ children }) {
 
   const value = useMemo(() => ({
     trips, activeTrip, activeTripId, currentUser, tripsLoaded,
-    setActiveTripId, updateTrip, addTrip, removeTrip,
-    vote, addPoll, addExpense, addItineraryItem, addContingency, markSettlementPaid,
+    setActiveTripId, updateTrip, addTrip, removeTrip, removeMember,
+    vote, addPoll,
+    addExpense, updateExpense, deleteExpense,
+    addItineraryItem, addContingency, markSettlementPaid,
     sendMessage, markChatRead, likeMessage, addPhoto, deletePhoto, joinTripViaInvite,
     addChecklistItem, toggleChecklistItem, deleteChecklistItem, updateChecklistItem,
     sendDueReminder, markRemindersSeen,
   }), [
     trips, activeTrip, activeTripId, currentUser, tripsLoaded,
-    updateTrip, addTrip, removeTrip,
-    vote, addPoll, addExpense, addItineraryItem, addContingency, markSettlementPaid,
+    updateTrip, addTrip, removeTrip, removeMember,
+    vote, addPoll,
+    addExpense, updateExpense, deleteExpense,
+    addItineraryItem, addContingency, markSettlementPaid,
     sendMessage, markChatRead, likeMessage, addPhoto, deletePhoto, joinTripViaInvite,
     addChecklistItem, toggleChecklistItem, deleteChecklistItem, updateChecklistItem,
     sendDueReminder, markRemindersSeen,

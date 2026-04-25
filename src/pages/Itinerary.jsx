@@ -6,13 +6,13 @@ import {
   ChevronDown, ChevronUp, DollarSign, StickyNote, Sparkles,
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
-import { generateItinerary, hasAIKey, getDestinationCurrency } from '../lib/itinerary';
+import { generateItinerary, hasAIKey, getTripCurrencySymbol } from '../lib/itinerary';
 
 const typeConfig = {
-  transport: { icon: Plane, color: 'var(--brand)', label: 'Transport' },
-  accommodation: { icon: Hotel, color: 'var(--purple)', label: 'Stay' },
-  activity: { icon: Camera, color: 'var(--teal)', label: 'Activity' },
-  food: { icon: UtensilsCrossed, color: 'var(--orange)', label: 'Food' },
+  transport:     { icon: Plane,           color: 'var(--brand)',  label: 'Transport',     badge: 'badge-blue' },
+  accommodation: { icon: Hotel,           color: 'var(--purple)', label: 'Stay',          badge: 'badge-purple' },
+  activity:      { icon: Camera,          color: 'var(--teal)',   label: 'Activity',      badge: 'badge-teal' },
+  food:          { icon: UtensilsCrossed, color: 'var(--orange)', label: 'Food',          badge: 'badge-orange' },
 };
 
 export default function Itinerary() {
@@ -66,7 +66,7 @@ if (!activeTrip) {
   }
 
   const { itinerary } = activeTrip;
-  const sym = getDestinationCurrency(activeTrip.destination) === 'INR' ? '₹' : '$';
+  const sym = getTripCurrencySymbol(activeTrip);
 
   function handleAdd() {
     if (!newItem.title || !showAdd) return;
@@ -197,7 +197,7 @@ if (!activeTrip) {
                                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                     <Icon size={14} style={{ color: cfg.color }} />
                                     <span style={{ fontWeight: 500, fontSize: 14 }}>{item.title}</span>
-                                    <span className={`badge ${cfg.color === 'var(--brand)' ? 'badge-blue' : cfg.color === 'var(--purple)' ? 'badge-purple' : cfg.color === 'var(--teal)' ? 'badge-teal' : 'badge-yellow'}`}
+                                    <span className={`badge ${cfg.badge}`}
                                       style={{ fontSize: 10, padding: '1px 6px' }}>
                                       {cfg.label}
                                     </span>

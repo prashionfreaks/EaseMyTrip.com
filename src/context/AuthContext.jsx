@@ -24,7 +24,12 @@ export function AuthProvider({ children }) {
       return;
     }
 
-    const sessionTimeout = setTimeout(() => setLoading(false), 5000);
+    // 10 s safety net — long enough to ride out a slow getSession on poor
+    // networks, short enough that a truly hung Supabase doesn't lock the UI
+    // forever. Without this, a stale fetch could leave the loader on screen
+    // indefinitely; with too short a value, we'd flash the LandingPage before
+    // onAuthStateChange resolves the real session.
+    const sessionTimeout = setTimeout(() => setLoading(false), 10000);
     supabase.auth.getSession().then(({ data: { session } }) => {
       clearTimeout(sessionTimeout);
       setUser(session?.user ?? null);
@@ -124,7 +129,9 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if (!isSupabaseConfigured || !user) return;
 
-    const events = ['mousedown', 'keydown', 'scroll', 'touchstart', 'mousemove'];
+    // `input` covers virtual-keyboard typing on mobile (where keydown is
+    // unreliable); `pointerdown` unifies mouse/touch/pen tap detection.
+    const events = ['mousedown', 'keydown', 'input', 'scroll', 'touchstart', 'mousemove', 'pointerdown'];
     const handler = () => resetInactivityTimer();
 
     events.forEach(e => window.addEventListener(e, handler, { passive: true }));

@@ -565,7 +565,12 @@ export default function Photos() {
                         supabase.storage.from('trip-photos').remove([photo.storagePath]);
                       }
                       deletePhoto(activeTrip.id, photo.id);
-                      setLightbox(l => photos.length > 1 ? (l > 0 ? l - 1 : 0) : null);
+                      // After delete, the photos array shrinks by 1.
+                      // Close the lightbox if it was the last photo;
+                      // otherwise clamp the index so we don't index past end.
+                      const remaining = photos.length - 1;
+                      if (remaining <= 0) setLightbox(null);
+                      else setLightbox(l => Math.min(l ?? 0, remaining - 1));
                     }}
                     title="Delete"
                     style={{ background: 'rgba(239,68,68,0.2)', border: 'none', borderRadius: 8, padding: '6px 8px', cursor: 'pointer', color: '#f87171', display: 'flex', alignItems: 'center' }}

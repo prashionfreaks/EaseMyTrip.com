@@ -4,7 +4,7 @@ import {
   Route, Train, Plane, Bus, Car, ArrowRight,
   Clock, Plus, MapPin, Zap, Wallet, Ruler, Trash2, Navigation, ExternalLink,
 } from 'lucide-react';
-import { getDestinationCurrency } from '../lib/itinerary';
+import { getTripCurrencySymbol } from '../lib/itinerary';
 
 const INDIAN_ROUTES = {
   'goa|mumbai':             { dist: 600,  flight: [75, 4200, 'IndiGo / Air India · 1h 15m'], train: [480, 650, 'Konkan Kanya Express · 8h'], bus: [600, 400, 'Paulo Travels AC Sleeper · 10h'], car: [540, 2200, 'NH66 coastal highway · ~9h'] },
@@ -112,8 +112,11 @@ export default function Routes() {
   }
 
   const { routes } = activeTrip;
-  const isINR = getDestinationCurrency(activeTrip.destination) === 'INR';
-  const sym = isINR ? '₹' : '$';
+  // Routes-cost generator only knows two units (INR and "non-INR ≈ USD"),
+  // so we need a yes/no flag here even though the rest of the app handles
+  // arbitrary currencies. Pick INR only when the trip is explicitly in INR.
+  const isINR = (activeTrip.budget?.currency || 'USD') === 'INR';
+  const sym = getTripCurrencySymbol(activeTrip);
 
   function fmtDuration(mins) {
     if (!mins) return '—';
