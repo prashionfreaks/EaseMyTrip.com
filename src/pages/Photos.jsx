@@ -57,22 +57,7 @@ export default function Photos() {
   const [uploadError, setUploadError] = useState(null);
   const fileInputRef = useRef();
 
-  if (!activeTrip) {
-    return (
-      <>
-        <div className="page-header"><h1>Trip Photos</h1><p>Select a trip first</p></div>
-        <div className="page-body">
-          <div className="empty-state">
-            <Camera className="empty-icon" />
-            <h3>No trip selected</h3>
-            <p>Select a trip to view and add photos.</p>
-          </div>
-        </div>
-      </>
-    );
-  }
-
-  const photos = activeTrip.photos || [];
+  const photos = activeTrip?.photos || [];
 
   // Pick files → show caption modal
   async function handleFiles(files) {
@@ -194,6 +179,22 @@ export default function Photos() {
     setDragging(false);
     handleFiles(e.dataTransfer.files);
   }, []);
+
+  // ── All hooks called above. Safe to early-return after this point. ──
+  if (!activeTrip) {
+    return (
+      <>
+        <div className="page-header"><h1>Trip Photos</h1><p>Select a trip first</p></div>
+        <div className="page-body">
+          <div className="empty-state">
+            <Camera className="empty-icon" />
+            <h3>No trip selected</h3>
+            <p>Select a trip to view and add photos.</p>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   const onDragOver = e => { e.preventDefault(); setDragging(true); };
   const onDragLeave = () => setDragging(false);

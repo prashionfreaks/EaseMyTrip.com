@@ -21,6 +21,23 @@ export default function Checklist() {
   const [ownerId, setOwnerId]     = useState(currentUser?.id || '');
   const [ownerOpen, setOwnerOpen] = useState(false);
 
+  // ── All hooks must be called unconditionally — see Budget.jsx for context.
+  // Compute against safe defaults so this stays sound when activeTrip is null.
+  const members  = activeTrip?.members || [];
+  const items    = activeTrip?.checklist || [];
+  const total    = items.length;
+  const doneCount = items.filter(i => i.done).length;
+  const pct      = total > 0 ? Math.round((doneCount / total) * 100) : 0;
+
+  const filtered = useMemo(() => {
+    switch (filter) {
+      case 'mine':   return items.filter(i => i.ownerId === currentUser?.id);
+      case 'undone': return items.filter(i => !i.done);
+      case 'done':   return items.filter(i => i.done);
+      default:       return items;
+    }
+  }, [items, filter, currentUser]);
+
   if (!activeTrip) {
     return (
       <>
@@ -34,21 +51,6 @@ export default function Checklist() {
       </>
     );
   }
-
-  const members  = activeTrip.members || [];
-  const items    = activeTrip.checklist || [];
-  const total    = items.length;
-  const doneCount = items.filter(i => i.done).length;
-  const pct      = total > 0 ? Math.round((doneCount / total) * 100) : 0;
-
-  const filtered = useMemo(() => {
-    switch (filter) {
-      case 'mine':   return items.filter(i => i.ownerId === currentUser?.id);
-      case 'undone': return items.filter(i => !i.done);
-      case 'done':   return items.filter(i => i.done);
-      default:       return items;
-    }
-  }, [items, filter, currentUser]);
 
   function getMember(id) {
     return members.find(m => m.id === id) || null;

@@ -34,24 +34,15 @@ export default function Budget() {
     splitAmong: [], date: new Date().toISOString().split('T')[0],
   });
 
-  if (!activeTrip) {
-    return (
-      <>
-        <div className="page-header"><h1>Budget & Expenses</h1><p>Select a trip first</p></div>
-        <div className="page-body">
-          <div className="empty-state">
-            <Wallet className="empty-icon" />
-            <h3>No trip selected</h3>
-            <p>Go to Dashboard and select a trip to manage expenses.</p>
-          </div>
-        </div>
-      </>
-    );
-  }
-
-  const budget = activeTrip.budget || { total: 0, spent: 0, currency: 'INR' };
-  const expenses = activeTrip.expenses || [];
-  const members = activeTrip.members || [];
+  // ──────────────────────────────────────────────────────────────────────
+  // IMPORTANT: every hook below this point must be called unconditionally
+  // — React's rules-of-hooks. The early-return for `!activeTrip` happens
+  // AFTER all hooks. Otherwise a transition (sign-out, trip deletion via
+  // realtime, etc.) flips the hook count and React throws / blanks the UI.
+  // ──────────────────────────────────────────────────────────────────────
+  const budget = activeTrip?.budget || { total: 0, spent: 0, currency: 'INR' };
+  const expenses = activeTrip?.expenses || [];
+  const members = activeTrip?.members || [];
   const sym = getTripCurrencySymbol(activeTrip);
   const totalSpent = expenses.reduce((sum, e) => sum + e.amount, 0);
   const remaining = budget.total - totalSpent;
@@ -109,6 +100,21 @@ export default function Budget() {
     });
     return breakdown;
   }, [expenses]);
+
+  if (!activeTrip) {
+    return (
+      <>
+        <div className="page-header"><h1>Budget & Expenses</h1><p>Select a trip first</p></div>
+        <div className="page-body">
+          <div className="empty-state">
+            <Wallet className="empty-icon" />
+            <h3>No trip selected</h3>
+            <p>Go to Dashboard and select a trip to manage expenses.</p>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   function resetExpenseForm() {
     setNewExpense({
