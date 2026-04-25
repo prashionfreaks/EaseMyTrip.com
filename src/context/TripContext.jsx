@@ -200,35 +200,8 @@ export function TripProvider({ children }) {
     return () => supabase.removeChannel(channel);
   }, [dbUser]);
 
-  // Toast when a new payment-due reminder arrives for the current user.
-  // We snapshot all existing reminder IDs on first run so we don't toast for
-  // reminders that already existed before this session started.
-  const knownReminderIdsRef = useRef(null);
-  useEffect(() => {
-    const uid = currentUser?.id;
-    if (!uid) return;
-
-    if (knownReminderIdsRef.current === null) {
-      const seed = new Set();
-      trips.forEach(t => (t.dueReminders || []).forEach(r => seed.add(r.id)));
-      knownReminderIdsRef.current = seed;
-      return;
-    }
-
-    const known = knownReminderIdsRef.current;
-    trips.forEach(trip => {
-      (trip.dueReminders || []).forEach(r => {
-        if (known.has(r.id)) return;
-        known.add(r.id);
-        if (r.toUserId !== uid) return;
-        const cur = r.currency || trip.budget?.currency || '';
-        toast.info(
-          `${r.fromName} reminded you: ${cur} ${Number(r.amount).toFixed(0)} due for "${trip.name}"`,
-          { duration: 7000 },
-        );
-      });
-    });
-  }, [trips, currentUser]);
+  // Reminder-toast effect lives below `currentUser` so it can read its id —
+  // see the block right after `activeTrip`.
 
   // Debounced DB sync — with safety guard to never overwrite good data with empty data
   const syncToDB = useCallback((trip) => {
@@ -268,6 +241,36 @@ export function TripProvider({ children }) {
     }
     return demoUser;
   }, [dbUser]);
+
+  // Toast when a new payment-due reminder arrives for the current user.
+  // Snapshot all existing reminder IDs on first run so we don't toast for
+  // reminders that already existed before this session started.
+  const knownReminderIdsRef = useRef(null);
+  useEffect(() => {
+    const uid = currentUser?.id;
+    if (!uid) return;
+
+    if (knownReminderIdsRef.current === null) {
+      const seed = new Set();
+      trips.forEach(t => (t.dueReminders || []).forEach(r => seed.add(r.id)));
+      knownReminderIdsRef.current = seed;
+      return;
+    }
+
+    const known = knownReminderIdsRef.current;
+    trips.forEach(trip => {
+      (trip.dueReminders || []).forEach(r => {
+        if (known.has(r.id)) return;
+        known.add(r.id);
+        if (r.toUserId !== uid) return;
+        const cur = r.currency || trip.budget?.currency || '';
+        toast.info(
+          `${r.fromName} reminded you: ${cur} ${Number(r.amount).toFixed(0)} due for "${trip.name}"`,
+          { duration: 7000 },
+        );
+      });
+    });
+  }, [trips, currentUser]);
 
   const activeTrip = useMemo(
     () => trips.find(t => t.id === activeTripId) || null,
