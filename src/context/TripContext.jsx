@@ -36,7 +36,8 @@ function colorFromId(id) {
 function normalizeTrip(trip) {
   const t = { ...trip };
   const arrayFields = ['members', 'polls', 'expenses', 'itinerary', 'routes',
-    'activity', 'contingencies', 'messages', 'photos', 'paidSettlements', 'checklist'];
+    'activity', 'contingencies', 'messages', 'photos', 'paidSettlements', 'checklist',
+    'dueReminders'];
   for (const f of arrayFields) {
     if (!Array.isArray(t[f])) t[f] = [];
   }
@@ -198,6 +199,36 @@ export function TripProvider({ children }) {
       .subscribe();
     return () => supabase.removeChannel(channel);
   }, [dbUser]);
+
+  // Toast when a new payment-due reminder arrives for the current user.
+  // We snapshot all existing reminder IDs on first run so we don't toast for
+  // reminders that already existed before this session started.
+  const knownReminderIdsRef = useRef(null);
+  useEffect(() => {
+    const uid = currentUser?.id;
+    if (!uid) return;
+
+    if (knownReminderIdsRef.current === null) {
+      const seed = new Set();
+      trips.forEach(t => (t.dueReminders || []).forEach(r => seed.add(r.id)));
+      knownReminderIdsRef.current = seed;
+      return;
+    }
+
+    const known = knownReminderIdsRef.current;
+    trips.forEach(trip => {
+      (trip.dueReminders || []).forEach(r => {
+        if (known.has(r.id)) return;
+        known.add(r.id);
+        if (r.toUserId !== uid) return;
+        const cur = r.currency || trip.budget?.currency || '';
+        toast.info(
+          `${r.fromName} reminded you: ${cur} ${Number(r.amount).toFixed(0)} due for "${trip.name}"`,
+          { duration: 7000 },
+        );
+      });
+    });
+  }, [trips, currentUser]);
 
   // Debounced DB sync — with safety guard to never overwrite good data with empty data
   const syncToDB = useCallback((trip) => {
@@ -410,6 +441,34 @@ export function TripProvider({ children }) {
     }));
   }, [updateTrip]);
 
+  const sendDueReminder = useCallback((tripId, { fromUserId, toUserId, fromName, amount, currency }) => {
+    updateTrip(tripId, trip => ({
+      ...trip,
+      dueReminders: [
+        ...(trip.dueReminders || []),
+        {
+          id: 'dr' + Date.now() + Math.random().toString(36).slice(2, 6),
+          fromUserId, toUserId, fromName, amount,
+          currency: currency || trip.budget?.currency || 'INR',
+          sentAt: new Date().toISOString(),
+          seenAt: null,
+        },
+      ],
+    }));
+  }, [updateTrip]);
+
+  const markRemindersSeen = useCallback((tripId, reminderIds) => {
+    if (!reminderIds?.length) return;
+    const ids = new Set(reminderIds);
+    const seenAt = new Date().toISOString();
+    updateTrip(tripId, trip => ({
+      ...trip,
+      dueReminders: (trip.dueReminders || []).map(r =>
+        ids.has(r.id) && !r.seenAt ? { ...r, seenAt } : r
+      ),
+    }));
+  }, [updateTrip]);
+
   const addPhoto = useCallback((tripId, photo) => {
     updateTrip(tripId, trip => ({ ...trip, photos: [...(trip.photos || []), { ...photo, id: 'ph' + Date.now() }] }));
   }, [updateTrip]);
@@ -520,12 +579,14 @@ export function TripProvider({ children }) {
     vote, addPoll, addExpense, addItineraryItem, addContingency, markSettlementPaid,
     sendMessage, markChatRead, likeMessage, addPhoto, deletePhoto, joinTripViaInvite,
     addChecklistItem, toggleChecklistItem, deleteChecklistItem, updateChecklistItem,
+    sendDueReminder, markRemindersSeen,
   }), [
     trips, activeTrip, activeTripId, currentUser, tripsLoaded,
     updateTrip, addTrip, removeTrip,
     vote, addPoll, addExpense, addItineraryItem, addContingency, markSettlementPaid,
     sendMessage, markChatRead, likeMessage, addPhoto, deletePhoto, joinTripViaInvite,
     addChecklistItem, toggleChecklistItem, deleteChecklistItem, updateChecklistItem,
+    sendDueReminder, markRemindersSeen,
   ]);
 
   return <TripContext.Provider value={value}>{children}</TripContext.Provider>;

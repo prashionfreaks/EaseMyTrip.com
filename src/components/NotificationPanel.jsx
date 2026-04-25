@@ -1,6 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useTrips } from '../context/TripContext';
-import { X, ArrowRight, CheckCircle2, Bell, Copy, Check, AlertCircle } from 'lucide-react';
+import { toast } from '../lib/toast';
+import { format, parseISO } from 'date-fns';
+import { X, ArrowRight, CheckCircle2, Bell, BellRing, Send, Check, AlertCircle } from 'lucide-react';
 
 /** Greedy settlement algorithm — same logic as Budget.jsx */
 function computeSettlements(expenses, members) {
@@ -43,8 +45,37 @@ function getMember(trip, uid) {
 }
 
 export default function NotificationPanel({ onClose }) {
-  const { trips, markSettlementPaid, currentUser } = useTrips();
-  const [copiedKey, setCopiedKey] = useState(null);
+  const { trips, markSettlementPaid, sendDueReminder, markRemindersSeen, currentUser } = useTrips();
+  const [sentKey, setSentKey] = useState(null);
+
+  // Reminders sent TO the current user — shown in their panel
+  const incomingReminders = useMemo(() => {
+    const uid = currentUser?.id;
+    if (!uid) return [];
+    const out = [];
+    trips.forEach(trip => {
+      (trip.dueReminders || []).forEach(r => {
+        if (r.toUserId !== uid) return;
+        // Hide reminders for settlements that have since been marked paid
+        const paid = (trip.paidSettlements || []).some(p => p.from === r.toUserId && p.to === r.fromUserId);
+        if (paid) return;
+        out.push({ ...r, trip });
+      });
+    });
+    return out.sort((a, b) => (b.sentAt || '').localeCompare(a.sentAt || ''));
+  }, [trips, currentUser]);
+
+  // Mark unseen incoming reminders as seen on panel open
+  useEffect(() => {
+    const byTrip = new Map();
+    incomingReminders.forEach(r => {
+      if (r.seenAt) return;
+      if (!byTrip.has(r.trip.id)) byTrip.set(r.trip.id, []);
+      byTrip.get(r.trip.id).push(r.id);
+    });
+    byTrip.forEach((ids, tripId) => markRemindersSeen(tripId, ids));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Compute all outstanding dues across every trip for the current user
   const { owedByMe, owedToMe } = useMemo(() => {
@@ -77,13 +108,19 @@ export default function NotificationPanel({ onClose }) {
   const totalOwed = owedByMe.reduce((sum, d) => sum + d.amount, 0);
   const totalDue  = owedToMe.reduce((sum, d) => sum + d.amount, 0);
 
-  async function copyReminder(due) {
-    const person = getMember(due.trip, due.from);
-    const text = `Hey ${person?.name || 'there'}, just a reminder — you owe $${due.amount.toFixed(0)} for "${due.trip.name}". Let me know when you can send it over! 😊`;
-    try { await navigator.clipboard.writeText(text); } catch { /* ignore */ }
+  function sendReminder(due) {
+    const debtor = getMember(due.trip, due.from);
+    sendDueReminder(due.trip.id, {
+      fromUserId: currentUser.id,
+      toUserId: due.from,
+      fromName: currentUser.name,
+      amount: due.amount,
+      currency: due.trip.budget?.currency,
+    });
     const key = `${due.from}→${due.to}→${due.trip.id}`;
-    setCopiedKey(key);
-    setTimeout(() => setCopiedKey(null), 2500);
+    setSentKey(key);
+    setTimeout(() => setSentKey(null), 2500);
+    toast.success(`Reminder sent to ${debtor?.name || 'them'}`);
   }
 
   return (
@@ -167,7 +204,7 @@ export default function NotificationPanel({ onClose }) {
 
         {/* Content */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px' }}>
-          {total === 0 ? (
+          {total === 0 && incomingReminders.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '48px 20px' }}>
               <div style={{
                 width: 64, height: 64, borderRadius: '50%',
@@ -184,6 +221,52 @@ export default function NotificationPanel({ onClose }) {
             </div>
           ) : (
             <>
+              {/* Reminders received from other members */}
+              {incomingReminders.length > 0 && (
+                <Section
+                  title="Reminders for You"
+                  count={incomingReminders.length}
+                  accent="#7c3aed"
+                  bg="#f5f3ff"
+                  icon={<BellRing size={14} style={{ color: '#7c3aed' }} />}
+                >
+                  {incomingReminders.map(r => {
+                    const cur = r.currency || r.trip.budget?.currency || '';
+                    return (
+                      <div key={r.id} style={{
+                        background: r.seenAt ? '#f8fafc' : '#faf5ff',
+                        border: `1px solid ${r.seenAt ? '#e2e8f0' : '#ddd6fe'}`,
+                        borderRadius: 12,
+                        padding: '12px 14px',
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <div style={{
+                            width: 32, height: 32, borderRadius: '50%',
+                            background: '#ede9fe', color: '#7c3aed',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            flexShrink: 0,
+                          }}>
+                            <BellRing size={15} />
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <p style={{ fontSize: 13, color: '#0f172a', lineHeight: 1.4 }}>
+                              <strong>{r.fromName}</strong> reminded you:{' '}
+                              <span style={{ color: '#dc2626', fontWeight: 700 }}>
+                                {cur} {Number(r.amount).toFixed(0)}
+                              </span>{' '}
+                              due for &ldquo;{r.trip.name}&rdquo;
+                            </p>
+                            <p style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>
+                              {r.sentAt ? format(parseISO(r.sentAt), 'MMM d, h:mm a') : ''}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </Section>
+              )}
+
               {/* You owe */}
               {owedByMe.length > 0 && (
                 <Section
@@ -232,7 +315,7 @@ export default function NotificationPanel({ onClose }) {
                   {owedToMe.map((due, i) => {
                     const from = getMember(due.trip, due.from);
                     const key = `${due.from}→${due.to}→${due.trip.id}`;
-                    const copied = copiedKey === key;
+                    const sent = sentKey === key;
                     return (
                       <DueCard
                         key={i}
@@ -246,16 +329,19 @@ export default function NotificationPanel({ onClose }) {
                         action={
                           <div style={{ display: 'flex', gap: 6 }}>
                             <button
-                              onClick={() => copyReminder(due)}
+                              onClick={() => sendReminder(due)}
+                              disabled={sent}
                               className="btn btn-sm"
                               style={{
-                                background: copied ? '#dcfce7' : '#f1f5f9',
-                                color: copied ? '#16a34a' : '#64748b',
+                                background: sent ? '#dcfce7' : '#dbeafe',
+                                color: sent ? '#16a34a' : '#2563eb',
                                 border: 'none', fontSize: 11, padding: '4px 10px',
+                                cursor: sent ? 'default' : 'pointer',
                               }}
+                              title={sent ? 'Reminder sent' : `Send a live reminder to ${from?.name || 'them'}`}
                             >
-                              {copied ? <Check size={12} /> : <Copy size={12} />}
-                              {copied ? 'Copied!' : 'Remind'}
+                              {sent ? <Check size={12} /> : <Send size={12} />}
+                              {sent ? 'Sent!' : 'Send Reminder'}
                             </button>
                             <button
                               onClick={() => markSettlementPaid(due.trip.id, due.from, due.to)}
