@@ -238,6 +238,13 @@ const DASH_STYLES = `
   .slam-sticker.tr { top: 14px; right: 16px; }
   .slam-sticker.br { bottom: 12px; right: 24px; transform: rotate(10deg); animation-delay: 0.6s; }
   .slam-sticker.bl { bottom: 16px; left: 22px; transform: rotate(-12deg); animation-delay: 1.2s; }
+  /* The compact card is short — bottom stickers would land on the subtitle.
+     Pin the second sticker to the right edge instead and shrink it slightly. */
+  .slam-card--compact .slam-sticker.bl {
+    top: 18px; bottom: auto; left: auto; right: 56px;
+    font-size: 22px;
+    transform: rotate(8deg);
+  }
 
   .slam-avatar-stack { display: flex; align-items: center; }
   .slam-avatar-stack .user-avatar {
