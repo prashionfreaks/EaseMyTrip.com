@@ -74,6 +74,7 @@ function generateOptions(from, to, isINR) {
   const data = INDIAN_ROUTES[key];
 
   if (data) {
+    // Curated domestic route — all four modes are realistic.
     const MODES = ['flight', 'train', 'bus', 'car'];
     return MODES.map(mode => {
       const [duration, cost, note] = data[mode] || [0, 0, 'Not applicable'];
@@ -81,19 +82,24 @@ function generateOptions(from, to, isINR) {
     });
   }
 
-  const mult = isINR ? 1 : 1/83;
+  // Unknown pair — could be international (Pune → Costa Rica) or just
+  // long-haul domestic. Train / bus / car estimates would be misleading,
+  // so only suggest a flight and tell the user to verify on a booking site.
   return [
-    { mode: 'flight', duration: 120, cost: Math.round(5500 * mult), note: 'Check airline websites for availability' },
-    { mode: 'train',  duration: 600, cost: Math.round(800 * mult),  note: 'Book on IRCTC · Rajdhani / Express trains' },
-    { mode: 'bus',    duration: 720, cost: Math.round(500 * mult),  note: 'Private AC Volvo sleeper buses' },
-    { mode: 'car',    duration: 540, cost: Math.round(2500 * mult), note: 'Self-drive or cab · includes fuel & tolls' },
+    {
+      mode: 'flight',
+      duration: 0,
+      cost: 0,
+      note: 'Long-haul / international route — check Skyscanner, Google Flights, or MakeMyTrip for live fares and durations.',
+      placeholder: true,
+    },
   ];
 }
 
 export default function Routes() {
   const { activeTrip, updateTrip } = useTrips();
   const [showAdd, setShowAdd] = useState(false);
-  const [newRoute, setNewRoute] = useState({ from: '', to: '', returnTo: '' });
+  const [newRoute, setNewRoute] = useState({ from: '', roundTrip: false });
   const [loadingOptions, setLoadingOptions] = useState(null);
 
   if (!activeTrip) {
@@ -125,18 +131,20 @@ export default function Routes() {
   }
 
   function handleAdd() {
-    if (!newRoute.from.trim() || !newRoute.to.trim()) return;
+    const from = newRoute.from.trim();
+    const to = activeTrip?.destination?.trim() || '';
+    if (!from || !to) return;
     const routeId = 'r' + Date.now();
-    // Only set returnTo if the user explicitly typed it. Auto-filling with
-    // `from` made every one-way route render as a phantom round-trip.
+    // Destination is fixed by the trip; only the user's starting city is
+    // collected. Round-trip implicitly returns to where they started.
     const newEntry = {
       id: routeId,
-      from: newRoute.from.trim(),
-      to: newRoute.to.trim(),
-      returnTo: newRoute.returnTo.trim() || '',
+      from,
+      to,
+      returnTo: newRoute.roundTrip ? from : '',
     };
     updateTrip(activeTrip.id, trip => ({ ...trip, routes: [...trip.routes, newEntry] }));
-    setNewRoute({ from: '', to: '', returnTo: '' });
+    setNewRoute({ from: '', roundTrip: false });
     setShowAdd(false);
     setLoadingOptions(routeId);
     setTimeout(() => setLoadingOptions(null), 1800);
@@ -195,11 +203,13 @@ export default function Routes() {
 
       <div className="page-header" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
         <div>
-          <h1>Route Planner</h1>
-          <p>{activeTrip.name} — {routes.length} route{routes.length !== 1 ? 's' : ''}{allStops.length > 0 ? ` · ${allStops.length} stops` : ''}</p>
+          <h1>Getting to {activeTrip.destination}</h1>
+          <p>{routes.length === 0
+            ? 'Tell us where you\'re starting from and we\'ll suggest the best way to reach the trip.'
+            : `${routes.length} starting point${routes.length !== 1 ? 's' : ''} for the group`}</p>
         </div>
         <button className="btn btn-primary" onClick={() => setShowAdd(true)}>
-          <Plus size={16} /> Add Route
+          <Plus size={16} /> Add Starting City
         </button>
       </div>
 
@@ -286,10 +296,12 @@ export default function Routes() {
             }}>
               <Route size={32} style={{ color: 'var(--brand)' }} />
             </div>
-            <h3>No routes planned yet</h3>
-            <p style={{ maxWidth: 300, textAlign: 'center' }}>Add a route and we'll instantly suggest the best flight, train, bus and drive options.</p>
+            <h3>How are you getting to {activeTrip.destination}?</h3>
+            <p style={{ maxWidth: 320, textAlign: 'center' }}>
+              Add the city you're flying out of and we'll suggest the best routes — flights, plus trains, buses or drive options for short hops.
+            </p>
             <button className="btn btn-primary" style={{ marginTop: 12 }} onClick={() => setShowAdd(true)}>
-              <Plus size={16} /> Add First Route
+              <Plus size={16} /> Add starting city
             </button>
           </div>
         ) : (
@@ -383,8 +395,9 @@ export default function Routes() {
                     </div>
                   </div>
 
-                  {/* Best picks summary bar */}
-                  {!isLoading && cheapest && fastest && (
+                  {/* Best picks summary bar — only when we have real numbers,
+                      not for unknown long-haul routes (placeholder mode). */}
+                  {!isLoading && cheapest && fastest && !available[0]?.placeholder && (
                     <div style={{
                       display: 'flex', flexWrap: 'wrap', gap: 0,
                       borderBottom: '1px solid var(--border-light)',
@@ -504,30 +517,40 @@ export default function Routes() {
                                   <span style={{ fontWeight: 800, fontSize: 14, color: cfg.color }}>{cfg.label}</span>
                                 </div>
 
-                                {/* Price */}
+                                {/* Price (or "Check fares" for placeholder) */}
                                 <div style={{ marginBottom: 6 }}>
-                                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 5 }}>
-                                    <span style={{ fontSize: 22, fontWeight: 900, color: 'var(--text-primary)', lineHeight: 1 }}>
-                                      {sym}{opt.cost.toLocaleString()}
+                                  {opt.placeholder ? (
+                                    <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-secondary)', lineHeight: 1 }}>
+                                      Check live fares
                                     </span>
-                                    <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 500 }}>/ person</span>
-                                  </div>
-                                  {!hasReturn && (
-                                    <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>
-                                      RT ~{sym}{(opt.cost * 2).toLocaleString()}
-                                    </p>
+                                  ) : (
+                                    <>
+                                      <div style={{ display: 'flex', alignItems: 'baseline', gap: 5 }}>
+                                        <span style={{ fontSize: 22, fontWeight: 900, color: 'var(--text-primary)', lineHeight: 1 }}>
+                                          {sym}{opt.cost.toLocaleString()}
+                                        </span>
+                                        <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 500 }}>/ person</span>
+                                      </div>
+                                      {!hasReturn && (
+                                        <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>
+                                          RT ~{sym}{(opt.cost * 2).toLocaleString()}
+                                        </p>
+                                      )}
+                                    </>
                                   )}
                                 </div>
 
-                                {/* Duration */}
-                                <div style={{
-                                  display: 'inline-flex', alignItems: 'center', gap: 5,
-                                  background: 'rgba(0,0,0,0.05)', borderRadius: 6,
-                                  padding: '4px 8px', marginBottom: 10,
-                                }}>
-                                  <Clock size={11} style={{ color: 'var(--text-tertiary)' }} />
-                                  <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)' }}>{fmtDuration(opt.duration)}</span>
-                                </div>
+                                {/* Duration — hide entirely for placeholders */}
+                                {!opt.placeholder && (
+                                  <div style={{
+                                    display: 'inline-flex', alignItems: 'center', gap: 5,
+                                    background: 'rgba(0,0,0,0.05)', borderRadius: 6,
+                                    padding: '4px 8px', marginBottom: 10,
+                                  }}>
+                                    <Clock size={11} style={{ color: 'var(--text-tertiary)' }} />
+                                    <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)' }}>{fmtDuration(opt.duration)}</span>
+                                  </div>
+                                )}
 
                                 {/* Note */}
                                 <p style={{ fontSize: 11, color: 'var(--text-tertiary)', lineHeight: 1.5, borderTop: '1px solid rgba(0,0,0,0.06)', paddingTop: 8, marginTop: 2 }}>
@@ -726,91 +749,83 @@ export default function Routes() {
         {/* Bottom hint */}
         <p style={{
           textAlign: 'center', fontSize: 13, color: 'var(--text-tertiary)',
-          marginTop: 32, padding: '0 20px', lineHeight: 1.6,
+          marginTop: 24, padding: '0 20px', lineHeight: 1.6,
         }}>
-          Add a route and we'll instantly suggest the best flight, train, bus and drive options.
+          Each member can add their own starting city — we'll show ground options when the route is feasible, otherwise just flights.
         </p>
       </div>
 
-      {/* Add route modal */}
+      {/* Add starting city modal */}
       {showAdd && (
         <div className="modal-overlay" onClick={() => setShowAdd(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 500 }}>
+          <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 460 }}>
             <div className="modal-header">
               <h2 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Route size={18} style={{ color: 'var(--brand)' }} /> Add Route
+                <Plane size={18} style={{ color: 'var(--brand)' }} /> Add starting city
               </h2>
               <button className="btn-ghost" onClick={() => setShowAdd(false)} style={{ padding: 4 }}>
                 <span style={{ fontSize: 18 }}>&times;</span>
               </button>
             </div>
             <div className="modal-body">
-              <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 20 }}>
-                Enter your route cities and we'll instantly suggest the best travel options.
+              <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 16 }}>
+                We'll suggest the best ways to reach <strong>{activeTrip.destination}</strong>.
               </p>
 
-              {/* Visual route preview */}
-              {(newRoute.from || newRoute.to) && (
-                <div style={{
-                  display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center',
-                  padding: '12px 16px', borderRadius: 10, marginBottom: 16,
-                  background: 'linear-gradient(135deg, var(--bg-tertiary), var(--brand-light))',
-                  border: '1px solid var(--border-light)',
-                }}>
-                  <span style={{ fontWeight: 700, color: 'var(--brand)', fontSize: 14 }}>{newRoute.from || '…'}</span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, flex: 1, justifyContent: 'center' }}>
-                    <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
-                    <Plane size={14} style={{ color: 'var(--text-tertiary)' }} />
-                    <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
-                  </div>
-                  <span style={{ fontWeight: 700, color: 'var(--success)', fontSize: 14 }}>{newRoute.to || '…'}</span>
-                  {newRoute.returnTo && newRoute.returnTo !== newRoute.to && (
-                    <>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <div style={{ width: 12, height: 1, background: 'var(--border)' }} />
-                        <ArrowRight size={12} style={{ color: 'var(--text-tertiary)' }} />
-                        <div style={{ width: 12, height: 1, background: 'var(--border)' }} />
-                      </div>
-                      <span style={{ fontWeight: 700, color: 'var(--orange)', fontSize: 14 }}>{newRoute.returnTo}</span>
-                    </>
-                  )}
+              {/* Visual preview */}
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center',
+                padding: '12px 16px', borderRadius: 10, marginBottom: 16,
+                background: 'linear-gradient(135deg, var(--bg-tertiary), var(--brand-light))',
+                border: '1px solid var(--border-light)',
+              }}>
+                <span style={{ fontWeight: 700, color: 'var(--brand)', fontSize: 14 }}>{newRoute.from || 'Your city'}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, flex: 1, justifyContent: 'center' }}>
+                  <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+                  <Plane size={14} style={{ color: 'var(--text-tertiary)' }} />
+                  <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
                 </div>
-              )}
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--brand)', display: 'inline-block' }} /> From
-                    </label>
-                    <input className="form-input" placeholder="e.g. Mumbai" value={newRoute.from}
-                      onChange={e => setNewRoute(p => ({ ...p, from: e.target.value }))} />
-                  </div>
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--success)', display: 'inline-block' }} /> To
-                    </label>
-                    <input className="form-input" placeholder="e.g. Goa" value={newRoute.to}
-                      onChange={e => setNewRoute(p => ({ ...p, to: e.target.value }))} />
-                  </div>
-                </div>
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--orange)', display: 'inline-block' }} /> Return To <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 400 }}>(optional)</span>
-                  </label>
-                  <input className="form-input" placeholder="e.g. Mumbai" value={newRoute.returnTo}
-                    onChange={e => setNewRoute(p => ({ ...p, returnTo: e.target.value }))} />
-                </div>
+                <span style={{ fontWeight: 700, color: 'var(--success)', fontSize: 14 }}>{activeTrip.destination}</span>
               </div>
+
+              <div className="form-group" style={{ marginBottom: 12 }}>
+                <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--brand)', display: 'inline-block' }} />
+                  Where are you starting from?
+                </label>
+                <input
+                  className="form-input"
+                  placeholder="e.g. Mumbai"
+                  autoFocus
+                  value={newRoute.from}
+                  onChange={e => setNewRoute(p => ({ ...p, from: e.target.value }))}
+                  onKeyDown={e => { if (e.key === 'Enter' && newRoute.from.trim()) handleAdd(); }}
+                />
+              </div>
+
+              <label style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                padding: '10px 12px', borderRadius: 8,
+                border: '1px solid var(--border-light)', background: 'var(--bg-tertiary)',
+                cursor: 'pointer', fontSize: 13, color: 'var(--text-secondary)',
+              }}>
+                <input
+                  type="checkbox"
+                  checked={newRoute.roundTrip}
+                  onChange={e => setNewRoute(p => ({ ...p, roundTrip: e.target.checked }))}
+                  style={{ accentColor: 'var(--brand)' }}
+                />
+                Show return options too (round trip)
+              </label>
             </div>
             <div className="modal-footer">
               <button className="btn btn-secondary" onClick={() => setShowAdd(false)}>Cancel</button>
               <button
                 className="btn btn-primary"
                 onClick={handleAdd}
-                disabled={!newRoute.from.trim() || !newRoute.to.trim()}
+                disabled={!newRoute.from.trim()}
               >
-                <Plane size={14} /> Find Routes
+                <Plane size={14} /> Suggest routes
               </button>
             </div>
           </div>

@@ -33,9 +33,22 @@ function TabFallback() {
 
 const statusConfig = {
   planning:  { label: 'Planning',  badge: 'badge-blue',   icon: Clock },
-  voting:    { label: 'Voting',    badge: 'badge-yellow',  icon: Vote },
+  voting:    { label: 'Voting',    badge: 'badge-yellow', icon: Vote },
   confirmed: { label: 'Confirmed', badge: 'badge-green',  icon: CheckCircle2 },
+  completed: { label: 'Completed', badge: 'badge-gray',   icon: CheckCircle2 },
 };
+
+function effectiveTripStatus(trip) {
+  try {
+    if (trip?.endDate) {
+      const end = parseISO(trip.endDate);
+      const today = new Date();
+      end.setHours(23, 59, 59, 999);
+      if (end < today) return 'completed';
+    }
+  } catch { /* fall through */ }
+  return trip?.status || 'planning';
+}
 
 const PRIMARY_TABS = [
   { id: 'chat',      label: 'Chat',      icon: MessageCircle },
@@ -84,7 +97,7 @@ export default function TripDetail({ onInvite, defaultTab = 'chat' }) {
 
   if (!activeTrip) return null;
 
-  const cfg = statusConfig[activeTrip.status] || statusConfig.planning;
+  const cfg = statusConfig[effectiveTripStatus(activeTrip)] || statusConfig.planning;
   const StatusIcon = cfg.icon;
 
   function renderContent() {

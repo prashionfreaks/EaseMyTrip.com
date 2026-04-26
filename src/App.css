@@ -400,6 +400,7 @@ select.form-input { cursor: pointer; }
 .badge-purple { background: #ede9fe; color: #7c3aed; }
 .badge-teal   { background: #cffafe; color: #0891b2; }
 .badge-orange { background: #ffedd5; color: #ea580c; }
+.badge-gray   { background: #e2e8f0; color: #475569; }
 
 /* ─── Avatar group ────────────────────────────────────── */
 .avatar-group { display: flex; }

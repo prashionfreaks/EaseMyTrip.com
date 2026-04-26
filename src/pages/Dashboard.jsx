@@ -53,9 +53,24 @@ function countOutstandingDues(trips, currentUserId) {
 
 const statusConfig = {
   planning:  { label: 'Planning',  badge: 'badge-blue',   icon: Clock },
-  voting:    { label: 'Voting',    badge: 'badge-yellow',  icon: Vote },
+  voting:    { label: 'Voting',    badge: 'badge-yellow', icon: Vote },
   confirmed: { label: 'Confirmed', badge: 'badge-green',  icon: CheckCircle2 },
+  completed: { label: 'Completed', badge: 'badge-gray',   icon: CheckCircle2 },
 };
+
+/** Trip status, but auto-flipped to "completed" once the end date is past. */
+function effectiveTripStatus(trip) {
+  try {
+    if (trip?.endDate) {
+      const end = parseISO(trip.endDate);
+      const today = new Date();
+      // Compare at day granularity so "ends today" doesn't get archived early.
+      end.setHours(23, 59, 59, 999);
+      if (end < today) return 'completed';
+    }
+  } catch { /* malformed date, fall through */ }
+  return trip?.status || 'planning';
+}
 
 const DASH_STYLES = `
   @keyframes dashFadeUp {
@@ -905,7 +920,7 @@ function TravelCrewCard({ count, tripsCount, firstName }) {
 }
 
 function TripCard({ trip, index, isActive, onSelect, onDelete, isDeleting }) {
-  const cfg = statusConfig[trip.status] || statusConfig.planning;
+  const cfg = statusConfig[effectiveTripStatus(trip)] || statusConfig.planning;
   const StatusIcon = cfg.icon;
   const daysUntil = trip.startDate ? differenceInDays(parseISO(trip.startDate), new Date()) : null;
   const totalSpent = (trip.expenses || []).reduce((sum, e) => sum + e.amount, 0);

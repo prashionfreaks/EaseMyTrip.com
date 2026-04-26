@@ -68,17 +68,16 @@ html {
 
 body {
   font-family: var(--font);
-  /* Travel-vibe horizon: warm parchment at the top fading through soft sky
-     into the existing neutral. Layered semi-transparent so cards (which
-     still use --bg-primary) read cleanly on top. The fixed attachment
-     keeps the gradient anchored to the viewport while the page scrolls. */
+  /* Warm beige / sand parchment base — opaque so the previous cool grey
+     is fully replaced. Gentle yellow→peach gradient on top keeps the page
+     feeling lit by morning sun. Cards still use --bg-primary (white) so
+     content reads cleanly against the warm wash. */
   background:
     linear-gradient(180deg,
-      rgba(255, 237, 213, 0.55) 0%,
-      rgba(254, 243, 199, 0.35) 28%,
-      rgba(224, 242, 254, 0.4)  62%,
-      rgba(238, 242, 247, 0)    100%),
-    var(--bg-primary);
+      #fdf6e3 0%,
+      #fbecc7 35%,
+      #faf2dc 70%,
+      #f5ebcd 100%);
   background-attachment: fixed;
   color: var(--text-primary);
   line-height: 1.5;
