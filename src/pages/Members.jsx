@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useTrips } from '../context/TripContext';
 import { Users, Crown, User, Mail, Copy, Check } from 'lucide-react';
-import Checklist from './Checklist';
 
 export default function Members() {
   const { activeTrip, currentUser } = useTrips();
@@ -18,7 +17,6 @@ export default function Members() {
   }
 
   const members = activeTrip.members || [];
-  const organizer = members.find(m => m.role === 'organizer');
 
   return (
     <>
@@ -66,11 +64,6 @@ export default function Members() {
         {members.map(m => (
           <MemberCard key={m.id} member={m} isCurrentUser={m.id === currentUser?.id} />
         ))}
-      </div>
-
-      {/* ── Checklist section ── */}
-      <div style={{ borderTop: '1px solid var(--border)', marginTop: 4 }}>
-        <Checklist />
       </div>
     </>
   );

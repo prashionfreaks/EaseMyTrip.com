@@ -310,12 +310,14 @@ export function TripProvider({ children }) {
         role: 'organizer',
       };
       const fullTripData = {
-        ...tripData,
-        members: [creatorMember],
+        // Defaults first so user-provided fields (budget, dates, etc.) win.
+        budget: { total: 0, spent: 0, currency: 'INR' },
         polls: [], expenses: [], itinerary: [], routes: [],
         activity: [], contingencies: [], messages: [], photos: [],
-        budget: { total: 0, spent: 0, currency: 'INR' },
         paidSettlements: [],
+        ...tripData,
+        // Members is always overridden — the trip belongs to the creator.
+        members: [creatorMember],
       };
 
       console.log('[addTrip] checking session...');

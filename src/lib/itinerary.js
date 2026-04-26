@@ -805,22 +805,67 @@ function matchDestination(destination) {
   return { template: null, key: null };
 }
 
+// Themed pools so consecutive "generic" days don't repeat. The rotator
+// below picks a different theme per day index, so a 7-day generic trip
+// gets 7 distinct shapes instead of the same template five times.
+const GENERIC_THEMES = [
+  // 0: Cultural / heritage
+  (location) => [
+    { time: '09:00', title: `Old Town walking tour of ${location}`, type: 'activity', duration: 150, notes: 'Wear comfortable shoes', cost: 12 },
+    { time: '12:30', title: 'Heritage café lunch', type: 'food', duration: 60, notes: 'Try a regional speciality', cost: 12 },
+    { time: '14:30', title: 'Main museum or historical site', type: 'activity', duration: 180, notes: 'Skip-the-line tickets help', cost: 18 },
+    { time: '19:00', title: 'Dinner at a heritage restaurant', type: 'food', duration: 90, notes: '', cost: 25 },
+  ],
+  // 1: Nature / outdoors
+  (location) => [
+    { time: '08:30', title: `Day hike or park near ${location}`, type: 'activity', duration: 240, notes: 'Bring water + sunscreen', cost: 8 },
+    { time: '13:30', title: 'Picnic or trailhead lunch', type: 'food', duration: 60, notes: '', cost: 10 },
+    { time: '15:30', title: 'Viewpoint or scenic drive', type: 'activity', duration: 120, notes: '', cost: 5 },
+    { time: '19:30', title: 'Casual dinner', type: 'food', duration: 75, notes: '', cost: 18 },
+  ],
+  // 2: Markets + foodie
+  (location) => [
+    { time: '09:30', title: `Local market crawl in ${location}`, type: 'activity', duration: 120, notes: 'Cash helps for street vendors', cost: 0 },
+    { time: '12:30', title: 'Hands-on cooking class or food tour', type: 'food', duration: 180, notes: 'Book in advance', cost: 45 },
+    { time: '16:30', title: 'Café-hop afternoon', type: 'food', duration: 90, notes: '', cost: 12 },
+    { time: '20:00', title: 'Tasting-menu dinner', type: 'food', duration: 120, notes: '', cost: 35 },
+  ],
+  // 3: Day trip
+  (location) => [
+    { time: '08:00', title: `Day trip from ${location}`, type: 'transport', duration: 90, notes: 'Train / bus / cab — book early', cost: 18 },
+    { time: '10:30', title: 'Sightseeing at the day-trip spot', type: 'activity', duration: 240, notes: '', cost: 15 },
+    { time: '15:30', title: 'Local lunch on the way back', type: 'food', duration: 75, notes: '', cost: 14 },
+    { time: '19:30', title: 'Quiet dinner back in the hotel area', type: 'food', duration: 75, notes: '', cost: 18 },
+  ],
+  // 4: Relax + spa
+  (location) => [
+    { time: '10:00', title: 'Slow breakfast + neighbourhood stroll', type: 'food', duration: 90, notes: '', cost: 12 },
+    { time: '12:30', title: 'Massage / spa session', type: 'activity', duration: 90, notes: 'Book one slot ahead', cost: 35 },
+    { time: '15:00', title: 'Free time — pool / park / shopping', type: 'activity', duration: 180, notes: '', cost: 0 },
+    { time: '20:00', title: 'Date-night dinner', type: 'food', duration: 120, notes: '', cost: 30 },
+  ],
+  // 5: Adventure
+  (location) => [
+    { time: '08:30', title: `Adventure activity near ${location}`, type: 'activity', duration: 180, notes: 'Kayaking, biking, or guided tour', cost: 40 },
+    { time: '12:30', title: 'Refuel lunch', type: 'food', duration: 60, notes: '', cost: 14 },
+    { time: '15:00', title: 'Photo-walk or art quarter', type: 'activity', duration: 120, notes: '', cost: 0 },
+    { time: '20:00', title: 'Casual evening with the group', type: 'food', duration: 90, notes: '', cost: 22 },
+  ],
+];
+
 function makeGenericDay(destination, dayNum) {
   const location = destination.split(',')[0].trim();
-  return dayNum === 0
-    ? { location, items: [
-        { time: '12:00', title: `Arrive in ${location}`, type: 'transport', duration: 60, notes: 'Check in and freshen up', cost: 0 },
-        { time: '14:00', title: 'Check in to accommodation', type: 'accommodation', duration: 30, notes: '', cost: 50 },
-        { time: '16:00', title: `Explore ${location} neighbourhood`, type: 'activity', duration: 120, notes: 'Get your bearings, find local spots', cost: 0 },
-        { time: '19:00', title: 'Welcome dinner at a local restaurant', type: 'food', duration: 90, notes: 'Ask for a local speciality', cost: 15 },
-      ]}
-    : { location, items: [
-        { time: '09:00', title: 'Morning sightseeing — top landmark', type: 'activity', duration: 150, notes: 'Buy tickets in advance if possible', cost: 10 },
-        { time: '12:30', title: 'Lunch at a local eatery', type: 'food', duration: 60, notes: 'Try a regional speciality', cost: 10 },
-        { time: '14:30', title: 'Afternoon exploration — museum or market', type: 'activity', duration: 150, notes: '', cost: 8 },
-        { time: '18:00', title: 'Sunset viewpoint or evening walk', type: 'activity', duration: 90, notes: '', cost: 0 },
-        { time: '20:00', title: 'Dinner and evening stroll', type: 'food', duration: 90, notes: '', cost: 15 },
-      ]};
+  if (dayNum === 0) {
+    return { location, items: [
+      { time: '12:00', title: `Arrive in ${location}`, type: 'transport', duration: 60, notes: 'Check in and freshen up', cost: 0 },
+      { time: '14:00', title: 'Check in to accommodation', type: 'accommodation', duration: 30, notes: '', cost: 50 },
+      { time: '16:00', title: `Explore ${location} neighbourhood`, type: 'activity', duration: 120, notes: 'Get your bearings, find local spots', cost: 0 },
+      { time: '19:00', title: 'Welcome dinner at a local restaurant', type: 'food', duration: 90, notes: 'Ask for a local speciality', cost: 15 },
+    ]};
+  }
+  // Rotate through themed pools so consecutive days look distinct.
+  const theme = GENERIC_THEMES[(dayNum - 1) % GENERIC_THEMES.length];
+  return { location, items: theme(location) };
 }
 
 function generateBuiltIn(destination, startDate, numDays, startDateObj) {
@@ -833,12 +878,21 @@ function generateBuiltIn(destination, startDate, numDays, startDateObj) {
     const date = format(addDays(startDateObj, i), 'yyyy-MM-dd');
     const isLast = i === numDays - 1;
     let location, items;
-    if (template) {
-      const tpl = template.days[Math.min(i, template.days.length - 1)];
+    if (template && i < template.days.length) {
+      // Inside the curated template — use the matching day verbatim.
+      const tpl = template.days[i];
       location = tpl.location;
       items = isLast && template.departure
         ? [...tpl.items.slice(0, 2), template.departure]
         : [...tpl.items];
+    } else if (template) {
+      // Beyond the template — rotate through themed generic days so
+      // consecutive days don't all clone the last template day.
+      const g = makeGenericDay(template.days[template.days.length - 1].location, i);
+      location = g.location;
+      items = isLast && template.departure
+        ? [...g.items.slice(0, 2), template.departure]
+        : g.items;
     } else {
       const g = makeGenericDay(destination, i);
       location = g.location;

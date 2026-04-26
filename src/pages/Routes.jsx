@@ -127,11 +127,13 @@ export default function Routes() {
   function handleAdd() {
     if (!newRoute.from.trim() || !newRoute.to.trim()) return;
     const routeId = 'r' + Date.now();
+    // Only set returnTo if the user explicitly typed it. Auto-filling with
+    // `from` made every one-way route render as a phantom round-trip.
     const newEntry = {
       id: routeId,
       from: newRoute.from.trim(),
       to: newRoute.to.trim(),
-      returnTo: newRoute.returnTo.trim() || newRoute.from.trim(),
+      returnTo: newRoute.returnTo.trim() || '',
     };
     updateTrip(activeTrip.id, trip => ({ ...trip, routes: [...trip.routes, newEntry] }));
     setNewRoute({ from: '', to: '', returnTo: '' });
@@ -165,8 +167,8 @@ export default function Routes() {
         .route-card { animation: slideUp 0.25s ease; }
         .mode-card {
           position: relative;
-          border-radius: 14px;
-          padding: 16px;
+          border-radius: 12px;
+          padding: 12px;
           border: 1.5px solid var(--border-light);
           background: var(--bg-secondary);
           transition: box-shadow 0.15s, border-color 0.15s, transform 0.15s;
@@ -176,15 +178,19 @@ export default function Routes() {
           box-shadow: 0 4px 16px rgba(0,0,0,0.08);
           transform: translateY(-2px);
         }
-        .mode-card.highlighted {
-          border-color: transparent;
-          box-shadow: 0 0 0 2px currentColor;
-        }
         .delete-btn {
           opacity: 0;
           transition: opacity 0.15s;
         }
         .route-card:hover .delete-btn { opacity: 1; }
+        @media (hover: none), (pointer: coarse) {
+          .delete-btn { opacity: 1; }
+        }
+        .transport-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+          gap: 10px;
+        }
       `}</style>
 
       <div className="page-header" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
@@ -201,18 +207,18 @@ export default function Routes() {
 
         {/* Journey map strip */}
         {allStops.length > 0 && (
-          <div className="card" style={{ marginBottom: 24, overflow: 'hidden' }}>
+          <div className="card" style={{ marginBottom: 16, overflow: 'hidden' }}>
             <div style={{
               background: 'linear-gradient(135deg, var(--brand) 0%, var(--purple) 100%)',
-              padding: '12px 20px 10px',
+              padding: '8px 16px',
               display: 'flex', alignItems: 'center', gap: 8,
             }}>
-              <Navigation size={14} style={{ color: 'rgba(255,255,255,0.85)' }} />
-              <span style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.9)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+              <Navigation size={13} style={{ color: 'rgba(255,255,255,0.85)' }} />
+              <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.9)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
                 Journey Overview
               </span>
             </div>
-            <div className="card-body" style={{ padding: '16px 20px' }}>
+            <div className="card-body" style={{ padding: '12px 16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', overflowX: 'auto', paddingBottom: 4 }}>
                 {allStops.map((stop, i) => (
                   <div key={stop} style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
@@ -287,7 +293,7 @@ export default function Routes() {
             </button>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {routes.map(route => {
               const isLoading = loadingOptions === route.id;
               const hasReturn = route.returnTo && route.returnTo !== route.to;
@@ -310,7 +316,7 @@ export default function Routes() {
                   {/* Gradient header */}
                   <div className="route-card-header" style={{
                     background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
-                    padding: '18px 20px',
+                    padding: '12px 16px',
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
                     flexWrap: 'wrap',
                   }}>
@@ -421,7 +427,7 @@ export default function Routes() {
                   )}
 
                   {/* Transport options */}
-                  <div style={{ padding: '16px 20px 20px' }}>
+                  <div style={{ padding: '10px 14px 14px' }}>
                     {isLoading ? (
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px 0', gap: 16 }}>
                         <div style={{ display: 'flex', gap: 14 }}>
@@ -612,7 +618,7 @@ export default function Routes() {
                       )}
 
                       {/* Return transport options */}
-                      <div style={{ padding: '12px 20px 20px' }}>
+                      <div style={{ padding: '8px 14px 14px' }}>
                         {retAvailable.length === 0 ? (
                           <p style={{ fontSize: 13, color: 'var(--text-tertiary)', textAlign: 'center', padding: '16px 0' }}>
                             No travel options found for this return route.
@@ -778,7 +784,7 @@ export default function Routes() {
                       <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--brand)', display: 'inline-block' }} /> From
                     </label>
                     <input className="form-input" placeholder="e.g. Mumbai" value={newRoute.from}
-                      onChange={e => setNewRoute(p => ({ ...p, from: e.target.value, returnTo: p.returnTo || e.target.value }))} />
+                      onChange={e => setNewRoute(p => ({ ...p, from: e.target.value }))} />
                   </div>
                   <div className="form-group" style={{ marginBottom: 0 }}>
                     <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
