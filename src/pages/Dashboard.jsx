@@ -124,6 +124,141 @@ const DASH_STYLES = `
   .dash-orb-b { animation: dashOrbB 11s ease-in-out infinite; }
   .dash-orb-c { animation: dashOrbC 13s ease-in-out infinite; }
 
+  /* ────────── Slambook hero ────────── */
+  @keyframes slamWiggle {
+    0%, 100% { transform: rotate(-1.2deg); }
+    50%      { transform: rotate(0.4deg); }
+  }
+  @keyframes slamCountPop {
+    0%   { transform: scale(0.7); opacity: 0; }
+    60%  { transform: scale(1.12); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes slamStickerBounce {
+    0%, 100% { transform: rotate(-8deg) translateY(0); }
+    50%      { transform: rotate(-8deg) translateY(-3px); }
+  }
+
+  .slam-card {
+    position: relative;
+    background:
+      linear-gradient(135deg, #fffbeb 0%, #ffedd5 60%, #fef3c7 100%);
+    border-radius: 18px;
+    padding: 22px 22px 20px;
+    margin-bottom: 18px;
+    border: 2px dashed #f59e0b;
+    box-shadow: 0 6px 16px rgba(245, 158, 11, 0.12),
+                0 1px 0 rgba(255,255,255,0.6) inset;
+    overflow: hidden;
+    transform: rotate(-0.6deg);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .slam-card::before {
+    /* notebook ruled lines, very faint */
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      repeating-linear-gradient(transparent 0, transparent 27px, rgba(120,53,15,0.08) 28px);
+    pointer-events: none;
+    opacity: 0.6;
+  }
+  .slam-card:hover { transform: rotate(0deg) translateY(-2px); }
+  .slam-tape {
+    position: absolute;
+    top: -10px; left: 28px;
+    width: 78px; height: 22px;
+    background: rgba(56, 189, 248, 0.35);
+    border: 1px dashed rgba(14, 165, 233, 0.45);
+    border-radius: 2px;
+    transform: rotate(-6deg);
+    box-shadow: 0 2px 5px rgba(14, 165, 233, 0.12);
+  }
+  .slam-tape.right {
+    left: auto; right: 22px;
+    background: rgba(244, 114, 182, 0.32);
+    border-color: rgba(236, 72, 153, 0.45);
+    transform: rotate(7deg);
+  }
+  .slam-title {
+    font-family: 'Caveat', cursive;
+    font-weight: 700;
+    font-size: 30px;
+    color: #92400e;
+    line-height: 1.05;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+  .slam-sub {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 15px;
+    color: #b45309;
+    line-height: 1.45;
+  }
+  .slam-count {
+    font-family: 'Caveat', cursive;
+    font-weight: 700;
+    font-size: 64px;
+    line-height: 1;
+    color: #ea580c;
+    letter-spacing: -1px;
+    text-shadow: 1px 2px 0 rgba(255,255,255,0.7);
+    animation: slamCountPop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    display: inline-block;
+  }
+  .slam-count-label {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #b45309;
+    opacity: 0.8;
+  }
+  .slam-sticker {
+    position: absolute;
+    font-size: 26px;
+    transform: rotate(-8deg);
+    animation: slamStickerBounce 3s ease-in-out infinite;
+    filter: drop-shadow(1px 1px 0 rgba(0,0,0,0.08));
+    pointer-events: none;
+  }
+  .slam-sticker.tr { top: 14px; right: 16px; }
+  .slam-sticker.br { bottom: 12px; right: 24px; transform: rotate(10deg); animation-delay: 0.6s; }
+  .slam-sticker.bl { bottom: 16px; left: 22px; transform: rotate(-12deg); animation-delay: 1.2s; }
+
+  .slam-avatar-stack { display: flex; align-items: center; }
+  .slam-avatar-stack .user-avatar {
+    border: 2px solid #fffbeb;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  }
+  .slam-avatar-stack .user-avatar + .user-avatar { margin-left: -10px; }
+
+  /* Trip cards: slight slambook tilt + tape */
+  .dash-card.slam-tilt {
+    transform: rotate(var(--slam-rot, -0.6deg));
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.35s ease;
+  }
+  .dash-card.slam-tilt:hover { transform: rotate(0deg) translateY(-6px) scale(1.01); }
+  .dash-card.slam-tilt::after {
+    content: '';
+    position: absolute;
+    top: -8px; left: 50%;
+    width: 64px; height: 16px;
+    margin-left: -32px;
+    background: rgba(254, 240, 138, 0.85);
+    border: 1px dashed rgba(202, 138, 4, 0.5);
+    border-radius: 2px;
+    transform: rotate(-3deg);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  @media (max-width: 540px) {
+    .slam-count { font-size: 52px; }
+    .slam-title { font-size: 26px; }
+  }
+
   .dash-card {
     cursor: pointer;
     border-radius: 20px;
@@ -357,6 +492,20 @@ export default function Dashboard() {
   const [deleting, setDeleting] = useState(null);
   const dueCount = useMemo(() => countOutstandingDues(trips, currentUser?.id), [trips, currentUser?.id]);
 
+  // Travel-crew metrics for the slambook hero card.
+  const crewStats = useMemo(() => {
+    const ids = new Set();
+    const samples = [];
+    trips.forEach(t => (t.members || []).forEach(m => {
+      if (!m?.id || m.id === currentUser?.id) return;
+      if (!ids.has(m.id)) {
+        ids.add(m.id);
+        if (samples.length < 6) samples.push(m);
+      }
+    }));
+    return { count: ids.size, sample: samples };
+  }, [trips, currentUser?.id]);
+
   async function handleCreate() {
     if (!newTrip.name.trim() || !newTrip.destination.trim()) return;
     setCreating(true);
@@ -472,6 +621,16 @@ export default function Dashboard() {
       </div>
 
       <div className="page-body">
+        {/* Slambook hero — shows when browsing the trip list, hidden inside an active workspace */}
+        {!activeTrip && tripsLoaded && (
+          <TravelCrewCard
+            count={crewStats.count}
+            sample={crewStats.sample}
+            tripsCount={trips.length}
+            firstName={firstName}
+          />
+        )}
+
         {/* Due banner */}
         {dueCount > 0 && (
           <div className="dash-dues-banner" style={{
@@ -683,6 +842,57 @@ export default function Dashboard() {
   );
 }
 
+function TravelCrewCard({ count, sample, tripsCount, firstName }) {
+  const isEmpty = count === 0;
+  return (
+    <div className="slam-card">
+      <div className="slam-tape" />
+      <div className="slam-tape right" />
+      <span className="slam-sticker tr">✈️</span>
+      <span className="slam-sticker br">🌍</span>
+      <span className="slam-sticker bl">📸</span>
+
+      <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+        <div style={{ flex: '1 1 220px', minWidth: 0 }}>
+          <div className="slam-title">
+            {isEmpty ? `Hey ${firstName} 👋` : `${firstName}'s travel crew`}
+          </div>
+          <p className="slam-sub">
+            {isEmpty
+              ? 'Plan a trip and invite your friends — they\'ll show up here as you build your slambook of adventures.'
+              : <>You{'’'}ve travelled with <strong>{count}</strong> {count === 1 ? 'wanderer' : 'wanderers'} across <strong>{tripsCount}</strong> {tripsCount === 1 ? 'adventure' : 'adventures'} so far ✨</>}
+          </p>
+        </div>
+
+        {!isEmpty && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+              <span className="slam-count" key={count}>{count}</span>
+              <span className="slam-count-label">{count === 1 ? 'friend' : 'friends'}</span>
+            </div>
+            <div className="slam-avatar-stack">
+              {sample.slice(0, 5).map(m => (
+                <div key={m.id} className="user-avatar" title={m.name}
+                  style={{ background: m.color || '#2563eb', width: 30, height: 30, fontSize: 12 }}>
+                  {(m.name?.[0] || '?').toUpperCase()}
+                </div>
+              ))}
+              {count > sample.length && (
+                <div className="user-avatar" style={{
+                  background: 'rgba(180,83,9,0.15)', color: '#92400e',
+                  width: 30, height: 30, fontSize: 11, fontWeight: 800,
+                }}>
+                  +{count - sample.length}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function TripCard({ trip, index, isActive, onSelect, onDelete, isDeleting }) {
   const cfg = statusConfig[trip.status] || statusConfig.planning;
   const StatusIcon = cfg.icon;
@@ -692,11 +902,15 @@ function TripCard({ trip, index, isActive, onSelect, onDelete, isDeleting }) {
   const budgetPct = budgetTotal > 0 ? Math.min(100, (totalSpent / budgetTotal) * 100) : 0;
   const sym = getTripCurrencySymbol(trip);
 
+  // Alternate tilt direction so a row of trip cards reads like polaroids
+  // pinned in a slambook page rather than a uniform grid.
+  const slamRot = ((index % 4) - 1.5) * 0.5; // ~ -0.75deg, -0.25deg, +0.25deg, +0.75deg
   return (
     <div
-      className="dash-card"
+      className="dash-card slam-tilt"
       onClick={onSelect}
       style={{
+        '--slam-rot': `${slamRot}deg`,
         border: isActive ? '2px solid var(--brand)' : '1px solid var(--border-light)',
         boxShadow: isActive
           ? '0 0 0 4px rgba(14,165,233,0.12), var(--shadow-md)'
