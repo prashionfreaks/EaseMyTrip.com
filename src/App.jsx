@@ -314,34 +314,58 @@ export default function App() {
                 <XIcon size={16} />
               </button>
             </div>
-            {/* Trip-scoped extra destinations */}
+            {/* Trip-scoped destinations — chunked into "Trip" and "Plan ahead"
+                groups so the eye picks 1 of 4 per group instead of 1 of 6
+                (Miller / Hick). Tile size bumps to 56px-min-height for Fitts. */}
             {activeTrip && (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, padding: '14px 0' }}>
+              <>
                 {[
-                  { id: 'calendar', label: 'Calendar', Icon: CalendarRange },
-                  { id: 'routes',   label: 'Routes',   Icon: RouteIcon },
-                  { id: 'photos',   label: 'Photos',   Icon: Camera },
-                  { id: 'members',  label: 'Members',  Icon: Users },
-                  { id: 'about',    label: 'About',    Icon: Globe },
-                  { id: 'contingency', label: 'Plans', Icon: ShieldAlert },
-                ].map(({ id, label, Icon }) => (
-                  <button
-                    key={id}
-                    onClick={() => { navigate(id); setAccountSheetOpen(false); }}
-                    style={{
-                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
-                      padding: '12px 8px',
-                      background: 'var(--bg-secondary)',
-                      border: '1px solid var(--border)', borderRadius: 12,
-                      color: 'var(--text-primary)',
-                      fontSize: 12, fontWeight: 600, cursor: 'pointer',
-                    }}
-                  >
-                    <Icon size={20} color="var(--brand)" />
-                    {label}
-                  </button>
+                  {
+                    label: 'Trip',
+                    items: [
+                      { id: 'about',    label: 'About',    Icon: Globe },
+                      { id: 'members',  label: 'Members',  Icon: Users },
+                      { id: 'photos',   label: 'Photos',   Icon: Camera },
+                      { id: 'calendar', label: 'Calendar', Icon: CalendarRange },
+                    ],
+                  },
+                  {
+                    label: 'Plan ahead',
+                    items: [
+                      { id: 'routes',      label: 'Routes', Icon: RouteIcon },
+                      { id: 'contingency', label: 'Plans',  Icon: ShieldAlert },
+                    ],
+                  },
+                ].map(group => (
+                  <div key={group.label} style={{ padding: '12px 0 4px' }}>
+                    <p style={{
+                      fontSize: 10, fontWeight: 800, color: 'var(--text-tertiary)',
+                      textTransform: 'uppercase', letterSpacing: '0.08em',
+                      marginBottom: 8,
+                    }}>{group.label}</p>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+                      {group.items.map(({ id, label, Icon }) => (
+                        <button
+                          key={id}
+                          onClick={() => { navigate(id); setAccountSheetOpen(false); }}
+                          style={{
+                            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                            padding: '12px 6px',
+                            minHeight: 64,
+                            background: 'var(--bg-secondary)',
+                            border: '1px solid var(--border)', borderRadius: 12,
+                            color: 'var(--text-primary)',
+                            fontSize: 11.5, fontWeight: 600, cursor: 'pointer',
+                          }}
+                        >
+                          <Icon size={20} color="var(--maroon)" />
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 ))}
-              </div>
+              </>
             )}
 
             {!isDemo && (

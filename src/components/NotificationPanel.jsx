@@ -142,17 +142,17 @@ export default function NotificationPanel({ onClose }) {
         top: 0, right: 0, bottom: 0,
         width: 380,
         maxWidth: '100vw',
-        background: 'white',
+        background: 'var(--bg-secondary)',
         zIndex: 300,
         display: 'flex',
         flexDirection: 'column',
-        boxShadow: '-8px 0 32px rgba(0,0,0,0.12)',
+        boxShadow: '-8px 0 32px rgba(58, 31, 18, 0.18)',
         animation: 'slideInRight 0.22s ease',
       }}>
         {/* Header */}
         <div style={{
           padding: '20px 20px 16px',
-          borderBottom: '1px solid #f1f5f9',
+          borderBottom: '1px solid var(--border-light)',
           display: 'flex', alignItems: 'center', gap: 12,
         }}>
           <div style={{
@@ -164,7 +164,7 @@ export default function NotificationPanel({ onClose }) {
           </div>
           <div style={{ flex: 1 }}>
             <h2 style={{ fontSize: 16, fontWeight: 700 }}>Payment Dues</h2>
-            <p style={{ fontSize: 12, color: '#94a3b8', marginTop: 1 }}>
+            <p style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 1 }}>
               {total === 0 ? 'All settled up!' : `${total} outstanding across ${trips.length} trip${trips.length !== 1 ? 's' : ''}`}
             </p>
           </div>
@@ -174,7 +174,7 @@ export default function NotificationPanel({ onClose }) {
               width: 32, height: 32, borderRadius: 8,
               border: 'none', background: '#f1f5f9',
               cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: '#64748b',
+              color: 'var(--text-secondary)',
             }}
           >
             <X size={16} />
@@ -185,16 +185,16 @@ export default function NotificationPanel({ onClose }) {
         {total > 0 && (
           <div style={{
             display: 'grid', gridTemplateColumns: '1fr 1fr',
-            borderBottom: '1px solid #f1f5f9',
+            borderBottom: '1px solid var(--border-light)',
           }}>
             <div style={{ padding: '14px 20px', borderRight: '1px solid #f1f5f9' }}>
-              <p style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>You owe</p>
+              <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>You owe</p>
               <p style={{ fontSize: 22, fontWeight: 800, color: '#dc2626', marginTop: 2 }}>
                 ${totalOwed.toFixed(0)}
               </p>
             </div>
             <div style={{ padding: '14px 20px' }}>
-              <p style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Owed to you</p>
+              <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Owed to you</p>
               <p style={{ fontSize: 22, fontWeight: 800, color: '#16a34a', marginTop: 2 }}>
                 ${totalDue.toFixed(0)}
               </p>
@@ -214,8 +214,8 @@ export default function NotificationPanel({ onClose }) {
               }}>
                 <CheckCircle2 size={32} style={{ color: '#16a34a' }} />
               </div>
-              <h3 style={{ fontSize: 16, fontWeight: 700, color: '#0f172a', marginBottom: 6 }}>All Settled Up!</h3>
-              <p style={{ fontSize: 13, color: '#64748b', lineHeight: 1.5 }}>
+              <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>All Settled Up!</h3>
+              <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
                 No outstanding payments across any of your trips. Great job keeping up!
               </p>
             </div>
@@ -249,14 +249,14 @@ export default function NotificationPanel({ onClose }) {
                             <BellRing size={15} />
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <p style={{ fontSize: 13, color: '#0f172a', lineHeight: 1.4 }}>
+                            <p style={{ fontSize: 13, color: 'var(--text-primary)', lineHeight: 1.4 }}>
                               <strong>{r.fromName}</strong> reminded you:{' '}
                               <span style={{ color: '#dc2626', fontWeight: 700 }}>
                                 {cur} {Number(r.amount).toFixed(0)}
                               </span>{' '}
                               due for &ldquo;{r.trip.name}&rdquo;
                             </p>
-                            <p style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>
+                            <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>
                               {r.sentAt ? format(parseISO(r.sentAt), 'MMM d, h:mm a') : ''}
                             </p>
                           </div>
@@ -365,7 +365,7 @@ export default function NotificationPanel({ onClose }) {
         <div style={{
           padding: '12px 16px',
           borderTop: '1px solid #f1f5f9',
-          fontSize: 11, color: '#94a3b8', textAlign: 'center', lineHeight: 1.5,
+          fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'center', lineHeight: 1.5,
         }}>
           "Mark Paid" records the payment locally. Amounts are auto-calculated from your expense splits.
         </div>
@@ -412,8 +412,8 @@ function Section({ title, count, accent, bg, icon, children }) {
 function DueCard({ avatarColor, avatarLetter, name, tripName, amount, amountColor, label, action }) {
   return (
     <div style={{
-      background: '#f8fafc',
-      border: '1px solid #e2e8f0',
+      background: 'var(--bg-tertiary)',
+      border: '1px solid var(--border-light)',
       borderRadius: 12,
       padding: '12px 14px',
     }}>
@@ -428,11 +428,11 @@ function DueCard({ avatarColor, avatarLetter, name, tripName, amount, amountColo
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-            <span style={{ fontSize: 14, fontWeight: 700, color: '#0f172a' }}>{name}</span>
-            <ArrowRight size={11} style={{ color: '#94a3b8', flexShrink: 0 }} />
+            <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{name}</span>
+            <ArrowRight size={11} style={{ color: 'var(--text-tertiary)', flexShrink: 0 }} />
             <span style={{ fontSize: 20, fontWeight: 800, color: amountColor }}>${amount.toFixed(0)}</span>
           </div>
-          <p style={{ fontSize: 11, color: '#94a3b8', marginTop: 1 }}>
+          <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 1 }}>
             {label} · {tripName}
           </p>
         </div>

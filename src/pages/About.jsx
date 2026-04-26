@@ -255,7 +255,7 @@ export default function About() {
 
       {/* Hero banner */}
       <div className="about-section" style={{
-        background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 60%, #0e7490 100%)',
+        background: 'linear-gradient(135deg, #2a1a0d 0%, #4a1e23 55%, #0f766e 100%)',
         borderRadius: 16, margin: '0 0 20px', padding: '32px 28px 28px',
         position: 'relative', overflow: 'hidden',
       }}>
@@ -297,7 +297,7 @@ export default function About() {
 
         {/* Quick Facts */}
         <div className="card about-section">
-          <div style={{ background: 'linear-gradient(135deg, var(--brand) 0%, var(--teal) 100%)', padding: '12px 20px 10px', borderRadius: '14px 14px 0 0', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ background: 'linear-gradient(135deg, #0f766e 0%, #134e4a 100%)', padding: '12px 20px 10px', borderRadius: '14px 14px 0 0', display: 'flex', alignItems: 'center', gap: 8 }}>
             <Info size={14} style={{ color: 'rgba(255,255,255,0.9)' }} />
             <span style={{ fontSize: 12, fontWeight: 700, color: 'white', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Quick Facts</span>
           </div>
@@ -328,7 +328,7 @@ export default function About() {
 
         {/* Best Time to Visit */}
         <div className="card about-section">
-          <div style={{ background: 'linear-gradient(135deg, var(--success) 0%, #059669 100%)', padding: '12px 20px 10px', borderRadius: '14px 14px 0 0', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ background: 'linear-gradient(135deg, #0d9488 0%, #115e59 100%)', padding: '12px 20px 10px', borderRadius: '14px 14px 0 0', display: 'flex', alignItems: 'center', gap: 8 }}>
             <Clock size={14} style={{ color: 'rgba(255,255,255,0.9)' }} />
             <span style={{ fontSize: 12, fontWeight: 700, color: 'white', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Best Time to Visit</span>
           </div>
@@ -353,7 +353,7 @@ export default function About() {
 
         {/* Top Attractions */}
         <div className="card about-section">
-          <div style={{ background: 'linear-gradient(135deg, var(--purple) 0%, #7c3aed 100%)', padding: '12px 20px 10px', borderRadius: '14px 14px 0 0', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ background: 'linear-gradient(135deg, #722f37 0%, #4a1e23 100%)', padding: '12px 20px 10px', borderRadius: '14px 14px 0 0', display: 'flex', alignItems: 'center', gap: 8 }}>
             <Star size={14} style={{ color: 'rgba(255,255,255,0.9)' }} />
             <span style={{ fontSize: 12, fontWeight: 700, color: 'white', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Top Attractions</span>
           </div>
@@ -401,7 +401,7 @@ export default function About() {
         {/* Best Eateries — only if data present */}
         {Array.isArray(info.eateries) && info.eateries.length > 0 && (
           <div className="card about-section">
-            <div style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)', padding: '12px 20px 10px', borderRadius: '14px 14px 0 0', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ background: 'linear-gradient(135deg, #b8860b 0%, #92400e 100%)', padding: '12px 20px 10px', borderRadius: '14px 14px 0 0', display: 'flex', alignItems: 'center', gap: 8 }}>
               <Utensils size={14} style={{ color: 'rgba(255,255,255,0.95)' }} />
               <span style={{ fontSize: 12, fontWeight: 700, color: 'white', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Best Eateries Around</span>
               <span style={{
@@ -487,7 +487,7 @@ export default function About() {
 
         {/* Historical Facts */}
         <div className="card about-section">
-          <div style={{ background: 'linear-gradient(135deg, var(--orange) 0%, #ea580c 100%)', padding: '12px 20px 10px', borderRadius: '14px 14px 0 0', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ background: 'linear-gradient(135deg, #6b3e2c 0%, #3a1f12 100%)', padding: '12px 20px 10px', borderRadius: '14px 14px 0 0', display: 'flex', alignItems: 'center', gap: 8 }}>
             <BookOpen size={14} style={{ color: 'rgba(255,255,255,0.9)' }} />
             <span style={{ fontSize: 12, fontWeight: 700, color: 'white', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Historical Facts</span>
           </div>
@@ -510,7 +510,7 @@ export default function About() {
 
         {/* Local Cuisine */}
         <div className="card about-section">
-          <div style={{ background: 'linear-gradient(135deg, #e11d48 0%, #be123c 100%)', padding: '12px 20px 10px', borderRadius: '14px 14px 0 0', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ background: 'linear-gradient(135deg, #b8860b 0%, #6b3e2c 100%)', padding: '12px 20px 10px', borderRadius: '14px 14px 0 0', display: 'flex', alignItems: 'center', gap: 8 }}>
             <Utensils size={14} style={{ color: 'rgba(255,255,255,0.9)' }} />
             <span style={{ fontSize: 12, fontWeight: 700, color: 'white', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Local Cuisine — Must Try</span>
           </div>
