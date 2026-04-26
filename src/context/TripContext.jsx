@@ -354,6 +354,14 @@ export function TripProvider({ children }) {
     }
   }, [dbUser]);
 
+  const setTripPinned = useCallback((tripId, pinned) => {
+    updateTrip(tripId, trip => ({
+      ...trip,
+      pinned: !!pinned,
+      pinnedAt: pinned ? new Date().toISOString() : null,
+    }));
+  }, [updateTrip]);
+
   const removeMember = useCallback(async (tripId, userId) => {
     // Drop the trip_members row first so the user's RLS access is revoked
     // even if the JSON write later fails. updateTrip handles the JSON side.
@@ -629,7 +637,7 @@ export function TripProvider({ children }) {
 
   const value = useMemo(() => ({
     trips, activeTrip, activeTripId, currentUser, tripsLoaded,
-    setActiveTripId, updateTrip, addTrip, removeTrip, removeMember,
+    setActiveTripId, updateTrip, addTrip, removeTrip, removeMember, setTripPinned,
     vote, addPoll,
     addExpense, updateExpense, deleteExpense,
     addItineraryItem, addContingency, markSettlementPaid,

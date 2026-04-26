@@ -69,6 +69,68 @@ function getRouteDistance(from, to) {
   return data?.dist ?? null;
 }
 
+// ── Region-based flight estimator ──────────────────────────────
+// We don't hallucinate a single price — instead we publish a public range
+// derived from typical economy fares (Skyscanner / Google Flights medians)
+// and tag every result `estimated: true`. The user is told to verify before
+// booking. Numbers are deliberately conservative to avoid optimism bias.
+const REGION_KEYWORDS = {
+  india:   ['mumbai', 'pune', 'delhi', 'bangalore', 'bengaluru', 'chennai', 'kolkata', 'hyderabad', 'goa', 'kerala', 'kochi', 'jaipur', 'agra', 'shimla', 'manali', 'wayanad', 'ladakh', 'leh', 'meghalaya', 'shillong', 'varanasi', 'mahabaleshwar', 'udaipur', 'ahmedabad', 'lucknow', 'ooty', 'hampi', 'mangalore', 'ayodhya', 'amritsar'],
+  seasia:  ['bangkok', 'phuket', 'chiang mai', 'singapore', 'bali', 'jakarta', 'kuala lumpur', 'penang', 'hanoi', 'ho chi minh', 'vietnam', 'thailand', 'indonesia', 'malaysia', 'myanmar', 'manila', 'cambodia', 'siem reap'],
+  eastasia:['tokyo', 'osaka', 'kyoto', 'japan', 'seoul', 'busan', 'south korea', 'beijing', 'shanghai', 'hong kong', 'taipei', 'taiwan'],
+  middleeast: ['dubai', 'uae', 'abu dhabi', 'doha', 'qatar', 'bahrain', 'muscat', 'oman', 'riyadh', 'jeddah', 'tehran', 'baku', 'azerbaijan', 'istanbul', 'turkey'],
+  europe:  ['paris', 'london', 'rome', 'amsterdam', 'berlin', 'madrid', 'barcelona', 'vienna', 'zurich', 'switzerland', 'austria', 'france', 'germany', 'spain', 'portugal', 'italy', 'lisbon', 'prague', 'budapest', 'helsinki', 'finland', 'oslo', 'stockholm', 'copenhagen', 'moscow', 'reykjavik', 'iceland', 'dublin', 'edinburgh', 'uk', 'england'],
+  africa:  ['cairo', 'egypt', 'nairobi', 'kenya', 'johannesburg', 'cape town', 'south africa', 'morocco', 'marrakech', 'tunisia', 'tanzania', 'zanzibar'],
+  americas:['new york', 'nyc', 'los angeles', 'la', 'san francisco', 'chicago', 'miami', 'toronto', 'vancouver', 'montreal', 'mexico', 'cancun', 'costa rica', 'san jose', 'panama', 'rio', 'sao paulo', 'buenos aires', 'lima', 'cusco', 'havana', 'cuba'],
+  oceania: ['sydney', 'melbourne', 'brisbane', 'perth', 'auckland', 'wellington', 'queenstown', 'fiji', 'australia', 'new zealand'],
+  srilanka:['colombo', 'kandy', 'galle', 'srilanka', 'sri lanka', 'ceylon'],
+  bhutan:  ['thimphu', 'paro', 'bhutan'],
+  nepal:   ['kathmandu', 'pokhara', 'nepal'],
+  maldives:['maldives', 'male'],
+};
+
+function regionOf(city) {
+  if (!city) return null;
+  const lower = city.toLowerCase();
+  for (const [region, keys] of Object.entries(REGION_KEYWORDS)) {
+    if (keys.some(k => lower.includes(k))) return region;
+  }
+  return null;
+}
+
+// Range tables — [minHours, maxHours, minINR, maxINR]. Values reflect
+// typical economy round-trip-aware one-way fares from major hubs.
+const FLIGHT_RANGES = {
+  // From → To (region pairs). Lookup is symmetric.
+  'india|india':       [1, 3,    4500,   9500,  'Domestic — IndiGo / Air India / Vistara'],
+  'india|seasia':      [4, 7,   18000,  38000,  'IndiGo / Thai / Singapore Airlines · 4–7 h'],
+  'india|eastasia':    [6, 10,  35000,  65000,  'Air India / ANA / Korean Air · 6–10 h'],
+  'india|middleeast':  [3, 5,   14000,  30000,  'IndiGo / Emirates / Qatar · 3–5 h'],
+  'india|europe':      [8, 12,  48000,  90000,  'Lufthansa / British Airways / Air India · 8–12 h, often via DXB / DOH'],
+  'india|africa':      [8, 13,  40000,  85000,  'Ethiopian / Kenya Airways / EgyptAir · 8–13 h with stop'],
+  'india|americas':    [18, 28, 70000, 145000,  'Air India / United / Lufthansa · 18–28 h with 1–2 stops'],
+  'india|oceania':     [11, 16, 55000, 105000,  'Singapore Airlines / Qantas · 11–16 h with stop'],
+  'india|srilanka':    [1, 4,    9000,  22000,  'SriLankan / IndiGo · 1–4 h'],
+  'india|bhutan':      [2, 4,   18000,  32000,  'Druk Air / Bhutan Airlines · 2–4 h, restricted runways'],
+  'india|nepal':       [1, 3,   12000,  26000,  'IndiGo / Buddha Air · 1–3 h'],
+  'india|maldives':    [3, 6,   22000,  45000,  'IndiGo / Maldivian · 3–6 h'],
+  // Cross-region (non-India origin) — generic fallback values
+  'seasia|seasia':     [2, 5,   12000,  30000,  'AirAsia / Thai / Singapore Air · regional · 2–5 h'],
+  'europe|europe':     [1, 4,    8000,  28000,  'Ryanair / EasyJet · intra-Europe · 1–4 h'],
+  'americas|americas': [3, 8,   28000,  75000,  'Domestic Americas · 3–8 h'],
+};
+
+function rangeKeyFor(fromCity, toCity) {
+  const a = regionOf(fromCity);
+  const b = regionOf(toCity);
+  if (!a || !b) return null;
+  // Prefer "india|other" form if either side is India, else "a|b" sorted.
+  if (a === 'india' && b !== 'india') return `india|${b}`;
+  if (b === 'india' && a !== 'india') return `india|${a}`;
+  if (a === b) return `${a}|${a}`;
+  return null; // unhandled pair — caller falls back to generic estimate
+}
+
 function generateOptions(from, to, isINR) {
   const key = getRouteKey(from, to);
   const data = INDIAN_ROUTES[key];
@@ -82,18 +144,36 @@ function generateOptions(from, to, isINR) {
     });
   }
 
-  // Unknown pair — could be international (Pune → Costa Rica) or just
-  // long-haul domestic. Train / bus / car estimates would be misleading,
-  // so only suggest a flight and tell the user to verify on a booking site.
-  return [
-    {
+  // No curated entry. Try a region-based flight range estimate.
+  const rangeKey = rangeKeyFor(from, to);
+  const range = rangeKey ? FLIGHT_RANGES[rangeKey] : null;
+
+  if (range) {
+    const [hMin, hMax, costMin, costMax, note] = range;
+    const midDuration = Math.round(((hMin + hMax) / 2) * 60);
+    const midCostINR = Math.round((costMin + costMax) / 2);
+    const cost = isINR ? midCostINR : Math.round(midCostINR / 83);
+    const minCost = isINR ? costMin : Math.round(costMin / 83);
+    const maxCost = isINR ? costMax : Math.round(costMax / 83);
+    return [{
       mode: 'flight',
-      duration: 0,
-      cost: 0,
-      note: 'Long-haul / international route — check Skyscanner, Google Flights, or MakeMyTrip for live fares and durations.',
-      placeholder: true,
-    },
-  ];
+      duration: midDuration,
+      cost,
+      costRange: [minCost, maxCost],
+      hourRange: [hMin, hMax],
+      note: `Approx. range — ${note}. Verify on Skyscanner / Google Flights before booking.`,
+      estimated: true,
+    }];
+  }
+
+  // Last resort — region unknown (very obscure city). Honest about it.
+  return [{
+    mode: 'flight',
+    duration: 0,
+    cost: 0,
+    note: 'Couldn\'t identify the region from those city names. Search the route on Skyscanner or Google Flights for live fares.',
+    placeholder: true,
+  }];
 }
 
 export default function Routes() {
@@ -175,16 +255,16 @@ export default function Routes() {
         .route-card { animation: slideUp 0.25s ease; }
         .mode-card {
           position: relative;
-          border-radius: 12px;
-          padding: 12px;
+          border-radius: 10px;
+          padding: 10px 12px;
           border: 1.5px solid var(--border-light);
           background: var(--bg-secondary);
           transition: box-shadow 0.15s, border-color 0.15s, transform 0.15s;
           overflow: hidden;
         }
         .mode-card:hover {
-          box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-          transform: translateY(-2px);
+          box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+          transform: translateY(-1px);
         }
         .delete-btn {
           opacity: 0;
@@ -470,121 +550,18 @@ export default function Routes() {
                     ) : (
                       <>
                         <div className="transport-grid">
-                          {available.map(opt => {
-                            const cfg = MODE_CONFIG[opt.mode] || MODE_CONFIG.car;
-                            const Icon = cfg.icon;
-                            const isCheapest = cheapest?.mode === opt.mode;
-                            const isFastest  = fastest?.mode === opt.mode;
-                            const isHighlighted = isCheapest || isFastest;
-
-                            return (
-                              <div key={opt.mode} className="mode-card" style={{
-                                borderColor: isHighlighted ? cfg.color + '50' : 'var(--border-light)',
-                                background: isHighlighted ? cfg.bg : 'var(--bg-secondary)',
-                              }}>
-                                {/* Colored top bar */}
-                                <div style={{
-                                  position: 'absolute', top: 0, left: 0, right: 0, height: 3,
-                                  background: cfg.color,
-                                  borderRadius: '14px 14px 0 0',
-                                  opacity: isHighlighted ? 1 : 0.35,
-                                }} />
-
-                                {/* Badge row */}
-                                <div style={{ display: 'flex', gap: 4, minHeight: 20, marginBottom: 12, flexWrap: 'wrap' }}>
-                                  {isFastest && (
-                                    <span style={{ fontSize: 9, fontWeight: 800, background: '#06b6d4', color: 'white', padding: '2px 8px', borderRadius: 99, display: 'flex', alignItems: 'center', gap: 3 }}>
-                                      <Zap size={8} /> FASTEST
-                                    </span>
-                                  )}
-                                  {isCheapest && (
-                                    <span style={{ fontSize: 9, fontWeight: 800, background: '#10b981', color: 'white', padding: '2px 8px', borderRadius: 99, display: 'flex', alignItems: 'center', gap: 3 }}>
-                                      <Wallet size={8} /> CHEAPEST
-                                    </span>
-                                  )}
-                                </div>
-
-                                {/* Icon + label */}
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-                                  <div style={{
-                                    width: 38, height: 38, borderRadius: 10,
-                                    background: cfg.color + '20',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    flexShrink: 0,
-                                  }}>
-                                    <Icon size={18} style={{ color: cfg.color }} />
-                                  </div>
-                                  <span style={{ fontWeight: 800, fontSize: 14, color: cfg.color }}>{cfg.label}</span>
-                                </div>
-
-                                {/* Price (or "Check fares" for placeholder) */}
-                                <div style={{ marginBottom: 6 }}>
-                                  {opt.placeholder ? (
-                                    <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-secondary)', lineHeight: 1 }}>
-                                      Check live fares
-                                    </span>
-                                  ) : (
-                                    <>
-                                      <div style={{ display: 'flex', alignItems: 'baseline', gap: 5 }}>
-                                        <span style={{ fontSize: 22, fontWeight: 900, color: 'var(--text-primary)', lineHeight: 1 }}>
-                                          {sym}{opt.cost.toLocaleString()}
-                                        </span>
-                                        <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 500 }}>/ person</span>
-                                      </div>
-                                      {!hasReturn && (
-                                        <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>
-                                          RT ~{sym}{(opt.cost * 2).toLocaleString()}
-                                        </p>
-                                      )}
-                                    </>
-                                  )}
-                                </div>
-
-                                {/* Duration — hide entirely for placeholders */}
-                                {!opt.placeholder && (
-                                  <div style={{
-                                    display: 'inline-flex', alignItems: 'center', gap: 5,
-                                    background: 'rgba(0,0,0,0.05)', borderRadius: 6,
-                                    padding: '4px 8px', marginBottom: 10,
-                                  }}>
-                                    <Clock size={11} style={{ color: 'var(--text-tertiary)' }} />
-                                    <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)' }}>{fmtDuration(opt.duration)}</span>
-                                  </div>
-                                )}
-
-                                {/* Note */}
-                                <p style={{ fontSize: 11, color: 'var(--text-tertiary)', lineHeight: 1.5, borderTop: '1px solid rgba(0,0,0,0.06)', paddingTop: 8, marginTop: 2 }}>
-                                  {opt.note}
-                                </p>
-
-                                {/* Booking links */}
-                                {(BOOKING_PLATFORMS[opt.mode] || []).length > 0 && (
-                                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 10 }}>
-                                    {BOOKING_PLATFORMS[opt.mode].map(p => (
-                                      <a
-                                        key={p.name}
-                                        href={p.buildUrl(route.from, route.to)}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        style={{
-                                          fontSize: 10, fontWeight: 700,
-                                          padding: '5px 10px', borderRadius: 8,
-                                          background: cfg.color + '15',
-                                          color: cfg.color,
-                                          border: `1px solid ${cfg.color}30`,
-                                          textDecoration: 'none',
-                                          display: 'inline-flex', alignItems: 'center', gap: 4,
-                                          transition: 'all 0.15s',
-                                        }}
-                                      >
-                                        <ExternalLink size={9} /> {p.name}
-                                      </a>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          })}
+                          {available.map(opt => (
+                            <ModeCard
+                              key={opt.mode}
+                              opt={opt}
+                              isCheapest={cheapest?.mode === opt.mode}
+                              isFastest={fastest?.mode === opt.mode}
+                              hasReturn={hasReturn}
+                              sym={sym}
+                              fromCity={route.from}
+                              toCity={route.to}
+                            />
+                          ))}
                         </div>
 
                         <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 14, display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -648,93 +625,18 @@ export default function Routes() {
                           </p>
                         ) : (
                           <div className="transport-grid">
-                            {retAvailable.map(opt => {
-                              const cfg = MODE_CONFIG[opt.mode] || MODE_CONFIG.car;
-                              const Icon = cfg.icon;
-                              const isCheapest = retCheapest?.mode === opt.mode;
-                              const isFastest  = retFastest?.mode === opt.mode;
-                              const isHighlighted = isCheapest || isFastest;
-
-                              return (
-                                <div key={opt.mode} className="mode-card" style={{
-                                  borderColor: isHighlighted ? cfg.color + '50' : 'var(--border-light)',
-                                  background: isHighlighted ? cfg.bg : 'var(--bg-secondary)',
-                                }}>
-                                  <div style={{
-                                    position: 'absolute', top: 0, left: 0, right: 0, height: 3,
-                                    background: cfg.color, borderRadius: '14px 14px 0 0',
-                                    opacity: isHighlighted ? 1 : 0.35,
-                                  }} />
-                                  <div style={{ display: 'flex', gap: 4, minHeight: 20, marginBottom: 12, flexWrap: 'wrap' }}>
-                                    {isFastest && (
-                                      <span style={{ fontSize: 9, fontWeight: 800, background: '#06b6d4', color: 'white', padding: '2px 8px', borderRadius: 99, display: 'flex', alignItems: 'center', gap: 3 }}>
-                                        <Zap size={8} /> FASTEST
-                                      </span>
-                                    )}
-                                    {isCheapest && (
-                                      <span style={{ fontSize: 9, fontWeight: 800, background: '#10b981', color: 'white', padding: '2px 8px', borderRadius: 99, display: 'flex', alignItems: 'center', gap: 3 }}>
-                                        <Wallet size={8} /> CHEAPEST
-                                      </span>
-                                    )}
-                                  </div>
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-                                    <div style={{
-                                      width: 38, height: 38, borderRadius: 10,
-                                      background: cfg.color + '20',
-                                      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                                    }}>
-                                      <Icon size={18} style={{ color: cfg.color }} />
-                                    </div>
-                                    <span style={{ fontWeight: 800, fontSize: 14, color: cfg.color }}>{cfg.label}</span>
-                                  </div>
-                                  <div style={{ marginBottom: 6 }}>
-                                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 5 }}>
-                                      <span style={{ fontSize: 22, fontWeight: 900, color: 'var(--text-primary)', lineHeight: 1 }}>
-                                        {sym}{opt.cost.toLocaleString()}
-                                      </span>
-                                      <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 500 }}>/ person</span>
-                                    </div>
-                                  </div>
-                                  <div style={{
-                                    display: 'inline-flex', alignItems: 'center', gap: 5,
-                                    background: 'rgba(0,0,0,0.05)', borderRadius: 6,
-                                    padding: '4px 8px', marginBottom: 10,
-                                  }}>
-                                    <Clock size={11} style={{ color: 'var(--text-tertiary)' }} />
-                                    <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)' }}>{fmtDuration(opt.duration)}</span>
-                                  </div>
-                                  <p style={{ fontSize: 11, color: 'var(--text-tertiary)', lineHeight: 1.5, borderTop: '1px solid rgba(0,0,0,0.06)', paddingTop: 8, marginTop: 2 }}>
-                                    {opt.note}
-                                  </p>
-
-                                  {/* Booking links */}
-                                  {(BOOKING_PLATFORMS[opt.mode] || []).length > 0 && (
-                                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 10 }}>
-                                      {BOOKING_PLATFORMS[opt.mode].map(p => (
-                                        <a
-                                          key={p.name}
-                                          href={p.buildUrl(route.to, route.returnTo)}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          style={{
-                                            fontSize: 10, fontWeight: 700,
-                                            padding: '5px 10px', borderRadius: 8,
-                                            background: cfg.color + '15',
-                                            color: cfg.color,
-                                            border: `1px solid ${cfg.color}30`,
-                                            textDecoration: 'none',
-                                            display: 'inline-flex', alignItems: 'center', gap: 4,
-                                            transition: 'all 0.15s',
-                                          }}
-                                        >
-                                          <ExternalLink size={9} /> {p.name}
-                                        </a>
-                                      ))}
-                                    </div>
-                                  )}
-                                </div>
-                              );
-                            })}
+                            {retAvailable.map(opt => (
+                              <ModeCard
+                                key={opt.mode}
+                                opt={opt}
+                                isCheapest={retCheapest?.mode === opt.mode}
+                                isFastest={retFastest?.mode === opt.mode}
+                                hasReturn
+                                sym={sym}
+                                fromCity={route.to}
+                                toCity={route.returnTo}
+                              />
+                            ))}
                           </div>
                         )}
                       </div>
@@ -832,5 +734,132 @@ export default function Routes() {
         </div>
       )}
     </>
+  );
+}
+
+
+/* ─── Compact ModeCard ───────────────────────────────────────────────── */
+function ModeCard({ opt, isCheapest, isFastest, hasReturn, sym, fromCity, toCity }) {
+  const cfg = MODE_CONFIG[opt.mode] || MODE_CONFIG.car;
+  const Icon = cfg.icon;
+  const isHighlighted = isCheapest || isFastest;
+  const platforms = BOOKING_PLATFORMS[opt.mode] || [];
+
+  return (
+    <div className="mode-card" style={{
+      borderColor: isHighlighted ? cfg.color + '50' : 'var(--border-light)',
+      background: isHighlighted ? cfg.bg : 'var(--bg-secondary)',
+    }}>
+      {/* Top accent bar */}
+      <div style={{
+        position: 'absolute', top: 0, left: 0, right: 0, height: 2,
+        background: cfg.color, opacity: isHighlighted ? 1 : 0.3,
+      }} />
+
+      {/* Header row: icon + label + badges + price (all on one line) */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+        <div style={{
+          width: 26, height: 26, borderRadius: 8,
+          background: cfg.color + '20',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          flexShrink: 0,
+        }}>
+          <Icon size={14} style={{ color: cfg.color }} />
+        </div>
+        <span style={{ fontWeight: 800, fontSize: 13, color: cfg.color }}>{cfg.label}</span>
+        <div style={{ marginLeft: 'auto', display: 'flex', gap: 3 }}>
+          {isFastest && (
+            <span title="Fastest" style={{
+              fontSize: 9, fontWeight: 800, background: '#06b6d4', color: 'white',
+              padding: '1px 6px', borderRadius: 99, display: 'inline-flex', alignItems: 'center', gap: 2,
+            }}><Zap size={8} /></span>
+          )}
+          {isCheapest && (
+            <span title="Cheapest" style={{
+              fontSize: 9, fontWeight: 800, background: '#10b981', color: 'white',
+              padding: '1px 6px', borderRadius: 99, display: 'inline-flex', alignItems: 'center', gap: 2,
+            }}><Wallet size={8} /></span>
+          )}
+        </div>
+      </div>
+
+      {/* Price + duration on a single tight line */}
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
+        {opt.placeholder ? (
+          <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-secondary)' }}>
+            Check live fares
+          </span>
+        ) : opt.estimated && opt.costRange ? (
+          <>
+            <span style={{ fontSize: 16, fontWeight: 900, color: 'var(--text-primary)', lineHeight: 1 }}>
+              {sym}{opt.costRange[0].toLocaleString()}–{opt.costRange[1].toLocaleString()}
+            </span>
+            <span style={{ fontSize: 10, fontWeight: 700, color: '#b45309', background: '#fef3c7', padding: '1px 6px', borderRadius: 99 }}>
+              estimate
+            </span>
+          </>
+        ) : (
+          <>
+            <span style={{ fontSize: 18, fontWeight: 900, color: 'var(--text-primary)', lineHeight: 1 }}>
+              {sym}{opt.cost.toLocaleString()}
+            </span>
+            <span style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 500 }}>/ person</span>
+          </>
+        )}
+        {!opt.placeholder && (
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: 3,
+            fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)',
+            background: 'rgba(0,0,0,0.04)', borderRadius: 5, padding: '2px 6px',
+          }}>
+            <Clock size={10} />
+            {opt.estimated && opt.hourRange
+              ? `${opt.hourRange[0]}–${opt.hourRange[1]} h`
+              : (function() {
+                  const h = Math.floor(opt.duration / 60);
+                  const m = opt.duration % 60;
+                  return h > 0 ? `${h}h${m ? ` ${m}m` : ''}` : `${m}m`;
+                })()}
+          </span>
+        )}
+      </div>
+
+      {/* Note (kept short, 2 lines max) */}
+      {opt.note && (
+        <p style={{
+          fontSize: 11, color: 'var(--text-tertiary)', lineHeight: 1.4,
+          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+          overflow: 'hidden', marginBottom: platforms.length ? 6 : 0,
+        }}>
+          {opt.note}
+        </p>
+      )}
+
+      {/* Booking links */}
+      {platforms.length > 0 && (
+        <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+          {platforms.map(p => (
+            <a
+              key={p.name}
+              href={p.buildUrl(fromCity, toCity)}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={e => e.stopPropagation()}
+              style={{
+                fontSize: 10, fontWeight: 700,
+                padding: '3px 8px', borderRadius: 6,
+                background: cfg.color + '15',
+                color: cfg.color,
+                border: `1px solid ${cfg.color}30`,
+                textDecoration: 'none',
+                display: 'inline-flex', alignItems: 'center', gap: 3,
+              }}
+            >
+              <ExternalLink size={9} /> {p.name}
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

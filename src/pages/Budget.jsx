@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useTrips } from '../context/TripContext';
 import Modal from '../components/Modal';
+import { toast } from '../lib/toast';
 import { getMemberById } from '../data/sampleData';
 import {
   Plus, Wallet, Users, ArrowRight,
@@ -116,13 +117,25 @@ export default function Budget() {
     );
   }
 
+  // Pick a paidBy default that's actually a real member id, falling through
+  // current user → first member → '' (only if the trip is empty).
+  function defaultPaidBy() {
+    if (currentUser?.id && members.some(m => m.id === currentUser.id)) return currentUser.id;
+    return members[0]?.id || '';
+  }
+
   function resetExpenseForm() {
     setNewExpense({
       title: '', amount: '', category: 'transport',
-      paidBy: currentUser?.id || '', splitAmong: [],
+      paidBy: defaultPaidBy(), splitAmong: [],
       date: new Date().toISOString().split('T')[0],
     });
     setEditingExpenseId(null);
+  }
+
+  function openAddExpense() {
+    resetExpenseForm();
+    setShowAdd(true);
   }
 
   function openEditExpense(exp) {
@@ -130,7 +143,7 @@ export default function Budget() {
       title: exp.title || '',
       amount: String(exp.amount ?? ''),
       category: exp.category || 'transport',
-      paidBy: exp.paidBy || currentUser?.id || '',
+      paidBy: exp.paidBy || defaultPaidBy(),
       splitAmong: Array.isArray(exp.splitAmong) ? [...exp.splitAmong] : [],
       date: exp.date || new Date().toISOString().split('T')[0],
     });
@@ -139,16 +152,30 @@ export default function Budget() {
   }
 
   function handleSaveExpense() {
-    if (!newExpense.title || !newExpense.amount) return;
+    const title = (newExpense.title || '').trim();
+    if (!title) { toast.error('Give the expense a name first.'); return; }
     const amount = Number(newExpense.amount);
-    if (!Number.isFinite(amount) || amount <= 0) return;
-    const splitAmong = newExpense.splitAmong.length > 0 ? newExpense.splitAmong : members.map(m => m.id);
-    const payload = { ...newExpense, amount, splitAmong };
+    if (!Number.isFinite(amount) || amount <= 0) {
+      toast.error('Enter an amount greater than 0.');
+      return;
+    }
+    if (!members.length) { toast.error('Add members to the trip first.'); return; }
+    const paidBy = newExpense.paidBy || defaultPaidBy();
+    if (!paidBy) { toast.error("Pick who paid for this expense."); return; }
+    const splitAmong = newExpense.splitAmong.length > 0
+      ? newExpense.splitAmong
+      : members.map(m => m.id);
+    const payload = {
+      ...newExpense,
+      title, amount, paidBy, splitAmong,
+    };
 
     if (editingExpenseId) {
       updateExpense(activeTrip.id, editingExpenseId, payload);
+      toast.success('Expense updated');
     } else {
       addExpense(activeTrip.id, payload);
+      toast.success('Expense added');
     }
     resetExpenseForm();
     setShowAdd(false);
@@ -166,7 +193,7 @@ export default function Budget() {
           <h1>Budget & Expenses</h1>
           <p>{activeTrip.name} — {expenses.length} expenses tracked</p>
         </div>
-        <button className="btn btn-primary" onClick={() => setShowAdd(true)}>
+        <button className="btn btn-primary" onClick={openAddExpense}>
           <Plus size={16} /> Add Expense
         </button>
       </div>
@@ -417,7 +444,7 @@ export default function Budget() {
                   <Receipt className="empty-icon" />
                   <h3>No expenses yet</h3>
                   <p>Start tracking your trip expenses.</p>
-                  <button className="btn btn-primary" onClick={() => setShowAdd(true)}>
+                  <button className="btn btn-primary" onClick={openAddExpense}>
                     <Plus size={16} /> Add First Expense
                   </button>
                 </div>

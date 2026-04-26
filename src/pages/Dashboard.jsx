@@ -7,7 +7,7 @@ import TripDetail from '../components/TripDetail';
 import {
   Plus, MapPin, Calendar, Vote, Wallet,
   Clock, CheckCircle2, Trash2, Bell,
-  ArrowRight, Map,
+  ArrowRight, Map, Pin, PinOff,
 } from 'lucide-react';
 import { getTripCurrencySymbol } from '../lib/itinerary';
 import DestinationPicker from '../components/DestinationPicker';
@@ -304,6 +304,14 @@ const DASH_STYLES = `
     transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
                 box-shadow 0.35s ease;
   }
+  /* Warm-tone surface so trip cards complement the beige page background.
+     A whisper of cream into white instead of pure white-on-beige. */
+  .warm-card {
+    background: linear-gradient(180deg, #fffaf0 0%, #fdf3df 100%);
+  }
+  .warm-card.pinned {
+    background: linear-gradient(180deg, #fffaf0 0%, #fde9c8 100%);
+  }
   .dash-card:active {
     transform: translateY(-3px) scale(0.995);
   }
@@ -313,14 +321,13 @@ const DASH_STYLES = `
   .dash-card .card-cover .cover-overlay {
     transition: opacity 0.4s ease;
   }
-  .dash-card .card-delete {
-    opacity: 0;
-    transition: opacity 0.2s ease, transform 0.2s ease;
-    transform: scale(0.85);
-  }
-  /* Touch devices can't hover — keep delete visible so trips can still be removed */
+  .dash-card .card-actions { opacity: 0; transition: opacity 0.2s ease; }
+  .dash-card .card-action,
+  .dash-card .card-delete { transition: transform 0.15s ease, background 0.15s ease; }
+  .dash-card:hover .card-actions { opacity: 1; }
+  /* Touch devices can't hover — keep actions visible so trips can be pinned/deleted */
   @media (hover: none), (pointer: coarse) {
-    .dash-card .card-delete { opacity: 1; transform: scale(1); }
+    .dash-card .card-actions { opacity: 1; }
   }
   .dash-card .card-arrow {
     opacity: 0;
@@ -383,7 +390,6 @@ const DASH_STYLES = `
     }
     .dash-card:hover .card-cover img { transform: scale(1.08); }
     .dash-card:hover .card-cover .cover-overlay { opacity: 0.7; }
-    .dash-card:hover .card-delete { opacity: 1; transform: scale(1); }
     .dash-card:hover .card-arrow { opacity: 1; transform: translateX(0); }
 
     .dash-create-card:hover::before { opacity: 1; }
@@ -518,8 +524,20 @@ function getGreeting() {
 }
 
 export default function Dashboard() {
-  const { trips: allTrips, setActiveTripId, activeTrip, addTrip, removeTrip, currentUser, tripsLoaded } = useTrips();
-  const trips = allTrips.filter(t => (t.members || []).some(m => m.id === currentUser?.id));
+  const { trips: allTrips, setActiveTripId, activeTrip, addTrip, removeTrip, setTripPinned, currentUser, tripsLoaded } = useTrips();
+  const trips = useMemo(() => {
+    const mine = allTrips.filter(t => (t.members || []).some(m => m.id === currentUser?.id));
+    // Pinned trips first, newest pin on top within them; rest keeps source order.
+    return [...mine].sort((a, b) => {
+      if (!!a.pinned === !!b.pinned) {
+        if (a.pinned && b.pinned) {
+          return (b.pinnedAt || '').localeCompare(a.pinnedAt || '');
+        }
+        return 0;
+      }
+      return a.pinned ? -1 : 1;
+    });
+  }, [allTrips, currentUser?.id]);
   const [showCreate, setShowCreate] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -731,6 +749,7 @@ export default function Dashboard() {
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
                 onDelete={() => handleDelete(trip)}
+                onTogglePin={() => setTripPinned(trip.id, !trip.pinned)}
                 isDeleting={deleting === trip.id}
               />
             ))}
@@ -919,7 +938,7 @@ function TravelCrewCard({ count, tripsCount, firstName }) {
   );
 }
 
-function TripCard({ trip, index, isActive, onSelect, onDelete, isDeleting }) {
+function TripCard({ trip, index, isActive, onSelect, onDelete, onTogglePin, isDeleting }) {
   const cfg = statusConfig[effectiveTripStatus(trip)] || statusConfig.planning;
   const StatusIcon = cfg.icon;
   const daysUntil = trip.startDate ? differenceInDays(parseISO(trip.startDate), new Date()) : null;
@@ -933,14 +952,20 @@ function TripCard({ trip, index, isActive, onSelect, onDelete, isDeleting }) {
   const slamRot = ((index % 4) - 1.5) * 0.5; // ~ -0.75deg, -0.25deg, +0.25deg, +0.75deg
   return (
     <div
-      className="dash-card slam-tilt"
+      className={`dash-card slam-tilt warm-card${trip.pinned ? ' pinned' : ''}`}
       onClick={onSelect}
       style={{
         '--slam-rot': `${slamRot}deg`,
-        border: isActive ? '2px solid var(--brand)' : '1px solid var(--border-light)',
+        border: isActive
+          ? '2px solid var(--brand)'
+          : trip.pinned
+            ? '2px solid #f59e0b'
+            : '1px solid var(--border-light)',
         boxShadow: isActive
           ? '0 0 0 4px rgba(14,165,233,0.12), var(--shadow-md)'
-          : 'var(--shadow-sm)',
+          : trip.pinned
+            ? '0 6px 18px rgba(245, 158, 11, 0.18), var(--shadow-sm)'
+            : 'var(--shadow-sm)',
         animation: `dashFadeUp 0.5s ease ${index * 0.06}s both`,
       }}
     >
@@ -978,6 +1003,20 @@ function TripCard({ trip, index, isActive, onSelect, onDelete, isDeleting }) {
           </div>
         )}
 
+        {/* Pinned ribbon */}
+        {trip.pinned && !isActive && (
+          <div style={{
+            position: 'absolute', top: 12, left: 12,
+            display: 'inline-flex', alignItems: 'center', gap: 4,
+            background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+            color: 'white', fontSize: 9, fontWeight: 800,
+            padding: '3px 9px 3px 7px', borderRadius: 999, letterSpacing: '0.5px',
+            boxShadow: '0 3px 10px rgba(245,158,11,0.4)',
+          }}>
+            <Pin size={9} /> PINNED
+          </div>
+        )}
+
         {/* Bottom info overlay */}
         <div style={{ position: 'absolute', bottom: 12, left: 14, right: 14 }}>
           <h3 style={{
@@ -995,24 +1034,43 @@ function TripCard({ trip, index, isActive, onSelect, onDelete, isDeleting }) {
           </p>
         </div>
 
-        {/* Delete button */}
-        <button
-          className="card-delete"
-          onClick={e => { e.stopPropagation(); onDelete(); }}
-          title="Delete trip"
-          disabled={isDeleting}
-          style={{
-            position: 'absolute', bottom: 12, right: 12,
-            width: 28, height: 28, borderRadius: 8,
-            background: isDeleting ? 'rgba(220,38,38,0.8)' : 'rgba(0,0,0,0.5)',
-            backdropFilter: 'blur(4px)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            color: 'white', cursor: isDeleting ? 'wait' : 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}
-        >
-          {isDeleting ? <div className="spinner spinner-sm" /> : <Trash2 size={12} />}
-        </button>
+        {/* Pin + Delete actions */}
+        <div className="card-actions" style={{
+          position: 'absolute', bottom: 12, right: 12,
+          display: 'flex', gap: 6,
+        }}>
+          <button
+            className="card-action"
+            onClick={e => { e.stopPropagation(); onTogglePin(); }}
+            title={trip.pinned ? 'Unpin from top' : 'Pin to top'}
+            style={{
+              width: 28, height: 28, borderRadius: 8,
+              background: trip.pinned ? 'rgba(245,158,11,0.85)' : 'rgba(0,0,0,0.5)',
+              backdropFilter: 'blur(4px)',
+              border: '1px solid rgba(255,255,255,0.18)',
+              color: 'white', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            {trip.pinned ? <PinOff size={12} /> : <Pin size={12} />}
+          </button>
+          <button
+            className="card-delete"
+            onClick={e => { e.stopPropagation(); onDelete(); }}
+            title="Delete trip"
+            disabled={isDeleting}
+            style={{
+              width: 28, height: 28, borderRadius: 8,
+              background: isDeleting ? 'rgba(220,38,38,0.8)' : 'rgba(0,0,0,0.5)',
+              backdropFilter: 'blur(4px)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              color: 'white', cursor: isDeleting ? 'wait' : 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            {isDeleting ? <div className="spinner spinner-sm" /> : <Trash2 size={12} />}
+          </button>
+        </div>
       </div>
 
       {/* Card body */}
