@@ -354,6 +354,22 @@ export function TripProvider({ children }) {
     }
   }, [dbUser]);
 
+  const setTripStay = useCallback((tripId, stay) => {
+    // stay: { confirmed, name, area, notes }  (or null to clear)
+    updateTrip(tripId, trip => ({
+      ...trip,
+      stay: stay
+        ? {
+            confirmed: !!stay.confirmed,
+            name: stay.name?.trim() || '',
+            area: stay.area?.trim() || '',
+            notes: stay.notes?.trim() || '',
+            updatedAt: new Date().toISOString(),
+          }
+        : null,
+    }));
+  }, [updateTrip]);
+
   const setTripPinned = useCallback((tripId, pinned) => {
     updateTrip(tripId, trip => ({
       ...trip,
@@ -637,7 +653,7 @@ export function TripProvider({ children }) {
 
   const value = useMemo(() => ({
     trips, activeTrip, activeTripId, currentUser, tripsLoaded,
-    setActiveTripId, updateTrip, addTrip, removeTrip, removeMember, setTripPinned,
+    setActiveTripId, updateTrip, addTrip, removeTrip, removeMember, setTripPinned, setTripStay,
     vote, addPoll,
     addExpense, updateExpense, deleteExpense,
     addItineraryItem, addContingency, markSettlementPaid,

@@ -6,24 +6,55 @@ import { supabase, isSupabaseConfigured } from './supabase';
 // (demo mode), we fall back to the built-in templates.
 export function hasAIKey() { return isSupabaseConfigured; }
 
-export async function generateItinerary(destination, startDate, endDate) {
+export async function generateItinerary(destination, startDate, endDate, opts = {}) {
   const start = parseISO(startDate);
   const numDays = Math.max(1, Math.round((parseISO(endDate) - start) / 86400000) + 1);
   const { key } = matchDestination(destination);
   const currency = INDIAN_DEST_KEYS.has(key) ? 'INR' : 'USD';
+  const stay = opts.stay && opts.stay.confirmed ? opts.stay : null;
   if (isSupabaseConfigured) {
     try {
-      const days = await generateWithClaude(destination, startDate, endDate, numDays, start);
-      return { days, currency };
+      const days = await generateWithClaude(destination, startDate, endDate, numDays, start, stay);
+      return { days: applyStay(days, stay), currency };
     }
     catch (err) { console.warn('Itinerary AI failed, using built-in:', err.message); }
   }
-  return generateBuiltIn(destination, startDate, numDays, start);
+  const built = generateBuiltIn(destination, startDate, numDays, start);
+  return { days: applyStay(built.days, stay), currency: built.currency };
 }
 
-async function generateWithClaude(destination, startDate, endDate, numDays, startDateObj) {
+// Replace the first accommodation entry on Day 1 with the user's confirmed
+// stay so the itinerary reflects reality. If no accommodation slot exists,
+// inject one. Idempotent — safe to call with stay=null.
+function applyStay(days, stay) {
+  if (!stay || !Array.isArray(days) || !days.length) return days;
+  const day0 = { ...days[0], items: [...(days[0].items || [])] };
+  const accIdx = day0.items.findIndex(it => it.type === 'accommodation');
+  const stayItem = {
+    id: 'it-stay-' + Date.now(),
+    time: '15:00',
+    title: `Check in — ${stay.name}`,
+    type: 'accommodation',
+    duration: 30,
+    notes: [stay.area && `Area: ${stay.area}`, stay.notes].filter(Boolean).join(' · '),
+    cost: 0,
+  };
+  if (accIdx >= 0) {
+    const original = day0.items[accIdx];
+    day0.items[accIdx] = { ...stayItem, time: original.time || '15:00', cost: original.cost || 0 };
+  } else {
+    day0.items.splice(1, 0, stayItem);
+  }
+  return [day0, ...days.slice(1)];
+}
+
+async function generateWithClaude(destination, startDate, endDate, numDays, startDateObj, stay) {
   const { data, error } = await supabase.functions.invoke('generate-itinerary', {
-    body: { destination, startDate, endDate, numDays },
+    body: {
+      destination, startDate, endDate, numDays,
+      // Pass the confirmed stay so the model can plan around its area.
+      stay: stay ? { name: stay.name, area: stay.area, notes: stay.notes } : null,
+    },
   });
   if (error) throw new Error(error.message || 'Edge function error');
   if (!Array.isArray(data?.days)) throw new Error('Invalid response');

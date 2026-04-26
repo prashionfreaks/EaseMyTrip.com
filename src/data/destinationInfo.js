@@ -27,6 +27,12 @@ export const DESTINATION_INFO = {
       { name: 'Gyukatsu Motomura', area: 'Shibuya, Tokyo', rating: 4.6, reviews: 6420, type: 'Beef Cutlet', price: '¥¥', mustTry: 'Gyukatsu Teishoku' },
       { name: 'Afuri Ramen', area: 'Harajuku, Tokyo', rating: 4.5, reviews: 8910, type: 'Yuzu Ramen', price: '¥¥', mustTry: 'Yuzu Shio Ramen' },
     ],
+    stays: [
+      { name: 'Park Hyatt Tokyo', area: 'Shinjuku', rating: 4.7, reviews: 3120, type: 'Luxury hotel', price: '¥¥¥¥', highlight: 'Lost-in-Translation views, top-floor pool' },
+      { name: 'Hotel Gracery Shinjuku', area: 'Shinjuku', rating: 4.4, reviews: 5410, type: 'Mid-range hotel', price: '¥¥', highlight: 'Walk to Robot Restaurant, Godzilla head on roof' },
+      { name: 'Khaosan Tokyo Origami', area: 'Asakusa', rating: 4.5, reviews: 1890, type: 'Hostel', price: '¥', highlight: 'Steps from Senso-ji, social common floor' },
+      { name: 'Ryokan Sawanoya', area: 'Yanaka, Tokyo', rating: 4.6, reviews: 980, type: 'Traditional ryokan', price: '¥¥', highlight: 'Tatami rooms, family-run since 1949' },
+    ],
   },
 
   bali: {
@@ -53,6 +59,12 @@ export const DESTINATION_INFO = {
       { name: 'Warung Babi Guling Ibu Oka', area: 'Ubud', rating: 4.4, reviews: 8760, type: 'Balinese', price: '$', mustTry: 'Babi Guling Platter' },
       { name: 'La Brisa', area: 'Canggu', rating: 4.6, reviews: 12300, type: 'Beach Club / Mediterranean', price: '$$$', mustTry: 'Wood-Fired Pizza + Sunset' },
       { name: "Naughty Nuri's Warung", area: 'Ubud', rating: 4.5, reviews: 9450, type: 'BBQ Ribs', price: '$$', mustTry: 'Pork Ribs + Martini' },
+    ],
+    stays: [
+      { name: 'Bisma Eight', area: 'Ubud', rating: 4.7, reviews: 1820, type: 'Boutique resort', price: '$$$', highlight: 'Copper-tub jungle suites, pool with rice-paddy view' },
+      { name: 'Como Uma Ubud', area: 'Ubud', rating: 4.7, reviews: 1100, type: 'Luxury wellness retreat', price: '$$$$', highlight: 'Yoga shala, Ayurvedic spa, valley sunsets' },
+      { name: 'The Slow', area: 'Canggu', rating: 4.5, reviews: 920, type: 'Surf-and-art lodge', price: '$$$', highlight: 'Walking distance to Batu Bolong beach' },
+      { name: 'M Boutique Hostel', area: 'Seminyak', rating: 4.4, reviews: 2400, type: 'Hostel', price: '$', highlight: 'Pool deck, private pods, central Seminyak' },
     ],
   },
 
@@ -81,6 +93,12 @@ export const DESTINATION_INFO = {
       { name: 'Bouillon Pigalle', area: 'Pigalle', rating: 4.4, reviews: 18720, type: 'Classic Bistro', price: '€€', mustTry: 'Bœuf Bourguignon' },
       { name: "L'Ami Jean", area: '7th arrondissement', rating: 4.6, reviews: 2340, type: 'Basque / French', price: '€€€', mustTry: 'Rice Pudding (Riz au Lait)' },
     ],
+    stays: [
+      { name: 'Hôtel Plaza Athénée', area: '8th arrondissement (Champs-Élysées)', rating: 4.8, reviews: 1540, type: 'Palace hotel', price: '€€€€', highlight: 'Eiffel views, red-awning balconies' },
+      { name: 'Hôtel des Grands Boulevards', area: '2nd arrondissement', rating: 4.5, reviews: 2210, type: 'Boutique', price: '€€€', highlight: 'Glass-roof courtyard, walkable to Marais' },
+      { name: 'Generator Paris', area: '10th arrondissement (Canal Saint-Martin)', rating: 4.3, reviews: 6480, type: 'Hostel / hybrid', price: '€', highlight: 'Rooftop bar, near Gare du Nord' },
+      { name: 'Le Pigalle', area: '9th arrondissement', rating: 4.4, reviews: 1880, type: 'Design hotel', price: '€€', highlight: 'Vinyl-record rooms, neighbourhood-style stay' },
+    ],
   },
 
   london: {
@@ -108,6 +126,12 @@ export const DESTINATION_INFO = {
       { name: 'Poppies Fish & Chips', area: 'Spitalfields', rating: 4.5, reviews: 9140, type: 'Fish & Chips', price: '££', mustTry: 'Cod & Chips with Mushy Peas' },
       { name: 'Sketch (The Gallery)', area: 'Mayfair', rating: 4.3, reviews: 8200, type: 'Afternoon Tea', price: '£££', mustTry: 'Pink Room Afternoon Tea' },
     ],
+    stays: [
+      { name: 'The Ned', area: 'Bank / City', rating: 4.6, reviews: 4120, type: 'Members club hotel', price: '£££', highlight: 'Eight restaurants, marble swimming pool' },
+      { name: 'CitizenM Tower of London', area: 'Tower Hill', rating: 4.5, reviews: 7300, type: 'Smart hotel', price: '££', highlight: 'Tower & Thames views, tap-to-control rooms' },
+      { name: 'The Hoxton, Shoreditch', area: 'Shoreditch', rating: 4.5, reviews: 3210, type: 'Boutique', price: '££', highlight: 'Walkable East London, free hour-of-calls' },
+      { name: 'Wombat\'s City Hostel London', area: 'Aldgate', rating: 4.3, reviews: 4900, type: 'Hostel', price: '£', highlight: 'Steps from Tower of London, party basement bar' },
+    ],
   },
 
   dubai: {
@@ -134,6 +158,12 @@ export const DESTINATION_INFO = {
       { name: 'Ravi Restaurant', area: 'Satwa', rating: 4.5, reviews: 14200, type: 'Pakistani', price: 'AED', mustTry: 'Chicken Karahi + Fresh Naan' },
       { name: 'Pierchic', area: 'Madinat Jumeirah', rating: 4.5, reviews: 3950, type: 'Seafood on a Pier', price: 'AED AED AED AED', mustTry: 'Lobster Thermidor with Burj Al Arab Views' },
       { name: 'Zuma Dubai', area: 'DIFC', rating: 4.6, reviews: 4720, type: 'Modern Japanese', price: 'AED AED AED AED', mustTry: 'Black Cod Miso' },
+    ],
+    stays: [
+      { name: 'Atlantis The Palm', area: 'Palm Jumeirah', rating: 4.6, reviews: 9420, type: 'Resort', price: 'AED AED AED AED', highlight: 'Aquaventure waterpark, lost-chambers aquarium' },
+      { name: 'Rove Downtown', area: 'Downtown Dubai', rating: 4.5, reviews: 8200, type: 'Smart hotel', price: 'AED AED', highlight: 'Walk to Burj Khalifa, value pricing' },
+      { name: 'Address Beach Resort', area: 'JBR', rating: 4.6, reviews: 5400, type: 'Beachfront luxury', price: 'AED AED AED AED', highlight: 'Highest infinity pool in the world' },
+      { name: 'Form Hotel Al Jaddaf', area: 'Al Jaddaf', rating: 4.4, reviews: 3100, type: 'Design hotel', price: 'AED AED', highlight: 'Metro-connected, modern design' },
     ],
   },
 
@@ -209,6 +239,12 @@ export const DESTINATION_INFO = {
       { name: 'Vinayak Family Restaurant', area: 'Assagao, North Goa', rating: 4.4, reviews: 2910, type: 'Goan Thali', price: '₹₹', mustTry: 'Pomfret Rava Fry Thali' },
       { name: 'Thalassa', area: 'Vagator', rating: 4.3, reviews: 8720, type: 'Greek with Cliff Views', price: '₹₹₹', mustTry: 'Moussaka + Sunset Seating' },
       { name: "Fisherman's Wharf", area: 'Cavelossim', rating: 4.4, reviews: 6140, type: 'Goan Seafood', price: '₹₹', mustTry: 'Goan Prawn Curry Rice' },
+    ],
+    stays: [
+      { name: 'W Goa', area: 'Vagator, North Goa', rating: 4.5, reviews: 3120, type: 'Beach resort', price: '₹₹₹₹', highlight: 'Cliff-side villas, Sundowner sessions' },
+      { name: 'Mojigao', area: 'Assagao, North Goa', rating: 4.7, reviews: 880, type: 'Eco boutique', price: '₹₹₹', highlight: 'Forest cottages, away from Vagator chaos' },
+      { name: 'Stone Wood Hotel', area: 'Anjuna, North Goa', rating: 4.4, reviews: 2800, type: 'Mid-range hotel', price: '₹₹', highlight: 'Walk to flea market & Anjuna beach' },
+      { name: 'The Hosteller Goa', area: 'Vagator', rating: 4.3, reviews: 5400, type: 'Hostel', price: '₹', highlight: 'Pool, Olive Bar nearby, social vibe' },
     ],
   },
 

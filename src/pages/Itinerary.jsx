@@ -29,7 +29,12 @@ export default function Itinerary() {
     setGenerating(true);
     setGenError(null);
     try {
-      const { days, currency } = await generateItinerary(activeTrip.destination, activeTrip.startDate, activeTrip.endDate);
+      const { days, currency } = await generateItinerary(
+        activeTrip.destination,
+        activeTrip.startDate,
+        activeTrip.endDate,
+        { stay: activeTrip.stay }, // confirmed stay anchors the check-in items
+      );
       updateTrip(activeTrip.id, t => ({
         ...t,
         itinerary: days,

@@ -387,13 +387,19 @@ export default function ChatPage() {
         <div
           style={{
             display: 'flex', gap: 10, alignItems: 'flex-end',
-            background: 'var(--bg-primary)',
+            background: 'var(--bg-input)',
             border: '1.5px solid var(--border)',
             borderRadius: 18, padding: '8px 8px 8px 12px',
-            transition: 'border-color 0.15s',
+            transition: 'border-color 0.15s, box-shadow 0.15s',
           }}
-          onFocusCapture={e => e.currentTarget.style.borderColor = 'var(--brand)'}
-          onBlurCapture={e => e.currentTarget.style.borderColor = 'var(--border)'}
+          onFocusCapture={e => {
+            e.currentTarget.style.borderColor = 'var(--maroon)';
+            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(114,47,55,0.16)';
+          }}
+          onBlurCapture={e => {
+            e.currentTarget.style.borderColor = 'var(--border)';
+            e.currentTarget.style.boxShadow = 'none';
+          }}
         >
           {/* @ button — taps insert @ at cursor */}
           <button

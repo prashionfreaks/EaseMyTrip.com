@@ -1,8 +1,11 @@
+import { useState } from 'react';
 import { useTrips } from '../context/TripContext';
 import { matchDestinationInfo } from '../data/destinationInfo';
+import { toast } from '../lib/toast';
 import {
   MapPin, Star, Clock, BookOpen, Utensils, Info,
   Globe, DollarSign, Languages, Landmark, ExternalLink, Sparkles,
+  BedDouble, CheckCircle2, Pencil, X,
 } from 'lucide-react';
 
 function mapsUrl(query) {
@@ -35,7 +38,7 @@ function RatingStars({ rating }) {
 }
 
 export default function About() {
-  const { activeTrip } = useTrips();
+  const { activeTrip, setTripStay } = useTrips();
 
   if (!activeTrip) {
     return (
@@ -341,6 +344,13 @@ export default function About() {
           </div>
         </div>
 
+        {/* Where you'll stay */}
+        <StayCard
+          trip={activeTrip}
+          stays={info.stays || []}
+          onSave={(stay) => setTripStay(activeTrip.id, stay)}
+        />
+
         {/* Top Attractions */}
         <div className="card about-section">
           <div style={{ background: 'linear-gradient(135deg, var(--purple) 0%, #7c3aed 100%)', padding: '12px 20px 10px', borderRadius: '14px 14px 0 0', display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -523,5 +533,262 @@ export default function About() {
 
       </div>
     </>
+  );
+}
+
+/* ─── Stay finalisation card ─────────────────────────────────────────── */
+function StayCard({ trip, stays, onSave }) {
+  const stay = trip?.stay || null;
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState({ name: '', area: '', notes: '' });
+
+  function startEdit(prefill) {
+    setDraft({
+      name: prefill?.name || stay?.name || '',
+      area: prefill?.area || stay?.area || '',
+      notes: prefill?.notes || stay?.notes || '',
+    });
+    setEditing(true);
+  }
+
+  function commit() {
+    if (!draft.name.trim()) {
+      toast.error('Add the stay name first.');
+      return;
+    }
+    onSave({ confirmed: true, name: draft.name, area: draft.area, notes: draft.notes });
+    setEditing(false);
+    toast.success('Stay saved');
+  }
+
+  function clearStay() {
+    if (!window.confirm('Mark stay as not confirmed?')) return;
+    onSave(null);
+    setEditing(false);
+  }
+
+  return (
+    <div className="card about-section">
+      <div style={{
+        background: 'linear-gradient(135deg, #be185d 0%, #db2777 100%)',
+        padding: '12px 20px 10px', borderRadius: '14px 14px 0 0',
+        display: 'flex', alignItems: 'center', gap: 8,
+      }}>
+        <BedDouble size={14} style={{ color: 'rgba(255,255,255,0.95)' }} />
+        <span style={{ fontSize: 12, fontWeight: 700, color: 'white', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+          Where you&rsquo;ll stay
+        </span>
+        {stay?.confirmed && (
+          <span style={{
+            marginLeft: 'auto', fontSize: 10, fontWeight: 700, color: 'white',
+            background: 'rgba(255,255,255,0.18)', padding: '2px 8px', borderRadius: 99,
+            display: 'inline-flex', alignItems: 'center', gap: 4,
+          }}>
+            <CheckCircle2 size={10} /> Confirmed
+          </span>
+        )}
+      </div>
+
+      <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {stay?.confirmed && !editing && (
+          <div style={{
+            display: 'flex', gap: 12, alignItems: 'flex-start',
+            padding: '14px 16px', borderRadius: 12,
+            background: 'linear-gradient(135deg, #fff1f2, #fef2f2)',
+            border: '1px solid #fbcfe8',
+          }}>
+            <div style={{
+              flexShrink: 0, width: 40, height: 40, borderRadius: 10,
+              background: 'rgba(190,24,93,0.12)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <BedDouble size={18} style={{ color: '#be185d' }} />
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <h4 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>
+                {stay.name}
+              </h4>
+              {stay.area && (
+                <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2, display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <MapPin size={11} /> {stay.area}
+                </p>
+              )}
+              {stay.notes && (
+                <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 6, lineHeight: 1.5 }}>
+                  {stay.notes}
+                </p>
+              )}
+            </div>
+            <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+              <button onClick={() => startEdit()} className="btn btn-sm" style={{
+                background: 'transparent', color: '#be185d',
+                border: '1px solid #f9a8d4', fontSize: 11, padding: '4px 10px',
+              }}>
+                <Pencil size={11} /> Edit
+              </button>
+              <button onClick={clearStay} className="btn btn-sm" style={{
+                background: 'transparent', color: 'var(--text-secondary)',
+                border: '1px solid var(--border)', fontSize: 11, padding: '4px 10px',
+              }}>
+                <X size={11} /> Clear
+              </button>
+            </div>
+          </div>
+        )}
+
+        {!stay?.confirmed && !editing && (
+          <>
+            <div style={{
+              padding: '12px 14px', borderRadius: 10,
+              background: 'linear-gradient(135deg, #fff7ed, #ffedd5)',
+              border: '1px solid #fdba74',
+              display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
+            }}>
+              <div style={{ flex: '1 1 200px', minWidth: 0 }}>
+                <p style={{ fontSize: 14, fontWeight: 700, color: '#9a3412' }}>
+                  Have you booked a place to stay?
+                </p>
+                <p style={{ fontSize: 12, color: '#b45309', marginTop: 2, lineHeight: 1.4 }}>
+                  Confirming your stay tailors the itinerary check-in &amp; nearby suggestions.
+                </p>
+              </div>
+              <button onClick={() => startEdit()} className="btn btn-primary btn-sm" style={{
+                fontSize: 12, padding: '6px 12px', flexShrink: 0,
+              }}>
+                <CheckCircle2 size={12} /> Yes, mark as booked
+              </button>
+            </div>
+
+            {stays.length > 0 && (
+              <div>
+                <p style={{
+                  fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)',
+                  textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8,
+                  display: 'flex', alignItems: 'center', gap: 5,
+                }}>
+                  <Sparkles size={10} /> Top picks {trip?.destination ? `in ${trip.destination}` : ''} (Google reviews)
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {stays.map(s => (
+                    <button
+                      key={s.name}
+                      onClick={() => startEdit({
+                        name: s.name,
+                        area: s.area,
+                        notes: `${s.type} · ${s.highlight}`,
+                      })}
+                      style={{
+                        display: 'flex', gap: 10, alignItems: 'flex-start',
+                        padding: '12px 14px', borderRadius: 12,
+                        background: 'var(--bg-tertiary)',
+                        border: '1px solid var(--border-light)',
+                        textAlign: 'left', cursor: 'pointer', width: '100%',
+                        transition: 'box-shadow 0.15s, border-color 0.15s',
+                      }}
+                      onMouseOver={e => {
+                        e.currentTarget.style.borderColor = '#f9a8d4';
+                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(190,24,93,0.08)';
+                      }}
+                      onMouseOut={e => {
+                        e.currentTarget.style.borderColor = 'var(--border-light)';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                    >
+                      <div style={{
+                        flexShrink: 0, width: 36, height: 36, borderRadius: 10,
+                        background: 'linear-gradient(135deg, #fce7f3, #fbcfe8)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 18,
+                      }}>🛏️</div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 3 }}>
+                          <h4 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{s.name}</h4>
+                          <span style={{
+                            fontSize: 10, fontWeight: 700, color: '#be185d',
+                            background: '#fce7f3', padding: '1px 7px', borderRadius: 99,
+                          }}>
+                            {s.price}
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
+                          <span style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 3,
+                            fontSize: 12, fontWeight: 700, color: '#92400e',
+                          }}>
+                            <Star size={11} fill="#f59e0b" color="#f59e0b" /> {s.rating?.toFixed(1)}
+                          </span>
+                          <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
+                            ({s.reviews?.toLocaleString()} reviews)
+                          </span>
+                          <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>·</span>
+                          <span style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>
+                            {s.type}
+                          </span>
+                        </div>
+                        <p style={{ fontSize: 11.5, color: 'var(--text-secondary)', lineHeight: 1.5, display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <MapPin size={10} /> {s.area} · {s.highlight}
+                        </p>
+                      </div>
+                      <span style={{
+                        fontSize: 11, fontWeight: 700, color: '#be185d',
+                        whiteSpace: 'nowrap', alignSelf: 'center',
+                      }}>
+                        Pick this →
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {stays.length === 0 && (
+              <button onClick={() => startEdit()} className="btn btn-secondary btn-sm" style={{ alignSelf: 'flex-start' }}>
+                <Pencil size={12} /> Add your own stay
+              </button>
+            )}
+          </>
+        )}
+
+        {editing && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label">Stay name</label>
+              <input
+                className="form-input"
+                placeholder="Hotel / hostel / Airbnb"
+                value={draft.name}
+                onChange={e => setDraft(d => ({ ...d, name: e.target.value }))}
+                autoFocus
+              />
+            </div>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label">Area / neighbourhood (optional)</label>
+              <input
+                className="form-input"
+                placeholder="e.g. Shibuya, Tokyo"
+                value={draft.area}
+                onChange={e => setDraft(d => ({ ...d, area: e.target.value }))}
+              />
+            </div>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label">Notes (optional)</label>
+              <textarea
+                className="form-input"
+                placeholder="Check-in time, booking ref, anything useful for the group"
+                value={draft.notes}
+                onChange={e => setDraft(d => ({ ...d, notes: e.target.value }))}
+                rows={2}
+              />
+            </div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={() => setEditing(false)} className="btn btn-secondary btn-sm">Cancel</button>
+              <button onClick={commit} className="btn btn-primary btn-sm">
+                <CheckCircle2 size={13} /> Confirm stay
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

@@ -16,7 +16,16 @@
   /* Text */
   --text-primary: #0f1c2e;
   --text-secondary: #4a607a;
-  --text-tertiary: #8ba3bc;
+  /* Greyed / placeholder text — warm burgundy at low saturation so it
+     reads against the ivory inputs and beige page background. */
+  --text-tertiary: #8c5a64;
+
+  /* Surfaces specific to inputs — ivory instead of cool white. */
+  --bg-input: #fffff0;
+
+  /* Accents — rich maroon/burgundy for focus rings and emphasis details. */
+  --maroon: #722f37;
+  --maroon-light: #f5e8ea;
 
   /* Borders */
   --border: #dde5f0;
