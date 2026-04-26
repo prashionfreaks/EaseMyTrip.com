@@ -7,47 +7,54 @@
 }
 
 :root {
-  /* Backgrounds */
-  --bg-primary: #eef2f7;
-  --bg-secondary: #ffffff;
-  --bg-tertiary: #f4f7fb;
-  --bg-accent: #e2eaf4;
+  /* ── Travel-journal palette ─────────────────────────────────────
+     Page = warm beige (set on body via gradient).
+     Surfaces = warm cream so cards stop reading as cold white.
+     Inputs  = ivory.
+     Brand   = deep teal (jade) so CTAs are calm and unmistakable.
+     Accent  = rich maroon for focus rings, hover, emphasis.
+     Text    = warm brown family — never cold blue-grey. */
+  --bg-primary: #f5ebcd;          /* page neutral fallback (matches body grad end) */
+  --bg-secondary: #fdfaef;        /* card surface — warm cream, replaces white */
+  --bg-tertiary: #f8f1de;         /* sub-surface (banner strips, chips) */
+  --bg-accent: #efe3c2;           /* mild emphasis (filter chips, hovered rows) */
+  --bg-input: #fffff0;            /* ivory inputs */
 
-  /* Text */
-  --text-primary: #0f1c2e;
-  --text-secondary: #4a607a;
-  /* Greyed / placeholder text — warm burgundy at low saturation so it
-     reads against the ivory inputs and beige page background. */
-  --text-tertiary: #8c5a64;
+  /* Text — warm browns for everything that used cool navy/grey. */
+  --text-primary: #2a1a0d;
+  --text-secondary: #5a4232;
+  --text-tertiary: #8c5a64;       /* muted burgundy for greyed labels */
 
-  /* Surfaces specific to inputs — ivory instead of cool white. */
-  --bg-input: #fffff0;
+  /* Borders — warm sand. */
+  --border: #e2d4b3;
+  --border-light: #ece2c5;
 
-  /* Accents — rich maroon/burgundy for focus rings and emphasis details. */
+  /* Brand — deep teal/jade. Pairs cleanly with beige + maroon. */
+  --brand: #0f766e;
+  --brand-light: #ccfbf1;
+  --brand-dark: #134e4a;
+
+  /* Maroon accent (focus rings, emphasis). */
   --maroon: #722f37;
   --maroon-light: #f5e8ea;
+  --maroon-dark: #4a1e23;
 
-  /* Borders */
-  --border: #dde5f0;
-  --border-light: #eaf0f8;
+  /* Gold accent — sparingly for highlights. */
+  --gold: #b8860b;
+  --gold-light: #fde9bf;
 
-  /* Brand — vibrant sky blue */
-  --brand: #0ea5e9;
-  --brand-light: #e0f2fe;
-  --brand-dark: #0284c7;
-
-  /* Status */
-  --success: #10b981;
-  --success-light: #d1fae5;
-  --warning: #f59e0b;
+  /* Status — slightly warmed so they sit on beige without screaming. */
+  --success: #15803d;
+  --success-light: #dcfce7;
+  --warning: #b45309;
   --warning-light: #fef3c7;
-  --danger: #ef4444;
+  --danger: #b91c1c;
   --danger-light: #fee2e2;
-  --purple: #8b5cf6;
+  --purple: #7c3aed;
   --purple-light: #ede9fe;
-  --teal: #06b6d4;
+  --teal: #0d9488;
   --teal-light: #cffafe;
-  --orange: #f97316;
+  --orange: #c2410c;
   --orange-light: #ffedd5;
 
   /* Radius */
@@ -62,7 +69,7 @@
   --shadow-md: 0 4px 12px rgba(15, 28, 46, 0.08);
   --shadow-lg: 0 8px 24px rgba(15, 28, 46, 0.10);
   --shadow-xl: 0 16px 48px rgba(15, 28, 46, 0.14);
-  --shadow-brand: 0 4px 16px rgba(14, 165, 233, 0.30);
+  --shadow-brand: 0 4px 16px rgba(15, 118, 110, 0.30);
   --shadow-card-hover: 0 12px 32px rgba(15, 28, 46, 0.14);
 
   --font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -102,10 +109,34 @@ body {
 a { color: inherit; text-decoration: none; }
 
 /* Headings → Exo 2. Components that opt-in to a different display font
-   (e.g. the slambook hero's hand-written titles) override this locally. */
+   (e.g. the slambook hero's hand-written titles) override this locally.
+   Sizes amplified for stronger hierarchy (Miller / Aesthetic-Usability). */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
+}
+h1 { font-size: 28px; font-weight: 800; line-height: 1.15; }
+h2 { font-size: 22px; font-weight: 800; line-height: 1.2; }
+h3 { font-size: 17px; font-weight: 700; line-height: 1.25; }
+h4 { font-size: 15px; font-weight: 700; line-height: 1.3; }
+
+/* Page header gets a touch more presence on desktop. */
+.page-header h1 { font-size: 30px; }
+@media (max-width: 768px) {
+  h1 { font-size: 22px; }
+  .page-header h1 { font-size: 22px; }
+}
+
+/* Fitts's Law floor — any interactive element bigger than 32px tall on
+   touch devices, and a hit-padding cushion on smaller buttons. */
+@media (hover: none), (pointer: coarse) {
+  button, a.btn, .btn {
+    min-height: 40px;
+  }
+  button.btn-sm, .btn-sm {
+    min-height: 32px;
+  }
 }
 
 button {

@@ -305,12 +305,15 @@ const DASH_STYLES = `
                 box-shadow 0.35s ease;
   }
   /* Warm-tone surface so trip cards complement the beige page background.
-     A whisper of cream into white instead of pure white-on-beige. */
+     A whisper of cream into ivory instead of cold white-on-beige. */
   .warm-card {
-    background: linear-gradient(180deg, #fffaf0 0%, #fdf3df 100%);
+    background: linear-gradient(180deg, #fffaf0 0%, #faf0d8 100%);
   }
   .warm-card.pinned {
-    background: linear-gradient(180deg, #fffaf0 0%, #fde9c8 100%);
+    background: linear-gradient(180deg, #fffaf0 0%, #fbe2bb 100%);
+  }
+  .warm-card .progress-bar {
+    background: rgba(114, 47, 55, 0.08);
   }
   .dash-card:active {
     transform: translateY(-3px) scale(0.995);
@@ -1034,7 +1037,8 @@ function TripCard({ trip, index, isActive, onSelect, onDelete, onTogglePin, isDe
           </p>
         </div>
 
-        {/* Pin + Delete actions */}
+        {/* Pin + Delete actions — bumped to 36px so tap targets clear
+            Fitts's Law's recommended floor on touch devices. */}
         <div className="card-actions" style={{
           position: 'absolute', bottom: 12, right: 12,
           display: 'flex', gap: 6,
@@ -1043,32 +1047,34 @@ function TripCard({ trip, index, isActive, onSelect, onDelete, onTogglePin, isDe
             className="card-action"
             onClick={e => { e.stopPropagation(); onTogglePin(); }}
             title={trip.pinned ? 'Unpin from top' : 'Pin to top'}
+            aria-label={trip.pinned ? 'Unpin trip' : 'Pin trip to top'}
             style={{
-              width: 28, height: 28, borderRadius: 8,
-              background: trip.pinned ? 'rgba(245,158,11,0.85)' : 'rgba(0,0,0,0.5)',
-              backdropFilter: 'blur(4px)',
-              border: '1px solid rgba(255,255,255,0.18)',
+              width: 36, height: 36, borderRadius: 10,
+              background: trip.pinned ? 'rgba(184,134,11,0.9)' : 'rgba(42,26,13,0.55)',
+              backdropFilter: 'blur(6px)',
+              border: '1px solid rgba(255,255,255,0.2)',
               color: 'white', cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}
           >
-            {trip.pinned ? <PinOff size={12} /> : <Pin size={12} />}
+            {trip.pinned ? <PinOff size={14} /> : <Pin size={14} />}
           </button>
           <button
             className="card-delete"
             onClick={e => { e.stopPropagation(); onDelete(); }}
             title="Delete trip"
+            aria-label="Delete trip"
             disabled={isDeleting}
             style={{
-              width: 28, height: 28, borderRadius: 8,
-              background: isDeleting ? 'rgba(220,38,38,0.8)' : 'rgba(0,0,0,0.5)',
-              backdropFilter: 'blur(4px)',
-              border: '1px solid rgba(255,255,255,0.1)',
+              width: 36, height: 36, borderRadius: 10,
+              background: isDeleting ? 'rgba(185,28,28,0.85)' : 'rgba(42,26,13,0.55)',
+              backdropFilter: 'blur(6px)',
+              border: '1px solid rgba(255,255,255,0.15)',
               color: 'white', cursor: isDeleting ? 'wait' : 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}
           >
-            {isDeleting ? <div className="spinner spinner-sm" /> : <Trash2 size={12} />}
+            {isDeleting ? <div className="spinner spinner-sm" /> : <Trash2 size={14} />}
           </button>
         </div>
       </div>

@@ -149,7 +149,7 @@ export default function TripDetail({ onInvite, defaultTab = 'chat' }) {
           .trip-detail-card {
             position: fixed !important;
             top: calc(56px + env(safe-area-inset-top, 0px));
-            bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+            bottom: calc(60px + env(safe-area-inset-bottom, 0px));
             left: 0; right: 0;
             z-index: 50;
             border-radius: 0 !important;
@@ -235,7 +235,7 @@ export default function TripDetail({ onInvite, defaultTab = 'chat' }) {
 
         {/* ── Mobile compact header bar ── */}
         <div className="trip-cover-mobile" style={{
-          background: 'linear-gradient(135deg, #0c1a2e, #1a2f50)',
+          background: 'linear-gradient(135deg, #3a1f12 0%, #6b3e2c 100%)',
           padding: '10px 14px',
           alignItems: 'center', gap: 10,
           flexShrink: 0,

@@ -106,7 +106,7 @@ export default function App() {
       <div style={{
         minHeight: '100vh',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+        background: 'linear-gradient(135deg, #3a1f12 0%, #5a3a26 100%)',
         flexDirection: 'column', gap: 24,
         overflow: 'hidden',
       }}>
@@ -287,7 +287,7 @@ export default function App() {
           />
           <div style={{
             position: 'fixed', left: 0, right: 0,
-            bottom: 'calc(56px + env(safe-area-inset-bottom))',
+            bottom: 'calc(60px + env(safe-area-inset-bottom))',
             background: 'var(--bg-primary)',
             borderRadius: '16px 16px 0 0',
             padding: '12px 16px 16px',
