@@ -57,6 +57,7 @@
   --shadow-card-hover: 0 12px 32px rgba(15, 28, 46, 0.14);
 
   --font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-heading: 'Exo 2', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 html {
@@ -80,6 +81,13 @@ body {
 }
 
 a { color: inherit; text-decoration: none; }
+
+/* Headings → Exo 2. Components that opt-in to a different display font
+   (e.g. the slambook hero's hand-written titles) override this locally. */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  letter-spacing: -0.01em;
+}
 
 button {
   font-family: var(--font);

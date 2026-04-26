@@ -153,6 +153,20 @@ const DASH_STYLES = `
     transform: rotate(-0.6deg);
     transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
+  .slam-card--compact {
+    padding: 14px 18px 14px;
+    margin-bottom: 14px;
+  }
+  @keyframes slamNumPop {
+    0%   { transform: translateY(2px) scale(0.85); color: #f97316; }
+    60%  { transform: translateY(-2px) scale(1.18); color: #ea580c; }
+    100% { transform: translateY(0) scale(1); color: inherit; }
+  }
+  .slam-num-pop {
+    display: inline-block;
+    animation: slamNumPop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    will-change: transform;
+  }
   .slam-card::before {
     /* notebook ruled lines, very faint */
     content: '';
@@ -625,7 +639,6 @@ export default function Dashboard() {
         {!activeTrip && tripsLoaded && (
           <TravelCrewCard
             count={crewStats.count}
-            sample={crewStats.sample}
             tripsCount={trips.length}
             firstName={firstName}
           />
@@ -842,52 +855,43 @@ export default function Dashboard() {
   );
 }
 
-function TravelCrewCard({ count, sample, tripsCount, firstName }) {
-  const isEmpty = count === 0;
+function AnimNum({ value, duration = 1200 }) {
+  const [shown, setShown] = useState(0);
+  useEffect(() => {
+    if (typeof value !== 'number' || value <= 0) { setShown(value || 0); return; }
+    let raf;
+    const start = performance.now();
+    const tick = (now) => {
+      const t = Math.min(1, (now - start) / duration);
+      // ease-out-cubic so it lands softly
+      const eased = 1 - Math.pow(1 - t, 3);
+      setShown(Math.round(value * eased));
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [value, duration]);
+  return <span className="slam-num-pop" key={value}>{shown}</span>;
+}
+
+function TravelCrewCard({ count, tripsCount, firstName }) {
+  const isEmpty = count === 0 && tripsCount === 0;
   return (
-    <div className="slam-card">
+    <div className="slam-card slam-card--compact">
       <div className="slam-tape" />
       <div className="slam-tape right" />
       <span className="slam-sticker tr">✈️</span>
-      <span className="slam-sticker br">🌍</span>
       <span className="slam-sticker bl">📸</span>
 
-      <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-        <div style={{ flex: '1 1 220px', minWidth: 0 }}>
-          <div className="slam-title">
-            {isEmpty ? `Hey ${firstName} 👋` : `${firstName}'s travel crew`}
-          </div>
-          <p className="slam-sub">
-            {isEmpty
-              ? 'Plan a trip and invite your friends — they\'ll show up here as you build your slambook of adventures.'
-              : <>You{'’'}ve travelled with <strong>{count}</strong> {count === 1 ? 'wanderer' : 'wanderers'} across <strong>{tripsCount}</strong> {tripsCount === 1 ? 'adventure' : 'adventures'} so far ✨</>}
-          </p>
+      <div style={{ position: 'relative' }}>
+        <div className="slam-title">
+          {isEmpty ? `Hey ${firstName} 👋` : `${firstName}'s travel crew`}
         </div>
-
-        {!isEmpty && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-              <span className="slam-count" key={count}>{count}</span>
-              <span className="slam-count-label">{count === 1 ? 'friend' : 'friends'}</span>
-            </div>
-            <div className="slam-avatar-stack">
-              {sample.slice(0, 5).map(m => (
-                <div key={m.id} className="user-avatar" title={m.name}
-                  style={{ background: m.color || '#2563eb', width: 30, height: 30, fontSize: 12 }}>
-                  {(m.name?.[0] || '?').toUpperCase()}
-                </div>
-              ))}
-              {count > sample.length && (
-                <div className="user-avatar" style={{
-                  background: 'rgba(180,83,9,0.15)', color: '#92400e',
-                  width: 30, height: 30, fontSize: 11, fontWeight: 800,
-                }}>
-                  +{count - sample.length}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+        <p className="slam-sub">
+          {isEmpty
+            ? 'Plan a trip and invite your friends — they\'ll show up here as you build your slambook of adventures.'
+            : <>You{'’'}ve travelled with <strong><AnimNum value={count} /></strong> {count === 1 ? 'wanderer' : 'wanderers'} across <strong><AnimNum value={tripsCount} duration={900} /></strong> {tripsCount === 1 ? 'adventure' : 'adventures'} so far ✨</>}
+        </p>
       </div>
     </div>
   );
