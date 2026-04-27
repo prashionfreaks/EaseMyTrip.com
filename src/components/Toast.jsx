@@ -5,7 +5,7 @@ import { toastBus } from '../lib/toast';
 const TYPE_STYLE = {
   success: { Icon: CheckCircle2, color: '#10b981', border: 'rgba(16,185,129,0.35)' },
   error:   { Icon: AlertTriangle, color: '#ef4444', border: 'rgba(239,68,68,0.35)' },
-  info:    { Icon: Info, color: '#0ea5e9', border: 'rgba(14,165,233,0.35)' },
+  info:    { Icon: Info, color: '#0f766e', border: 'rgba(15, 118, 110, 0.35)' },
 };
 
 export function ToastProvider({ children }) {

@@ -22,7 +22,7 @@ export default function Sidebar({ currentPage, onNavigate, isOpen, onClose }) {
         {/* Logo */}
         <div className="sidebar-header">
           <div className="sidebar-logo">
-            <div className="logo-icon" style={{ background: 'linear-gradient(135deg, #2563eb, #7c3aed)' }}>
+            <div className="logo-icon" style={{ background: 'linear-gradient(135deg, #722f37, #b8860b)' }}>
               <Compass size={17} />
             </div>
             TripSync
@@ -78,7 +78,7 @@ export default function Sidebar({ currentPage, onNavigate, isOpen, onClose }) {
         <div className="sidebar-user" style={{ flexDirection: 'column', gap: 0, padding: '12px 16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', marginBottom: !isDemo ? 10 : 0 }}>
             <div className="user-avatar" style={{
-              background: 'linear-gradient(135deg, #2563eb, #7c3aed)',
+              background: 'linear-gradient(135deg, #722f37, #b8860b)',
               width: 34, height: 34, fontSize: 14,
             }}>
               {initials}

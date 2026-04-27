@@ -113,40 +113,40 @@ export default function App() {
         <div style={{ position: 'relative', width: 90, height: 90 }}>
           <div style={{
             position: 'absolute', inset: 0,
-            border: '3px solid rgba(99,102,241,0.15)',
+            border: '3px solid rgba(184, 134, 11, 0.15)',
             borderRadius: '50%',
             animation: 'loaderPulse 2s ease-in-out infinite',
           }} />
           <div style={{
             position: 'absolute', inset: 8,
             border: '3px solid transparent',
-            borderTopColor: '#60a5fa', borderRightColor: '#a78bfa',
+            borderTopColor: '#f5d7a8', borderRightColor: '#e9b87a',
             borderRadius: '50%',
             animation: 'loaderSpin 1.2s linear infinite',
           }} />
           <div style={{
             position: 'absolute', inset: 20,
-            background: 'linear-gradient(135deg, #2563eb, #7c3aed)',
+            background: 'linear-gradient(135deg, #722f37, #b8860b)',
             borderRadius: '50%',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 0 30px rgba(99,102,241,0.4)',
+            boxShadow: '0 0 30px rgba(184, 134, 11, 0.45)',
             animation: 'loaderBounce 2s ease-in-out infinite',
           }}>
-            <Compass size={24} color="white" style={{ animation: 'loaderCompass 3s ease-in-out infinite' }} />
+            <Compass size={24} color="#fdf6e3" style={{ animation: 'loaderCompass 3s ease-in-out infinite' }} />
           </div>
         </div>
 
         <div style={{ textAlign: 'center' }}>
           <p style={{
             fontSize: 18, fontWeight: 700, letterSpacing: '-0.3px',
-            background: 'linear-gradient(90deg, #60a5fa, #c084fc, #60a5fa)',
+            background: 'linear-gradient(90deg, #f5d7a8, #fbbf24, #f5d7a8)',
             backgroundSize: '200% 100%',
             WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
             animation: 'loaderShimmer 2s ease-in-out infinite',
           }}>
             LetsWander
           </p>
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, marginTop: 6 }}>
+          <p style={{ color: 'rgba(245, 215, 168, 0.7)', fontSize: 13, marginTop: 6 }}>
             Getting your trips ready...
           </p>
         </div>
@@ -186,7 +186,7 @@ export default function App() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <div style={{
             width: 28, height: 28, borderRadius: 8,
-            background: 'linear-gradient(135deg, #0ea5e9, #7c3aed)',
+            background: 'linear-gradient(135deg, #722f37, #b8860b)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
             <Compass size={15} color="white" />
@@ -197,7 +197,7 @@ export default function App() {
           <span style={{
             flex: 1, minWidth: 0,
             fontSize: 15, fontWeight: 700,
-            color: '#38bdf8',
+            color: '#f5d7a8',
             overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
             paddingLeft: 10,
           }}>
@@ -298,7 +298,7 @@ export default function App() {
             <div style={{ width: 40, height: 4, background: 'var(--border)', borderRadius: 2, margin: '0 auto 14px' }} />
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '4px 4px 14px', borderBottom: '1px solid var(--border)' }}>
               <div className="user-avatar" style={{
-                background: 'linear-gradient(135deg, #2563eb, #7c3aed)',
+                background: 'linear-gradient(135deg, #722f37, #b8860b)',
                 width: 40, height: 40, fontSize: 15,
               }}>{initials}</div>
               <div style={{ flex: 1, minWidth: 0 }}>

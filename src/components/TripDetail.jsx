@@ -263,7 +263,7 @@ export default function TripDetail({ onInvite, defaultTab = 'chat' }) {
           </div>
           {/* Invite */}
           <button className="btn btn-sm" onClick={onInvite}
-            style={{ background: 'rgba(14,165,233,0.25)', color: '#38bdf8', border: '1px solid rgba(14,165,233,0.3)', flexShrink: 0, padding: '5px 10px' }}>
+            style={{ background: 'rgba(184,134,11,0.28)', color: '#f5d7a8', border: '1px solid rgba(184,134,11,0.4)', flexShrink: 0, padding: '5px 10px' }}>
             <UserPlus size={13} />
           </button>
           {/* Delete trip */}
@@ -292,7 +292,7 @@ export default function TripDetail({ onInvite, defaultTab = 'chat' }) {
                 <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Icon size={15} />
                   {badge > 0 && (
-                    <span style={{ position: 'absolute', top: -5, right: -7, width: 14, height: 14, background: 'linear-gradient(135deg,#0ea5e9,#6366f1)', color: 'white', fontSize: 8, fontWeight: 800, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1.5px solid var(--bg-secondary)' }}>
+                    <span style={{ position: 'absolute', top: -5, right: -7, width: 14, height: 14, background: 'linear-gradient(135deg,#722f37,#b8860b)', color: 'white', fontSize: 8, fontWeight: 800, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1.5px solid var(--bg-secondary)' }}>
                       {badge}
                     </span>
                   )}

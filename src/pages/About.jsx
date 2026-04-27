@@ -116,8 +116,8 @@ export default function About() {
           100% { opacity: 0; transform: scale(0.6) rotate(360deg); }
         }
         @keyframes ripple {
-          0%   { box-shadow: 0 0 0 0 rgba(14,165,233,0.35); }
-          100% { box-shadow: 0 0 0 14px rgba(14,165,233,0); }
+          0%   { box-shadow: 0 0 0 0 rgba(114, 47, 55,0.35); }
+          100% { box-shadow: 0 0 0 14px rgba(114, 47, 55,0); }
         }
 
         .about-section { animation: fadeUp 0.35s ease both; }
@@ -162,7 +162,7 @@ export default function About() {
         .quick-fact-card:hover {
           transform: translateY(-3px);
           border-color: var(--brand);
-          box-shadow: 0 6px 16px rgba(14,165,233,0.1);
+          box-shadow: 0 6px 16px rgba(114, 47, 55,0.1);
         }
         .quick-fact-card:hover .qf-icon { transform: rotate(-8deg) scale(1.15); }
         .qf-icon { transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
@@ -259,13 +259,13 @@ export default function About() {
         borderRadius: 16, margin: '0 0 20px', padding: '32px 28px 28px',
         position: 'relative', overflow: 'hidden',
       }}>
-        <div className="about-hero-blob-a" style={{ position: 'absolute', top: -40, right: -40, width: 200, height: 200, borderRadius: '50%', background: 'rgba(14,165,233,0.15)', pointerEvents: 'none' }} />
+        <div className="about-hero-blob-a" style={{ position: 'absolute', top: -40, right: -40, width: 200, height: 200, borderRadius: '50%', background: 'rgba(184, 134, 11, 0.18)', pointerEvents: 'none' }} />
         <div className="about-hero-blob-b" style={{ position: 'absolute', bottom: -30, left: '40%', width: 140, height: 140, borderRadius: '50%', background: 'rgba(139,92,246,0.12)', pointerEvents: 'none' }} />
 
         <div style={{ position: 'relative' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-            <MapPin size={14} style={{ color: '#38bdf8' }} />
-            <span style={{ fontSize: 12, fontWeight: 700, color: '#38bdf8', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+            <MapPin size={14} style={{ color: '#fbbf24' }} />
+            <span style={{ fontSize: 12, fontWeight: 700, color: '#fbbf24', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
               Destination Guide
             </span>
           </div>

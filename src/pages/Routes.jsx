@@ -316,7 +316,7 @@ export default function Routes() {
                       <div style={{
                         width: 40, height: 40, borderRadius: '50%',
                         background: i === 0
-                          ? 'linear-gradient(135deg, var(--brand), #38bdf8)'
+                          ? 'linear-gradient(135deg, var(--brand), var(--brand-dark))'
                           : i === allStops.length - 1
                             ? 'linear-gradient(135deg, var(--success), #34d399)'
                             : 'var(--bg-tertiary)',
@@ -419,7 +419,7 @@ export default function Routes() {
                         background: 'rgba(255,255,255,0.12)', borderRadius: 8,
                         padding: '6px 12px',
                       }}>
-                        <MapPin size={13} style={{ color: '#38bdf8' }} />
+                        <MapPin size={13} style={{ color: '#fbbf24' }} />
                         <span style={{ fontWeight: 700, fontSize: 15, color: 'white' }}>{route.from}</span>
                       </div>
 
@@ -507,7 +507,7 @@ export default function Routes() {
                     <div style={{
                       padding: '10px 20px 0', display: 'flex', alignItems: 'center', gap: 8,
                     }}>
-                      <MapPin size={13} style={{ color: '#38bdf8' }} />
+                      <MapPin size={13} style={{ color: '#fbbf24' }} />
                       <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                         {route.from} → {route.to}
                       </span>

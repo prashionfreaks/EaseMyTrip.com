@@ -130,8 +130,8 @@ const DASH_STYLES = `
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25));
   }
   @keyframes dashGlow {
-    0%, 100% { box-shadow: 0 0 20px rgba(14,165,233,0.15); }
-    50% { box-shadow: 0 0 30px rgba(14,165,233,0.3); }
+    0%, 100% { box-shadow: 0 0 20px rgba(114,47,55,0.15); }
+    50% { box-shadow: 0 0 30px rgba(114,47,55,0.3); }
   }
   .dash-float-icon { animation: dashFloat 4s ease-in-out infinite; }
   .dash-float-emoji { animation: dashFloatSoft 3.6s ease-in-out infinite; display: inline-block; }
@@ -197,10 +197,10 @@ const DASH_STYLES = `
     top: -10px; left: 28px;
     width: 78px; height: 22px;
     background: rgba(56, 189, 248, 0.35);
-    border: 1px dashed rgba(14, 165, 233, 0.45);
+    border: 1px dashed rgba(184, 134, 11, 0.55);
     border-radius: 2px;
     transform: rotate(-6deg);
-    box-shadow: 0 2px 5px rgba(14, 165, 233, 0.12);
+    box-shadow: 0 2px 5px rgba(184, 134, 11, 0.18);
   }
   .slam-tape.right {
     left: auto; right: 22px;
@@ -352,7 +352,7 @@ const DASH_STYLES = `
     position: absolute;
     inset: 0;
     background: linear-gradient(135deg,
-      rgba(14,165,233,0.04) 0%,
+      rgba(114,47,55,0.04) 0%,
       rgba(99,102,241,0.04) 100%);
     opacity: 0;
     transition: opacity 0.3s ease;
@@ -389,7 +389,7 @@ const DASH_STYLES = `
     .dash-card:hover {
       transform: translateY(-8px) scale(1.01);
       box-shadow: 0 20px 40px rgba(15, 28, 46, 0.15),
-                  0 0 0 1px rgba(14,165,233,0.1);
+                  0 0 0 1px rgba(114,47,55,0.1);
     }
     .dash-card:hover .card-cover img { transform: scale(1.08); }
     .dash-card:hover .card-cover .cover-overlay { opacity: 0.7; }
@@ -399,7 +399,7 @@ const DASH_STYLES = `
     .dash-create-card:hover {
       border-color: var(--brand);
       transform: translateY(-8px) scale(1.01);
-      box-shadow: 0 20px 40px rgba(14,165,233,0.12);
+      box-shadow: 0 20px 40px rgba(114,47,55,0.12);
     }
     .dash-create-card:hover .dash-create-icon { transform: rotate(90deg) scale(1.1); }
 
@@ -770,9 +770,9 @@ export default function Dashboard() {
             >
               <div className="dash-create-icon" style={{
                 width: 56, height: 56, borderRadius: 16,
-                background: 'linear-gradient(135deg, #0ea5e9, #6366f1)',
+                background: 'linear-gradient(135deg, #722f37, #b8860b)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14,
-                boxShadow: '0 8px 20px rgba(14,165,233,0.25)',
+                boxShadow: '0 8px 20px rgba(114,47,55,0.25)',
               }}>
                 <Plus size={26} color="white" />
               </div>
@@ -965,7 +965,7 @@ function TripCard({ trip, index, isActive, onSelect, onDelete, onTogglePin, isDe
             ? '2px solid #f59e0b'
             : '1px solid var(--border-light)',
         boxShadow: isActive
-          ? '0 0 0 4px rgba(14,165,233,0.12), var(--shadow-md)'
+          ? '0 0 0 4px rgba(114,47,55,0.12), var(--shadow-md)'
           : trip.pinned
             ? '0 6px 18px rgba(245, 158, 11, 0.18), var(--shadow-sm)'
             : 'var(--shadow-sm)',
@@ -997,10 +997,10 @@ function TripCard({ trip, index, isActive, onSelect, onDelete, onTogglePin, isDe
         {isActive && (
           <div style={{
             position: 'absolute', top: 12, left: 12,
-            background: 'linear-gradient(135deg, #0ea5e9, #6366f1)',
+            background: 'linear-gradient(135deg, #722f37, #b8860b)',
             color: 'white', fontSize: 9, fontWeight: 800,
             padding: '3px 10px', borderRadius: 999, letterSpacing: '0.5px',
-            boxShadow: '0 3px 10px rgba(14,165,233,0.4)',
+            boxShadow: '0 3px 10px rgba(114,47,55,0.4)',
           }}>
             OPEN
           </div>

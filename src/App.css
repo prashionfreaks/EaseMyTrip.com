@@ -7,7 +7,8 @@
 /* ─── Sidebar ─────────────────────────────────────────── */
 .sidebar {
   width: 260px;
-  background: linear-gradient(180deg, #0c1a2e 0%, #112240 100%);
+  /* Warm coffee column instead of cold navy. Pairs with the beige body. */
+  background: linear-gradient(180deg, #2a1a0d 0%, #3a1f12 100%);
   border-right: none;
   display: flex;
   flex-direction: column;
@@ -17,12 +18,12 @@
   height: 100dvh;
   z-index: 100;
   transition: transform 0.3s ease;
-  box-shadow: 4px 0 24px rgba(0,0,0,0.18);
+  box-shadow: 4px 0 24px rgba(58,31,18,0.25);
 }
 
 .sidebar-header {
   padding: 24px 20px 16px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
 }
 
 .sidebar-logo {
@@ -31,20 +32,21 @@
   gap: 10px;
   font-size: 20px;
   font-weight: 800;
-  color: #e8f4ff;
+  color: #fdf6e3;
   letter-spacing: -0.5px;
 }
 
 .sidebar-logo .logo-icon {
   width: 34px;
   height: 34px;
-  background: linear-gradient(135deg, #0ea5e9, #6366f1);
+  /* Logo dot: maroon → gold for a travel-stamp feel. */
+  background: linear-gradient(135deg, #722f37, #b8860b);
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  box-shadow: 0 4px 12px rgba(14,165,233,0.35);
+  box-shadow: 0 4px 12px rgba(114,47,55,0.35);
 }
 
 .sidebar-nav {
@@ -59,7 +61,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: #3d5a7a;
+  color: #b08a5d;
   padding: 16px 12px 6px;
 }
 
@@ -67,9 +69,9 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 9px 12px;
+  padding: 10px 12px;
   border-radius: var(--radius-md);
-  color: #7a9ab8;
+  color: #d8c8a3;
   font-size: 13.5px;
   font-weight: 500;
   transition: all 0.15s;
@@ -78,14 +80,15 @@
 }
 
 .nav-item:hover {
-  background: rgba(255,255,255,0.06);
-  color: #c8dff5;
+  background: rgba(255,255,255,0.07);
+  color: #fdf6e3;
 }
 
 .nav-item.active {
-  background: linear-gradient(135deg, rgba(14,165,233,0.22), rgba(99,102,241,0.15));
-  color: #38bdf8;
-  font-weight: 600;
+  /* Maroon-on-coffee active state — high contrast, on-theme. */
+  background: linear-gradient(135deg, rgba(245,232,234,0.96), rgba(245,232,234,0.85));
+  color: var(--maroon);
+  font-weight: 700;
 }
 
 .nav-item .nav-icon {
@@ -96,7 +99,7 @@
 
 .nav-item .nav-badge {
   margin-left: auto;
-  background: linear-gradient(135deg, #0ea5e9, #6366f1);
+  background: linear-gradient(135deg, #722f37, #b8860b);
   color: white;
   font-size: 10px;
   font-weight: 700;
@@ -106,11 +109,12 @@
 
 .sidebar-user {
   padding: 14px 16px;
-  border-top: 1px solid rgba(255,255,255,0.06);
+  border-top: 1px solid rgba(255,255,255,0.08);
   display: flex;
   align-items: center;
   gap: 10px;
   flex-shrink: 0;
+  color: #fdf6e3;
 }
 
 .user-avatar {
@@ -134,12 +138,12 @@
 .user-name {
   font-size: 13px;
   font-weight: 600;
-  color: #c8dff5;
+  color: #fdf6e3;
 }
 
 .user-role {
   font-size: 11px;
-  color: #3d5a7a;
+  color: #b08a5d;
 }
 
 /* ─── Main content ────────────────────────────────────── */
@@ -179,8 +183,8 @@
   position: fixed;
   top: 0; left: 0; right: 0;
   height: 56px;
-  background: #0c1a2e;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  background: #2a1a0d;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
   z-index: 90;
   padding: 0 16px;
   align-items: center;
@@ -191,7 +195,7 @@
   font-size: 18px;
   font-weight: 800;
   letter-spacing: -0.5px;
-  color: #e8f4ff;
+  color: #fdf6e3;
 }
 
 .menu-toggle {
@@ -295,12 +299,12 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  background: linear-gradient(135deg, #0f766e, #134e4a);
   color: white;
-  box-shadow: 0 2px 8px rgba(14,165,233,0.30);
+  box-shadow: 0 2px 8px rgba(15, 118, 110, 0.30);
 }
 .btn-primary:hover {
-  background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+  background: linear-gradient(135deg, #14a395, #0f766e);
   box-shadow: var(--shadow-brand);
   transform: translateY(-1px);
 }
@@ -433,7 +437,9 @@ select.form-input { cursor: pointer; }
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(10, 20, 40, 0.55);
+  /* Warm-brown scrim instead of cold navy so the modal feels of a piece
+     with the rest of the app. */
+  background: rgba(58, 31, 18, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -617,7 +623,7 @@ select.form-input { cursor: pointer; }
   position: absolute;
   top: -3px; right: -3px;
   width: 16px; height: 16px;
-  background: linear-gradient(135deg, #0ea5e9, #6366f1);
+  background: linear-gradient(135deg, #722f37, #b8860b);
   color: white;
   font-size: 9px;
   font-weight: 800;
