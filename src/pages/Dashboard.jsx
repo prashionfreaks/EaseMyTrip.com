@@ -553,9 +553,12 @@ const DASH_STYLES = `
 
 function getGreeting() {
   const h = new Date().getHours();
+  // Late-night / wee-hours bucket so midnight in IST doesn't say "Good morning".
+  if (h < 5)  return 'Good night';
   if (h < 12) return 'Good morning';
   if (h < 17) return 'Good afternoon';
-  return 'Good evening';
+  if (h < 21) return 'Good evening';
+  return 'Good night';
 }
 
 export default function Dashboard() {
@@ -650,9 +653,9 @@ export default function Dashboard() {
           ) : (
             <>
               <p style={{
-                fontFamily: "'Oregano', cursive",
-                fontSize: 22, fontWeight: 400, color: 'var(--maroon)',
-                marginBottom: 2, letterSpacing: '0.3px', lineHeight: 1.1,
+                fontFamily: "'Caveat', cursive",
+                fontSize: 28, fontWeight: 700, color: 'var(--maroon)',
+                marginBottom: 0, letterSpacing: '0.2px', lineHeight: 1.05,
                 animation: 'dashFadeUp 0.3s ease',
               }}>
                 {getGreeting()}, {firstName}
@@ -664,9 +667,9 @@ export default function Dashboard() {
                 <span className="dash-greeting">Your Trips</span>
               </h1>
               <p style={{
-                fontFamily: "'Oregano', cursive",
-                fontSize: 18, color: 'var(--text-secondary)', marginTop: 4,
-                lineHeight: 1.2,
+                fontFamily: "'Patrick Hand', cursive",
+                fontSize: 16, color: 'var(--text-secondary)', marginTop: 4,
+                lineHeight: 1.2, letterSpacing: '0.2px',
                 animation: 'dashFadeUp 0.5s ease',
               }}>
                 {trips.length === 0 ? 'No trips yet — start planning!' : `${trips.length} trip${trips.length !== 1 ? 's' : ''} planned`}
