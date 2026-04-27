@@ -307,15 +307,42 @@ const DASH_STYLES = `
   }
   /* Pastel trip cards — four warm-leaning tints cycle by card index so a
      row of trips reads like polaroids with different paper stocks rather
-     than a uniform cream wall. All tints stay close enough in luminance
-     that body text + maroon buttons keep contrast. */
-  .pastel-peach   { background: linear-gradient(180deg, #fff5ec 0%, #ffe1c9 100%); }
-  .pastel-rose    { background: linear-gradient(180deg, #fff3f0 0%, #fbd9d2 100%); }
-  .pastel-sage    { background: linear-gradient(180deg, #f4f7ec 0%, #d9e6c8 100%); }
-  .pastel-butter  { background: linear-gradient(180deg, #fffbe6 0%, #f9ecbf 100%); }
+     than a uniform cream wall. Yellows are intentionally avoided since
+     the page background is already warm beige and they vanish against it. */
+  .pastel-peach    { background: linear-gradient(180deg, #fff5ec 0%, #ffe1c9 100%); }
+  .pastel-rose     { background: linear-gradient(180deg, #fff3f0 0%, #fbd9d2 100%); }
+  .pastel-sage     { background: linear-gradient(180deg, #f1f7ee 0%, #cfe2c5 100%); }
+  .pastel-lavender { background: linear-gradient(180deg, #f4eef7 0%, #ddd0ea 100%); }
 
+  /* Coffee-tinted focus halo so each card lifts off the beige page.
+     A soft brown glow + a 1px coffee outline reads like a polaroid with
+     a paper drop-shadow on a vintage album page. */
+  .warm-card {
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.55) inset,
+      0 4px 14px rgba(58, 31, 18, 0.10),
+      0 12px 28px rgba(58, 31, 18, 0.08) !important;
+    border: 1px solid rgba(58, 31, 18, 0.12) !important;
+  }
+  .warm-card:active,
+  .warm-card.pinned {
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.55) inset,
+      0 6px 18px rgba(58, 31, 18, 0.16),
+      0 16px 36px rgba(58, 31, 18, 0.10) !important;
+  }
   .warm-card.pinned {
     background: linear-gradient(180deg, #fffaf0 0%, #fbe2bb 100%) !important;
+    border-color: rgba(184, 134, 11, 0.45) !important;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .warm-card:hover {
+      box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.55) inset,
+        0 8px 22px rgba(58, 31, 18, 0.18),
+        0 20px 44px rgba(58, 31, 18, 0.12) !important;
+      border-color: rgba(58, 31, 18, 0.22) !important;
+    }
   }
   .warm-card .progress-bar {
     background: rgba(114, 47, 55, 0.08);
@@ -965,7 +992,7 @@ function TripCard({ trip, index, isActive, onSelect, onDelete, onTogglePin, isDe
   // pinned in a slambook page rather than a uniform grid. Pastel tint
   // also cycles by index so the row feels hand-collaged.
   const slamRot = ((index % 4) - 1.5) * 0.5; // ~ -0.75deg, -0.25deg, +0.25deg, +0.75deg
-  const pastels = ['pastel-peach', 'pastel-rose', 'pastel-sage', 'pastel-butter'];
+  const pastels = ['pastel-peach', 'pastel-rose', 'pastel-sage', 'pastel-lavender'];
   const pastel = pastels[index % pastels.length];
   return (
     <div
