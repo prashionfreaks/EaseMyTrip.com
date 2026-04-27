@@ -8,9 +8,10 @@ import {
 } from 'lucide-react';
 
 import { format, parseISO } from 'date-fns';
-
-// Lazy-load tab content so each trip page lives in its own chunk.
-const ChatPage     = lazy(() => import('../pages/ChatPage'));
+// ChatPage is the default tab — import it statically so the first tap on
+// a trip card never has to wait on a lazy-chunk fetch (which was painting
+// blank until the chunk arrived). All other tabs stay code-split.
+import ChatPage      from '../pages/ChatPage';
 const PlanAndPolls = lazy(() => import('../pages/PlanAndPolls'));
 const Budget       = lazy(() => import('../pages/Budget'));
 const CalendarPage = lazy(() => import('../pages/CalendarPage'));
