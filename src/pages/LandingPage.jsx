@@ -87,7 +87,7 @@ export default function LandingPage() {
         .hero-anim-2 { animation: fadeUp 0.7s 0.15s ease both; }
         .hero-anim-3 { animation: fadeUp 0.7s 0.3s ease both; }
         .feature-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px rgba(37,99,235,0.12); }
-        .dest-pill:hover { background: linear-gradient(135deg, #2563eb, #7c3aed); color: white; transform: scale(1.05); }
+        .dest-pill:hover { background: linear-gradient(135deg, #722f37, #b8860b); color: white; transform: scale(1.05); }
         .google-btn:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.15); transform: translateY(-2px); }
         .slider-arrow { opacity: 0; transition: opacity 0.2s; }
         .slider-wrap:hover .slider-arrow { opacity: 1; }
@@ -115,20 +115,20 @@ export default function LandingPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{
             width: 36, height: 36, borderRadius: 10,
-            background: 'linear-gradient(135deg, #2563eb, #7c3aed)',
+            background: 'linear-gradient(135deg, #722f37, #b8860b)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             boxShadow: '0 4px 12px rgba(37,99,235,0.3)',
           }}>
             <Compass size={20} color="white" />
           </div>
-          <span style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.3px' }}>LetsWander</span>
+          <span style={{ fontSize: 18, fontWeight: 800, color: '#2a1a0d', letterSpacing: '-0.3px' }}>LetsWander</span>
         </div>
         <button
           onClick={handleGoogle}
           disabled={loading}
           style={{
             padding: '9px 20px', borderRadius: 10,
-            background: 'linear-gradient(135deg, #2563eb, #7c3aed)',
+            background: 'linear-gradient(135deg, #722f37, #b8860b)',
             color: 'white', border: 'none', fontWeight: 600, fontSize: 14,
             cursor: loading ? 'not-allowed' : 'pointer',
             transition: 'all 0.15s',
@@ -141,7 +141,7 @@ export default function LandingPage() {
 
       {/* ── Hero ── */}
       <section style={{
-        background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #4c1d95 100%)',
+        background: 'linear-gradient(135deg, #2a1a0d 0%, #4a1e23 55%, #b8860b 100%)',
         position: 'relative', overflow: 'hidden',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         minHeight: 'clamp(560px, 85vh, 780px)',
@@ -196,7 +196,7 @@ export default function LandingPage() {
           }}>
             <span style={{
               fontSize: 'clamp(32px, 6vw, 80px)', fontWeight: 700,
-              color: 'white', textShadow: '0 0 30px rgba(96,165,250,0.4)',
+              color: 'white', textShadow: '0 0 30px rgba(184,134,11,0.45)',
             }}>Plan trips</span>
             <span style={{
               fontSize: 'clamp(18px, 3vw, 40px)', fontWeight: 400,
@@ -204,7 +204,7 @@ export default function LandingPage() {
             }}>together, with</span>
             <span style={{
               fontSize: 'clamp(32px, 6vw, 80px)', fontWeight: 700,
-              background: 'linear-gradient(90deg, #60a5fa, #c084fc)',
+              background: 'linear-gradient(90deg, #fbbf24, #f5d7a8)',
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
             }}>Zero Drama.</span>
           </h1>
@@ -228,7 +228,7 @@ export default function LandingPage() {
                 display: 'inline-flex', alignItems: 'center', gap: 12,
                 padding: '14px 28px', borderRadius: 14,
                 background: 'white', border: 'none',
-                fontSize: 16, fontWeight: 700, color: '#0f172a',
+                fontSize: 16, fontWeight: 700, color: '#2a1a0d',
                 cursor: loading ? 'not-allowed' : 'pointer',
                 boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
                 transition: 'all 0.2s',
@@ -236,7 +236,7 @@ export default function LandingPage() {
               }}
             >
               {loading ? (
-                <div style={{ width: 20, height: 20, borderRadius: '50%', border: '2px solid #e2e8f0', borderTopColor: '#2563eb', animation: 'spin 0.7s linear infinite' }} />
+                <div style={{ width: 20, height: 20, borderRadius: '50%', border: '2px solid #e2e8f0', borderTopColor: '#722f37', animation: 'spin 0.7s linear infinite' }} />
               ) : (
                 <svg width="22" height="22" viewBox="0 0 48 48">
                   <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
@@ -264,11 +264,11 @@ export default function LandingPage() {
       {/* ── Destination Image Slider ── */}
       <section style={{
         padding: '72px 5%',
-        background: 'linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)',
+        background: 'linear-gradient(180deg, #fdf6e3 0%, #fdfaef 100%)',
       }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 40 }}>
-            <h2 style={{ fontSize: 'clamp(26px, 4vw, 40px)', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.5px', marginBottom: 12 }}>
+            <h2 style={{ fontSize: 'clamp(26px, 4vw, 40px)', fontWeight: 800, color: '#2a1a0d', letterSpacing: '-0.5px', marginBottom: 12 }}>
               Wander the world
             </h2>
             <p style={{ fontSize: 16, color: '#64748b', maxWidth: 480, margin: '0 auto' }}>
@@ -283,7 +283,7 @@ export default function LandingPage() {
             style={{ position: 'relative', borderRadius: 20, overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}
           >
             {/* Images */}
-            <div style={{ position: 'relative', height: 'clamp(280px, 40vw, 500px)', background: '#0f172a' }}>
+            <div style={{ position: 'relative', height: 'clamp(280px, 40vw, 500px)', background: '#2a1a0d' }}>
               {SLIDER_IMAGES.map((img, i) => (
                 <div key={i} style={{
                   position: 'absolute', inset: 0,
@@ -386,7 +386,7 @@ export default function LandingPage() {
       <section style={{ padding: '80px 5%', background: '#ffffff' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 56 }}>
-            <h2 style={{ fontSize: 'clamp(26px, 4vw, 40px)', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.5px', marginBottom: 12 }}>
+            <h2 style={{ fontSize: 'clamp(26px, 4vw, 40px)', fontWeight: 800, color: '#2a1a0d', letterSpacing: '-0.5px', marginBottom: 12 }}>
               Everything your group needs
             </h2>
             <p style={{ fontSize: 16, color: '#64748b', maxWidth: 480, margin: '0 auto' }}>
@@ -401,20 +401,20 @@ export default function LandingPage() {
           }}>
             {FEATURES.map(({ icon: Icon, title, desc }) => (
               <div key={title} className="feature-card" style={{
-                background: '#f8fafc', borderRadius: 18,
+                background: '#fdfaef', borderRadius: 18,
                 padding: '28px 28px',
                 border: '1px solid #e2e8f0',
                 transition: 'all 0.2s ease',
               }}>
                 <div style={{
                   width: 48, height: 48, borderRadius: 14,
-                  background: 'linear-gradient(135deg, #dbeafe, #ede9fe)',
+                  background: 'linear-gradient(135deg, #f5e8ea, #fde9bf)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   marginBottom: 16,
                 }}>
-                  <Icon size={22} style={{ color: '#2563eb' }} />
+                  <Icon size={22} style={{ color: '#722f37' }} />
                 </div>
-                <h3 style={{ fontSize: 17, fontWeight: 700, color: '#0f172a', marginBottom: 8 }}>{title}</h3>
+                <h3 style={{ fontSize: 17, fontWeight: 700, color: '#2a1a0d', marginBottom: 8 }}>{title}</h3>
                 <p style={{ fontSize: 14, color: '#64748b', lineHeight: 1.6 }}>{desc}</p>
               </div>
             ))}
@@ -423,10 +423,10 @@ export default function LandingPage() {
       </section>
 
       {/* ── Destinations ── */}
-      <section style={{ padding: '70px 5%', background: '#f8fafc' }}>
+      <section style={{ padding: '70px 5%', background: '#fdfaef' }}>
         <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center' }}>
-          <Globe size={32} style={{ color: '#2563eb', marginBottom: 16 }} />
-          <h2 style={{ fontSize: 'clamp(24px, 3.5vw, 36px)', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.5px', marginBottom: 12 }}>
+          <Globe size={32} style={{ color: '#722f37', marginBottom: 16 }} />
+          <h2 style={{ fontSize: 'clamp(24px, 3.5vw, 36px)', fontWeight: 800, color: '#2a1a0d', letterSpacing: '-0.5px', marginBottom: 12 }}>
             Explore anywhere
           </h2>
           <p style={{ fontSize: 15, color: '#64748b', marginBottom: 36 }}>
@@ -451,7 +451,7 @@ export default function LandingPage() {
 
       {/* ── CTA Banner ── */}
       <section style={{
-        background: 'linear-gradient(135deg, #1e3a8a, #4c1d95)',
+        background: 'linear-gradient(135deg, #4a1e23, #6b3e2c)',
         padding: '72px 5%', textAlign: 'center',
       }}>
         <h2 style={{ fontSize: 'clamp(26px, 4vw, 42px)', fontWeight: 800, color: 'white', letterSpacing: '-0.5px', marginBottom: 14 }}>
@@ -468,7 +468,7 @@ export default function LandingPage() {
             display: 'inline-flex', alignItems: 'center', gap: 10,
             padding: '14px 32px', borderRadius: 14,
             background: 'white', border: 'none',
-            fontSize: 16, fontWeight: 700, color: '#0f172a',
+            fontSize: 16, fontWeight: 700, color: '#2a1a0d',
             cursor: loading ? 'not-allowed' : 'pointer',
             boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
             transition: 'all 0.2s',
@@ -480,14 +480,14 @@ export default function LandingPage() {
 
       {/* ── Footer ── */}
       <footer style={{
-        background: '#0f172a', padding: '28px 5%',
+        background: '#2a1a0d', padding: '28px 5%',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         flexWrap: 'wrap', gap: 12,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <div style={{
             width: 28, height: 28, borderRadius: 8,
-            background: 'linear-gradient(135deg, #2563eb, #7c3aed)',
+            background: 'linear-gradient(135deg, #722f37, #b8860b)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
             <Compass size={15} color="white" />
