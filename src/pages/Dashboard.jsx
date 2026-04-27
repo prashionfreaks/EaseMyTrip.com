@@ -305,13 +305,17 @@ const DASH_STYLES = `
     transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
                 box-shadow 0.35s ease;
   }
-  /* Warm-tone surface so trip cards complement the beige page background.
-     A whisper of cream into ivory instead of cold white-on-beige. */
-  .warm-card {
-    background: linear-gradient(180deg, #fffaf0 0%, #faf0d8 100%);
-  }
+  /* Pastel trip cards — four warm-leaning tints cycle by card index so a
+     row of trips reads like polaroids with different paper stocks rather
+     than a uniform cream wall. All tints stay close enough in luminance
+     that body text + maroon buttons keep contrast. */
+  .pastel-peach   { background: linear-gradient(180deg, #fff5ec 0%, #ffe1c9 100%); }
+  .pastel-rose    { background: linear-gradient(180deg, #fff3f0 0%, #fbd9d2 100%); }
+  .pastel-sage    { background: linear-gradient(180deg, #f4f7ec 0%, #d9e6c8 100%); }
+  .pastel-butter  { background: linear-gradient(180deg, #fffbe6 0%, #f9ecbf 100%); }
+
   .warm-card.pinned {
-    background: linear-gradient(180deg, #fffaf0 0%, #fbe2bb 100%);
+    background: linear-gradient(180deg, #fffaf0 0%, #fbe2bb 100%) !important;
   }
   .warm-card .progress-bar {
     background: rgba(114, 47, 55, 0.08);
@@ -619,8 +623,9 @@ export default function Dashboard() {
           ) : (
             <>
               <p style={{
-                fontSize: 13, fontWeight: 600, color: 'var(--text-tertiary)',
-                marginBottom: 4, letterSpacing: '0.3px',
+                fontFamily: "'Oregano', cursive",
+                fontSize: 22, fontWeight: 400, color: 'var(--maroon)',
+                marginBottom: 2, letterSpacing: '0.3px', lineHeight: 1.1,
                 animation: 'dashFadeUp 0.3s ease',
               }}>
                 {getGreeting()}, {firstName}
@@ -632,7 +637,9 @@ export default function Dashboard() {
                 <span className="dash-greeting">Your Trips</span>
               </h1>
               <p style={{
-                fontSize: 13, color: 'var(--text-secondary)', marginTop: 4,
+                fontFamily: "'Oregano', cursive",
+                fontSize: 18, color: 'var(--text-secondary)', marginTop: 4,
+                lineHeight: 1.2,
                 animation: 'dashFadeUp 0.5s ease',
               }}>
                 {trips.length === 0 ? 'No trips yet — start planning!' : `${trips.length} trip${trips.length !== 1 ? 's' : ''} planned`}
@@ -725,9 +732,12 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Active trip workspace */}
+        {/* Active trip workspace.
+            Keying on activeTrip.id forces a clean unmount/remount when the
+            user picks a different trip — fixes a stale-state blank flash
+            we hit when re-using the same TripDetail instance. */}
         {activeTrip && (
-          <TripDetail onInvite={() => setShowInvite(true)} />
+          <TripDetail key={activeTrip.id} onInvite={() => setShowInvite(true)} />
         )}
 
         {/* Trip cards grid */}
@@ -952,11 +962,14 @@ function TripCard({ trip, index, isActive, onSelect, onDelete, onTogglePin, isDe
   const sym = getTripCurrencySymbol(trip);
 
   // Alternate tilt direction so a row of trip cards reads like polaroids
-  // pinned in a slambook page rather than a uniform grid.
+  // pinned in a slambook page rather than a uniform grid. Pastel tint
+  // also cycles by index so the row feels hand-collaged.
   const slamRot = ((index % 4) - 1.5) * 0.5; // ~ -0.75deg, -0.25deg, +0.25deg, +0.75deg
+  const pastels = ['pastel-peach', 'pastel-rose', 'pastel-sage', 'pastel-butter'];
+  const pastel = pastels[index % pastels.length];
   return (
     <div
-      className={`dash-card slam-tilt warm-card${trip.pinned ? ' pinned' : ''}`}
+      className={`dash-card slam-tilt warm-card ${pastel}${trip.pinned ? ' pinned' : ''}`}
       onClick={onSelect}
       style={{
         '--slam-rot': `${slamRot}deg`,

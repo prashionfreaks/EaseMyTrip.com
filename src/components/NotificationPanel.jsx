@@ -157,10 +157,10 @@ export default function NotificationPanel({ onClose }) {
         }}>
           <div style={{
             width: 36, height: 36, borderRadius: 10,
-            background: total > 0 ? '#fef2f2' : '#f0fdf4',
+            background: total > 0 ? 'var(--maroon-light)' : '#dcfce7',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <Bell size={18} style={{ color: total > 0 ? '#dc2626' : '#16a34a' }} />
+            <Bell size={18} style={{ color: total > 0 ? 'var(--maroon)' : '#16a34a' }} />
           </div>
           <div style={{ flex: 1 }}>
             <h2 style={{ fontSize: 16, fontWeight: 700 }}>Payment Dues</h2>
@@ -189,7 +189,7 @@ export default function NotificationPanel({ onClose }) {
           }}>
             <div style={{ padding: '14px 20px', borderRight: '1px solid #f1f5f9' }}>
               <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>You owe</p>
-              <p style={{ fontSize: 22, fontWeight: 800, color: '#dc2626', marginTop: 2 }}>
+              <p style={{ fontSize: 22, fontWeight: 800, color: 'var(--maroon)', marginTop: 2 }}>
                 ${totalOwed.toFixed(0)}
               </p>
             </div>
@@ -251,7 +251,7 @@ export default function NotificationPanel({ onClose }) {
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <p style={{ fontSize: 13, color: 'var(--text-primary)', lineHeight: 1.4 }}>
                               <strong>{r.fromName}</strong> reminded you:{' '}
-                              <span style={{ color: '#dc2626', fontWeight: 700 }}>
+                              <span style={{ color: 'var(--maroon)', fontWeight: 700 }}>
                                 {cur} {Number(r.amount).toFixed(0)}
                               </span>{' '}
                               due for &ldquo;{r.trip.name}&rdquo;
@@ -273,8 +273,8 @@ export default function NotificationPanel({ onClose }) {
                   title="You Owe"
                   count={owedByMe.length}
                   accent="#dc2626"
-                  bg="#fef2f2"
-                  icon={<AlertCircle size={14} style={{ color: '#dc2626' }} />}
+                  bg="var(--maroon-light)"
+                  icon={<AlertCircle size={14} style={{ color: 'var(--maroon)' }} />}
                 >
                   {owedByMe.map((due, i) => {
                     const to = getMember(due.trip, due.to);

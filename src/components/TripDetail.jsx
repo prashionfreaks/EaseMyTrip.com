@@ -24,9 +24,15 @@ const Members      = lazy(() => import('../pages/Members'));
 function TabFallback() {
   return (
     <div style={{
-      minHeight: 280, display: 'flex', alignItems: 'center', justifyContent: 'center',
+      minHeight: 320,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      flexDirection: 'column', gap: 12,
+      background: 'var(--bg-secondary)',
     }}>
-      <div className="spinner spinner-dark" style={{ width: 22, height: 22 }} />
+      <div className="spinner spinner-dark" style={{ width: 28, height: 28 }} />
+      <p style={{ fontSize: 12, color: 'var(--text-tertiary)', fontWeight: 500 }}>
+        Opening trip…
+      </p>
     </div>
   );
 }
