@@ -128,13 +128,14 @@ h4 { font-size: 15px; font-weight: 700; line-height: 1.3; }
   .page-header h1 { font-size: 22px; }
 }
 
-/* Fitts's Law floor — any interactive element bigger than 32px tall on
-   touch devices, and a hit-padding cushion on smaller buttons. */
+/* Fitts's Law floor — only on real .btn-class buttons, not every native
+   <button>. Targeting all buttons stretched icon controls (checkboxes,
+   chat reactions, etc.) into 40px tall rectangles. */
 @media (hover: none), (pointer: coarse) {
-  button, a.btn, .btn {
+  .btn {
     min-height: 40px;
   }
-  button.btn-sm, .btn-sm {
+  .btn-sm {
     min-height: 32px;
   }
 }

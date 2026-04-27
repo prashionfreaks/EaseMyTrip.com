@@ -76,8 +76,8 @@ export default function Checklist({ embedded = false }) {
         .cl-progress-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--brand), var(--teal, #0891b2)); transition: width 0.4s ease; }
 
         .cl-item {
-          display: flex; align-items: flex-start; gap: 10px;
-          padding: 11px 14px;
+          display: flex; align-items: center; gap: 10px;
+          padding: 10px 14px;
           border-radius: var(--radius-md, 10px);
           border: 1px solid var(--border);
           background: var(--bg-secondary);
@@ -86,7 +86,9 @@ export default function Checklist({ embedded = false }) {
         .cl-item.done { opacity: 0.55; }
 
         .cl-checkbox {
-          width: 20px; height: 20px; flex-shrink: 0; margin-top: 1px;
+          width: 20px; height: 20px; min-height: 20px;
+          flex-shrink: 0;
+          padding: 0;
           border: 2px solid var(--border-dark, #94a3b8);
           border-radius: 6px; background: transparent;
           cursor: pointer; display: flex; align-items: center; justify-content: center;
