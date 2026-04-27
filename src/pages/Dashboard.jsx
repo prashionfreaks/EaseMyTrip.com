@@ -713,14 +713,8 @@ export default function Dashboard() {
       </div>
 
       <div className="page-body">
-        {/* Slambook hero — shows when browsing the trip list, hidden inside an active workspace */}
-        {!activeTrip && tripsLoaded && (
-          <TravelCrewCard
-            count={crewStats.count}
-            tripsCount={trips.length}
-            firstName={firstName}
-          />
-        )}
+        {/* Travel Crew slambook hero — temporarily hidden.
+            Re-enable by restoring the <TravelCrewCard /> render here. */}
 
         {/* Due banner */}
         {dueCount > 0 && (
