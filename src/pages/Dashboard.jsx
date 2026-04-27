@@ -677,7 +677,7 @@ export default function Dashboard() {
             </>
           )}
         </div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center', animation: 'dashFadeUp 0.4s ease' }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginLeft: 'auto', flexShrink: 0, animation: 'dashFadeUp 0.4s ease' }}>
           <button
             className="dash-header-btn"
             onClick={() => setShowNotifications(true)}
