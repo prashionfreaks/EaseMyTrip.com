@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { format, parseISO, isPast } from 'date-fns';
 
-export default function Decisions() {
+export default function Decisions({ embedded = false }) {
   const { activeTrip, vote, currentUser, addPoll, updateTrip } = useTrips();
   const [showCreate, setShowCreate] = useState(false);
   const [filter, setFilter] = useState('all');
@@ -67,15 +67,32 @@ export default function Decisions() {
 
   return (
     <>
-      <div className="page-header" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-        <div>
-          <h1>Group Decisions</h1>
-          <p>{activeTrip.name} — {(activeTrip.polls || []).length} polls total</p>
+      {/* Standalone header — hidden when embedded inside PlanAndPolls.
+          The "New Poll" action is rendered in a compact action row when
+          embedded so the button is still reachable. */}
+      {!embedded ? (
+        <div className="page-header" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+          <div>
+            <h1>Group Decisions</h1>
+            <p>{activeTrip.name} — {(activeTrip.polls || []).length} polls total</p>
+          </div>
+          <button className="btn btn-primary" onClick={() => setShowCreate(true)}>
+            <Plus size={16} /> New Poll
+          </button>
         </div>
-        <button className="btn btn-primary" onClick={() => setShowCreate(true)}>
-          <Plus size={16} /> New Poll
-        </button>
-      </div>
+      ) : (
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '0 0 8px', flexWrap: 'wrap', gap: 8,
+        }}>
+          <p style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>
+            {(activeTrip.polls || []).length} {(activeTrip.polls || []).length === 1 ? 'poll' : 'polls'} total
+          </p>
+          <button className="btn btn-primary btn-sm" onClick={() => setShowCreate(true)}>
+            <Plus size={14} /> New Poll
+          </button>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="tab-nav">
@@ -95,7 +112,7 @@ export default function Decisions() {
         ))}
       </div>
 
-      <div className="page-body">
+      <div className={embedded ? '' : 'page-body'} style={embedded ? { paddingTop: 12 } : undefined}>
         {polls.length === 0 ? (
           <div className="empty-state">
             <Vote className="empty-icon" />

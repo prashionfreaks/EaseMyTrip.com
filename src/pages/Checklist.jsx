@@ -9,7 +9,7 @@ const FILTERS = [
   { id: 'done',   label: 'Done' },
 ];
 
-export default function Checklist() {
+export default function Checklist({ embedded = false }) {
   const {
     activeTrip, currentUser,
     addChecklistItem, toggleChecklistItem,
@@ -170,15 +170,18 @@ export default function Checklist() {
         }
       `}</style>
 
-      {/* Header */}
-      <div className="page-header">
-        <div>
-          <h1>Checklist</h1>
-          <p>{total === 0 ? 'Add tasks for the trip' : `${doneCount} of ${total} done · ${pct}%`}</p>
+      {/* Header — full when standalone, hidden when embedded (PlanAndPolls
+          renders a single unified header for both sections). */}
+      {!embedded && (
+        <div className="page-header">
+          <div>
+            <h1>Checklist</h1>
+            <p>{total === 0 ? 'Add tasks for the trip' : `${doneCount} of ${total} done · ${pct}%`}</p>
+          </div>
         </div>
-      </div>
+      )}
 
-      <div className="page-body" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div className={embedded ? '' : 'page-body'} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
         {/* Progress bar */}
         {total > 0 && (
