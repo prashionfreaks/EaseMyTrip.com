@@ -104,13 +104,19 @@ export function TripProvider({ children }) {
 
   // ── Supabase mode: DB + Realtime ─────────────────────────────────────────
   const fetchTrips = useCallback(async (userId) => {
+    // Hard 8 s timeout so a hung Supabase request can never freeze the
+    // dashboard in its skeleton state. The user gets cached trips (if any)
+    // and a clear path forward.
+    const timeoutMs = 8000;
+    const timeoutSignal = new AbortController();
+    const timer = setTimeout(() => timeoutSignal.abort(), timeoutMs);
     try {
-      // Single joined query replaces two serial round-trips
       const { data: rows, error } = await supabase
         .from('trip_members')
         .select('trips!inner(id, data, updated_at, created_at)')
         .eq('user_id', userId)
-        .order('created_at', { ascending: false, foreignTable: 'trips' });
+        .order('created_at', { ascending: false, foreignTable: 'trips' })
+        .abortSignal(timeoutSignal.signal);
       if (error) throw error;
 
       const fetched = (rows || [])
@@ -120,10 +126,14 @@ export function TripProvider({ children }) {
       setTrips(fetched);
       saveCachedTrips(userId, fetched);
     } catch (err) {
-      if (err?.name === 'AbortError') return;
-      console.error('[fetchTrips] FAILED:', err);
+      if (err?.name === 'AbortError') {
+        console.warn('[fetchTrips] timed out — keeping cached trips');
+      } else {
+        console.error('[fetchTrips] FAILED:', err);
+      }
       // Keep any cached trips already in state rather than wiping to []
     } finally {
+      clearTimeout(timer);
       setTripsLoaded(true);
     }
   }, []);
@@ -203,6 +213,27 @@ export function TripProvider({ children }) {
   // Reminder-toast effect lives below `currentUser` so it can read its id —
   // see the block right after `activeTrip`.
 
+  // Most recent in-flight trip payload per id, used by the flush handler.
+  const pendingPayload = useRef({});
+
+  async function flushSync(tripId) {
+    const payload = pendingPayload.current[tripId];
+    if (!payload) return;
+    clearTimeout(syncTimers.current[tripId]);
+    pendingPayload.current[tripId] = null;
+    if (!(await ensureSession())) { pendingSync.current[tripId] = false; return; }
+    const { id, ...data } = payload;
+    const { error } = await supabase.from('trips').update({
+      name: payload.name,
+      destination: payload.destination,
+      status: payload.status,
+      data,
+      updated_at: new Date().toISOString(),
+    }).eq('id', id);
+    pendingSync.current[tripId] = false;
+    if (error) console.error('[syncToDB] error:', error);
+  }
+
   // Debounced DB sync — with safety guard to never overwrite good data with empty data
   const syncToDB = useCallback((trip) => {
     if (!isSupabaseConfigured) return;
@@ -212,20 +243,32 @@ export function TripProvider({ children }) {
       return;
     }
     pendingSync.current[trip.id] = true;
+    pendingPayload.current[trip.id] = trip;
     clearTimeout(syncTimers.current[trip.id]);
-    syncTimers.current[trip.id] = setTimeout(async () => {
-      if (!(await ensureSession())) { pendingSync.current[trip.id] = false; return; }
-      const { id, ...data } = trip;
-      const { error } = await supabase.from('trips').update({
-        name: trip.name,
-        destination: trip.destination,
-        status: trip.status,
-        data,
-        updated_at: new Date().toISOString(),
-      }).eq('id', id);
-      pendingSync.current[trip.id] = false;
-      if (error) console.error('[syncToDB] error:', error);
+    syncTimers.current[trip.id] = setTimeout(() => {
+      flushSync(trip.id);
     }, 400); // 400ms debounce (faster sync)
+  }, []);
+
+  // Flush every pending sync when the tab is hidden / closed so a refresh
+  // never loses a write that's still inside the 400 ms debounce window
+  // (e.g. a checklist item added then immediate refresh).
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+    const flushAll = () => {
+      Object.keys(pendingPayload.current).forEach(id => {
+        if (pendingPayload.current[id]) flushSync(id);
+      });
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') flushAll();
+    };
+    window.addEventListener('beforeunload', flushAll);
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      window.removeEventListener('beforeunload', flushAll);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
   }, []);
 
   // ── currentUser ──────────────────────────────────────────────────────────
