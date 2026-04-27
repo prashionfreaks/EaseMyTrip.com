@@ -156,13 +156,14 @@ const DASH_STYLES = `
 
   .slam-card {
     position: relative;
+    /* Deepened so the hero still pops next to the cream trip cards. */
     background:
-      linear-gradient(135deg, #fffbeb 0%, #ffedd5 60%, #fef3c7 100%);
+      linear-gradient(135deg, #fef3c7 0%, #fde9bf 55%, #fcd9a3 100%);
     border-radius: 18px;
     padding: 22px 22px 20px;
     margin-bottom: 18px;
-    border: 2px dashed #f59e0b;
-    box-shadow: 0 6px 16px rgba(245, 158, 11, 0.12),
+    border: 2px dashed #d97706;
+    box-shadow: 0 8px 22px rgba(217, 119, 6, 0.18),
                 0 1px 0 rgba(255,255,255,0.6) inset;
     overflow: hidden;
     transform: rotate(-0.6deg);

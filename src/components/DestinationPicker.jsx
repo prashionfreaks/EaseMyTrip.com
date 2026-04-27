@@ -81,7 +81,7 @@ export default function DestinationPicker({ value, onChange }) {
         <div style={{
           position: 'absolute', top: '100%', left: 0, right: 0,
           zIndex: 1000, marginTop: 4,
-          background: 'white', borderRadius: 10,
+          background: 'var(--bg-input)', borderRadius: 10,
           border: '1px solid #e2e8f0',
           boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
           maxHeight: 220, overflowY: 'auto',
@@ -93,12 +93,12 @@ export default function DestinationPicker({ value, onChange }) {
               style={{
                 width: '100%', padding: '10px 14px',
                 display: 'flex', alignItems: 'center', gap: 10,
-                border: 'none', background: 'white',
+                border: 'none', background: 'var(--bg-input)',
                 cursor: 'pointer', fontSize: 13, color: '#0f172a',
                 textAlign: 'left', transition: 'background 0.1s',
               }}
-              onMouseOver={e => { e.currentTarget.style.background = '#f1f5f9'; }}
-              onMouseOut={e => { e.currentTarget.style.background = 'white'; }}
+              onMouseOver={e => { e.currentTarget.style.background = 'var(--maroon-light)'; }}
+              onMouseOut={e => { e.currentTarget.style.background = 'var(--bg-input)'; }}
             >
               <MapPin size={14} style={{ color: '#94a3b8', flexShrink: 0 }} />
               <div>

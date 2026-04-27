@@ -400,14 +400,18 @@ select.form-input { cursor: pointer; }
   letter-spacing: 0.2px;
 }
 
-.badge-blue   { background: #e0f2fe; color: #0284c7; }
-.badge-green  { background: #d1fae5; color: #059669; }
-.badge-yellow { background: #fef3c7; color: #d97706; }
-.badge-red    { background: #fee2e2; color: #dc2626; }
-.badge-purple { background: #ede9fe; color: #7c3aed; }
-.badge-teal   { background: #cffafe; color: #0891b2; }
-.badge-orange { background: #ffedd5; color: #ea580c; }
-.badge-gray   { background: #e2e8f0; color: #475569; }
+/* "Planning" status uses badge-blue — re-tint to a warm dusty teal so it
+   sits in the new palette instead of sky-blue. */
+.badge-blue   { background: #d4e7e3; color: #134e4a; }
+.badge-green  { background: #dcfce7; color: #15803d; }
+.badge-yellow { background: #fef3c7; color: #b45309; }
+.badge-red    { background: #fee2e2; color: #b91c1c; }
+.badge-purple { background: #ede9fe; color: #6d28d9; }
+.badge-teal   { background: #ccfbf1; color: #0f766e; }
+.badge-orange { background: #ffedd5; color: #c2410c; }
+.badge-gray   { background: #e7dec5; color: #5a4232; }
+.badge-maroon { background: var(--maroon-light); color: var(--maroon); }
+.badge-gold   { background: var(--gold-light); color: var(--gold); }
 
 /* ─── Avatar group ────────────────────────────────────── */
 .avatar-group { display: flex; }

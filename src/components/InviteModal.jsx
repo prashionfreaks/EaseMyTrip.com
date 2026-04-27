@@ -225,9 +225,9 @@ function MemberRow({ member, onSetRole, onRemove, isOwner }) {
             onChange={e => onSetRole(member.id, e.target.value)}
             style={{
               padding: '4px 8px', borderRadius: 6,
-              border: '1px solid #e2e8f0', fontSize: 12,
-              background: 'white', cursor: 'pointer', outline: 'none',
-              color: member.role === 'organizer' ? '#1d4ed8' : '#374151',
+              border: '1px solid var(--border)', fontSize: 12,
+              background: 'var(--bg-input)', cursor: 'pointer', outline: 'none',
+              color: member.role === 'organizer' ? 'var(--maroon)' : 'var(--text-secondary)',
             }}
           >
             <option value="organizer">Organizer</option>
