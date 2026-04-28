@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTrips } from '../context/TripContext';
 import {
-  Route, Train, Plane, Bus, Car, ArrowRight,
+  Route, Train, Plane, Bus, Car, Ship, ArrowRight,
   Clock, Plus, MapPin, Zap, Wallet, Ruler, Trash2, Navigation, ExternalLink,
 } from 'lucide-react';
 import { getTripCurrencySymbol } from '../lib/itinerary';
@@ -35,6 +35,7 @@ const MODE_CONFIG = {
   train:  { icon: Train,  color: '#0ea5e9', bg: '#e0f2fe', label: 'Train'      },
   bus:    { icon: Bus,    color: '#10b981', bg: '#d1fae5', label: 'Bus'        },
   car:    { icon: Car,    color: '#f97316', bg: '#ffedd5', label: 'Self Drive' },
+  ferry:  { icon: Ship,   color: '#0891b2', bg: '#cffafe', label: 'Ferry'      },
 };
 
 function citySlug(city) {
@@ -58,6 +59,10 @@ const BOOKING_PLATFORMS = {
     { name: 'Savaari',     buildUrl: (f, t) => `https://www.savaari.com/cab/${citySlug(f)}-to-${citySlug(t)}` },
     { name: 'Zoomcar',     buildUrl: () => 'https://www.zoomcar.com/' },
   ],
+  ferry: [
+    { name: 'DirectFerries', buildUrl: () => 'https://www.directferries.com/' },
+    { name: 'Search routes', buildUrl: (f, t) => `https://www.google.com/search?q=${encodeURIComponent(`ferry ${f} to ${t}`)}` },
+  ],
 };
 
 function getRouteKey(a, b) {
@@ -75,7 +80,7 @@ function getRouteDistance(from, to) {
 // and tag every result `estimated: true`. The user is told to verify before
 // booking. Numbers are deliberately conservative to avoid optimism bias.
 const REGION_KEYWORDS = {
-  india:   ['mumbai', 'pune', 'delhi', 'bangalore', 'bengaluru', 'chennai', 'kolkata', 'hyderabad', 'goa', 'kerala', 'kochi', 'jaipur', 'agra', 'shimla', 'manali', 'wayanad', 'ladakh', 'leh', 'meghalaya', 'shillong', 'varanasi', 'mahabaleshwar', 'udaipur', 'ahmedabad', 'lucknow', 'ooty', 'hampi', 'mangalore', 'ayodhya', 'amritsar'],
+  india:   ['mumbai', 'pune', 'delhi', 'bangalore', 'bengaluru', 'chennai', 'kolkata', 'hyderabad', 'goa', 'kerala', 'kochi', 'jaipur', 'agra', 'shimla', 'manali', 'wayanad', 'ladakh', 'leh', 'meghalaya', 'shillong', 'varanasi', 'mahabaleshwar', 'udaipur', 'ahmedabad', 'lucknow', 'ooty', 'hampi', 'mangalore', 'ayodhya', 'amritsar', 'jaisalmer', 'jodhpur', 'pushkar', 'mount abu', 'rishikesh', 'haridwar', 'nainital', 'mussoorie', 'jim corbett', 'corbett', 'dharamshala', 'mcleod ganj', 'mcleodganj', 'spiti', 'kasol', 'mathura', 'vrindavan', 'lonavala', 'ajanta', 'ellora', 'mysore', 'coorg', 'kodagu', 'gokarna', 'chikmagalur', 'munnar', 'alleppey', 'alappuzha', 'thekkady', 'mahabalipuram', 'madurai', 'kanyakumari', 'pondicherry', 'puducherry', 'tirupati', 'visakhapatnam', 'vizag', 'darjeeling', 'gangtok', 'sikkim', 'kaziranga', 'tawang', 'cherrapunji', 'bodh gaya', 'bodhgaya', 'puri', 'konark', 'bhubaneswar', 'khajuraho', 'bhopal', 'rann of kutch', 'kutch', 'gir', 'statue of unity', 'andaman', 'port blair'],
   seasia:  ['bangkok', 'phuket', 'chiang mai', 'singapore', 'bali', 'jakarta', 'kuala lumpur', 'penang', 'hanoi', 'ho chi minh', 'vietnam', 'thailand', 'indonesia', 'malaysia', 'myanmar', 'manila', 'cambodia', 'siem reap'],
   eastasia:['tokyo', 'osaka', 'kyoto', 'japan', 'seoul', 'busan', 'south korea', 'beijing', 'shanghai', 'hong kong', 'taipei', 'taiwan'],
   middleeast: ['dubai', 'uae', 'abu dhabi', 'doha', 'qatar', 'bahrain', 'muscat', 'oman', 'riyadh', 'jeddah', 'tehran', 'baku', 'azerbaijan', 'istanbul', 'turkey'],
@@ -128,7 +133,65 @@ function rangeKeyFor(fromCity, toCity) {
   if (a === 'india' && b !== 'india') return `india|${b}`;
   if (b === 'india' && a !== 'india') return `india|${a}`;
   if (a === b) return `${a}|${a}`;
-  return null; // unhandled pair — caller falls back to generic estimate
+  return [a, b].sort().join('|');
+}
+
+// Ground transport ranges by region pair. Each mode is optional and is
+// included only where it's realistic for the pair. Same shape as
+// FLIGHT_RANGES — [minHours, maxHours, minINR, maxINR, note].
+const GROUND_RANGES = {
+  'india|india': {
+    train: [6, 36,  400,  2200,  'Indian Railways · Sleeper to AC1 class · book on IRCTC'],
+    bus:   [8, 40,  500,  2400,  'State / private AC sleeper buses · check RedBus / AbhiBus'],
+    car:   [6, 40,  2500, 12000, 'Drive via NH highways · split fuel + tolls across the group'],
+  },
+  'europe|europe': {
+    train: [2, 16,  3500, 25000, 'High-speed rail (Eurostar / TGV / ICE) · book early for cheap fares'],
+    bus:   [4, 28,  1500, 9000,  'FlixBus / Eurolines · budget overnight option'],
+    car:   [3, 20,  8000, 35000, 'European motorway network · tolls + vignettes vary'],
+  },
+  'seasia|seasia': {
+    bus:   [4, 30,  1000, 5000,  'Cross-border / sleeper buses · widely available, slow but cheap'],
+  },
+  'eastasia|eastasia': {
+    train: [2, 8,   6000, 22000, 'Shinkansen / KTX / China Rail · intra-country, fast and frequent'],
+    bus:   [4, 16,  2500, 10000, 'Highway / overnight buses'],
+  },
+  'americas|americas': {
+    bus:   [6, 40,  2500, 15000, 'Greyhound / FlixBus · long-distance routes'],
+    car:   [4, 40,  6000, 35000, 'Drive on the interstate / highway system'],
+  },
+  'india|nepal': {
+    bus:   [14, 30, 1500, 3500,  'Cross-border buses to Kathmandu via Sunauli or Birgunj'],
+    car:   [14, 30, 6000, 15000, 'Drive to the border · visa-free for Indian nationals'],
+  },
+  'india|bhutan': {
+    bus:   [10, 18, 1500, 3500,  'Bus to Phuentsholing border, then onwards (Bhutan permits required)'],
+    car:   [10, 18, 5000, 12000, 'Drive to Phuentsholing border (Bhutan permits required)'],
+  },
+};
+
+// Ferry ranges by region pair (where sea crossings are realistic).
+const FERRY_RANGES = {
+  'india|srilanka':  [12, 14, 7500, 12000, 'Nagapattinam–Kankesanthurai ferry · limited sailings (relaunched 2023)'],
+  'seasia|seasia':   [1,  12, 800,  4500,  'Inter-island speedboats / ferries (Bali ↔ Lombok, Phuket ↔ Phi Phi etc.)'],
+  'oceania|oceania': [3,  30, 5000, 25000, 'Inter-island ferries (NZ Cook Strait, Aus ↔ Tasmania)'],
+  'europe|europe':   [1,  24, 3000, 18000, 'Channel ferries, Greek islands, Norwegian fjords etc.'],
+};
+
+function buildEstimateOption(mode, range, isINR) {
+  const [hMin, hMax, costMin, costMax, note] = range;
+  const midDuration = Math.round(((hMin + hMax) / 2) * 60);
+  const midCostINR  = Math.round((costMin + costMax) / 2);
+  return {
+    mode,
+    duration: midDuration,
+    cost: isINR ? midCostINR : Math.round(midCostINR / 83),
+    costRange: [isINR ? costMin : Math.round(costMin / 83), isINR ? costMax : Math.round(costMax / 83)],
+    hourRange: [hMin, hMax],
+    note,
+    estimated: true,
+  };
 }
 
 function generateOptions(from, to, isINR) {
@@ -136,44 +199,50 @@ function generateOptions(from, to, isINR) {
   const data = INDIAN_ROUTES[key];
 
   if (data) {
-    // Curated domestic route — all four modes are realistic.
-    const MODES = ['flight', 'train', 'bus', 'car'];
-    return MODES.map(mode => {
-      const [duration, cost, note] = data[mode] || [0, 0, 'Not applicable'];
-      return { mode, duration, cost: isINR ? cost : Math.round(cost / 83), note, unavailable: duration === 0 };
-    });
+    // Curated route — emit every mode the entry actually defines.
+    const MODES = ['flight', 'train', 'bus', 'car', 'ferry'];
+    return MODES
+      .filter(mode => data[mode])
+      .map(mode => {
+        const [duration, cost, note] = data[mode];
+        return { mode, duration, cost: isINR ? cost : Math.round(cost / 83), note, unavailable: duration === 0 };
+      });
   }
 
-  // No curated entry. Try a region-based flight range estimate.
-  const rangeKey = rangeKeyFor(from, to);
-  const range = rangeKey ? FLIGHT_RANGES[rangeKey] : null;
+  // No curated entry — stitch together region-based estimates for every
+  // mode that's realistic on this pair (flight + ground + ferry).
+  const pair = rangeKeyFor(from, to);
+  const results = [];
 
-  if (range) {
-    const [hMin, hMax, costMin, costMax, note] = range;
-    const midDuration = Math.round(((hMin + hMax) / 2) * 60);
-    const midCostINR = Math.round((costMin + costMax) / 2);
-    const cost = isINR ? midCostINR : Math.round(midCostINR / 83);
-    const minCost = isINR ? costMin : Math.round(costMin / 83);
-    const maxCost = isINR ? costMax : Math.round(costMax / 83);
+  const flightRange = pair ? FLIGHT_RANGES[pair] : null;
+  if (flightRange) {
+    const opt = buildEstimateOption('flight', flightRange, isINR);
+    opt.note = `Approx. range — ${flightRange[4]}. Verify on Skyscanner / Google Flights before booking.`;
+    results.push(opt);
+  }
+
+  const ground = pair ? GROUND_RANGES[pair] : null;
+  if (ground) {
+    for (const mode of ['train', 'bus', 'car']) {
+      if (ground[mode]) results.push(buildEstimateOption(mode, ground[mode], isINR));
+    }
+  }
+
+  const ferry = pair ? FERRY_RANGES[pair] : null;
+  if (ferry) results.push(buildEstimateOption('ferry', ferry, isINR));
+
+  if (results.length === 0) {
+    // Last resort — region unknown (very obscure city). Honest about it.
     return [{
       mode: 'flight',
-      duration: midDuration,
-      cost,
-      costRange: [minCost, maxCost],
-      hourRange: [hMin, hMax],
-      note: `Approx. range — ${note}. Verify on Skyscanner / Google Flights before booking.`,
-      estimated: true,
+      duration: 0,
+      cost: 0,
+      note: 'Couldn\'t identify the region from those city names. Search the route on Skyscanner or Google Flights for live fares.',
+      placeholder: true,
     }];
   }
 
-  // Last resort — region unknown (very obscure city). Honest about it.
-  return [{
-    mode: 'flight',
-    duration: 0,
-    cost: 0,
-    note: 'Couldn\'t identify the region from those city names. Search the route on Skyscanner or Google Flights for live fares.',
-    placeholder: true,
-  }];
+  return results;
 }
 
 export default function Routes() {
@@ -234,12 +303,17 @@ export default function Routes() {
     updateTrip(activeTrip.id, trip => ({ ...trip, routes: (trip.routes || []).filter(r => r.id !== routeId) }));
   }
 
+  // Journey strip is only meaningful for a single route — multiple starting
+  // points are independent journeys to the same destination, not a connected
+  // timeline. Concatenating them produces a misleading "Mumbai → Goa → Delhi"
+  // chain when really both Mumbai and Delhi are separate starts to Goa.
   const allStops = [];
-  routes.forEach(r => {
-    if (!allStops.includes(r.from)) allStops.push(r.from);
-    if (!allStops.includes(r.to)) allStops.push(r.to);
+  if (routes.length === 1) {
+    const r = routes[0];
+    if (r.from) allStops.push(r.from);
+    if (r.to && !allStops.includes(r.to)) allStops.push(r.to);
     if (r.returnTo && r.returnTo !== r.from && !allStops.includes(r.returnTo)) allStops.push(r.returnTo);
-  });
+  }
 
   return (
     <>
@@ -378,7 +452,7 @@ export default function Routes() {
             </div>
             <h3>How are you getting to {activeTrip.destination}?</h3>
             <p style={{ maxWidth: 320, textAlign: 'center' }}>
-              Add the city you're flying out of and we'll suggest the best routes — flights, plus trains, buses or drive options for short hops.
+              Add the city you're flying out of and we'll suggest the best routes — flights, plus trains, buses, ferries or drive options where they apply.
             </p>
             <button className="btn btn-primary" style={{ marginTop: 12 }} onClick={() => setShowAdd(true)}>
               <Plus size={16} /> Add starting city
@@ -524,7 +598,7 @@ export default function Routes() {
                     {isLoading ? (
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px 0', gap: 16 }}>
                         <div style={{ display: 'flex', gap: 14 }}>
-                          {['flight', 'train', 'bus', 'car'].map((m, i) => {
+                          {['flight', 'train', 'bus', 'car', 'ferry'].map((m, i) => {
                             const cfg = MODE_CONFIG[m];
                             const Icon = cfg.icon;
                             return (
@@ -653,7 +727,7 @@ export default function Routes() {
           textAlign: 'center', fontSize: 13, color: 'var(--text-tertiary)',
           marginTop: 24, padding: '0 20px', lineHeight: 1.6,
         }}>
-          Each member can add their own starting city — we'll show ground options when the route is feasible, otherwise just flights.
+          Each member can add their own starting city — we'll show ground and ferry options when the route is feasible, otherwise just flights.
         </p>
       </div>
 
