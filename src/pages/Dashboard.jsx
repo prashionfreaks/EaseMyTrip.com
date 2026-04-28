@@ -309,8 +309,8 @@ const DASH_STYLES = `
      row of trips reads like polaroids with different paper stocks rather
      than a uniform cream wall. Yellows are intentionally avoided since
      the page background is already warm beige and they vanish against it. */
-  .pastel-peach    { background: linear-gradient(180deg, #fff5ec 0%, #ffe1c9 100%); }
-  .pastel-rose     { background: linear-gradient(180deg, #fff3f0 0%, #fbd9d2 100%); }
+  .pastel-sunset   { background: linear-gradient(180deg, #ffd9c4 0%, #ff9d6f 100%); }
+  .pastel-olive    { background: linear-gradient(180deg, #dde3c0 0%, #a6b366 100%); }
   .pastel-sage     { background: linear-gradient(180deg, #f1f7ee 0%, #cfe2c5 100%); }
   .pastel-lavender { background: linear-gradient(180deg, #f4eef7 0%, #ddd0ea 100%); }
 
@@ -552,13 +552,7 @@ const DASH_STYLES = `
 `;
 
 function getGreeting() {
-  const h = new Date().getHours();
-  // Late-night / wee-hours bucket so midnight in IST doesn't say "Good morning".
-  if (h < 5)  return 'Good night';
-  if (h < 12) return 'Good morning';
-  if (h < 17) return 'Good afternoon';
-  if (h < 21) return 'Good evening';
-  return 'Good night';
+  return 'Hey';
 }
 
 export default function Dashboard() {
@@ -989,7 +983,7 @@ function TripCard({ trip, index, isActive, onSelect, onDelete, onTogglePin, isDe
   // pinned in a slambook page rather than a uniform grid. Pastel tint
   // also cycles by index so the row feels hand-collaged.
   const slamRot = ((index % 4) - 1.5) * 0.5; // ~ -0.75deg, -0.25deg, +0.25deg, +0.75deg
-  const pastels = ['pastel-peach', 'pastel-rose', 'pastel-sage', 'pastel-lavender'];
+  const pastels = ['pastel-sunset', 'pastel-olive', 'pastel-sage', 'pastel-lavender'];
   const pastel = pastels[index % pastels.length];
   return (
     <div
@@ -1011,10 +1005,21 @@ function TripCard({ trip, index, isActive, onSelect, onDelete, onTogglePin, isDe
       }}
     >
       {/* Cover image */}
-      <div className="card-cover" style={{ position: 'relative', overflow: 'hidden', height: 140 }}>
+      <div className="card-cover" style={{
+        position: 'relative', overflow: 'hidden', height: 140,
+        background: 'linear-gradient(135deg, #b8956a 0%, #722f37 100%)',
+      }}>
         <img
           src={trip.coverImage?.includes('photo-1488646953014') ? getDestinationImage(trip.destination) : (trip.coverImage || getDestinationImage(trip.destination))}
           alt=""
+          loading="lazy"
+          referrerPolicy="no-referrer"
+          onError={(e) => {
+            const t = e.currentTarget;
+            const fallback = `https://source.unsplash.com/600x400/?${encodeURIComponent(trip.destination || 'travel')}`;
+            if (t.src !== fallback) { t.src = fallback; }
+            else { t.style.display = 'none'; }
+          }}
           style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
         />
         <div className="cover-overlay" style={{
