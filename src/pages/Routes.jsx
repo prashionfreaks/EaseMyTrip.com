@@ -129,6 +129,57 @@ function nearestAirportFor(city) {
   return NEAREST_AIRPORT[k] || null;
 }
 
+// Same idea as NEAREST_AIRPORT but for trains. Listed only for cities
+// that don't have their own railway station — or whose station has very
+// limited service so a nearby junction is the practical choice.
+const NEAREST_STATION = {
+  wayanad:             { station: 'Kozhikode (Calicut)',     drive: '~2.5h drive' },
+  mahabaleshwar:       { station: 'Wathar',                  drive: '~45 min drive · or Pune ~3h' },
+  manali:              { station: 'Joginder Nagar',          drive: '~5h on the narrow gauge · or Chandigarh ~8h drive' },
+  shimla:              { station: 'Kalka',                   drive: 'change to UNESCO Toy Train · ~6h total · or Chandigarh ~4h drive' },
+  coorg:               { station: 'Mysore',                  drive: '~3h drive · or Mangalore ~4h' },
+  munnar:              { station: 'Aluva (Ernakulam)',       drive: '~4h drive' },
+  thekkady:            { station: 'Kottayam',                drive: '~4h drive' },
+  mussoorie:           { station: 'Dehradun',                drive: '~1h drive' },
+  nainital:            { station: 'Kathgodam',               drive: '~1h drive' },
+  pushkar:             { station: 'Ajmer',                   drive: '~30 min drive' },
+  'mount abu':         { station: 'Abu Road',                drive: '~45 min drive' },
+  spiti:               { station: 'Joginder Nagar',          drive: '~10h+ mountain drive' },
+  'spiti valley':      { station: 'Joginder Nagar',          drive: '~10h+ mountain drive' },
+  kasol:               { station: 'Joginder Nagar',          drive: '~4h drive · or Chandigarh ~8h' },
+  dharamshala:         { station: 'Pathankot (Chakki Bank)', drive: '~3.5h drive' },
+  'mcleod ganj':       { station: 'Pathankot (Chakki Bank)', drive: '~4h drive' },
+  ajanta:              { station: 'Jalgaon',                 drive: '~1h drive · or Aurangabad ~2h' },
+  ellora:              { station: 'Aurangabad',              drive: '~45 min drive' },
+  'ajanta & ellora':   { station: 'Aurangabad / Jalgaon',    drive: '~45 min – 2h drive' },
+  hampi:               { station: 'Hosapete (Hospet)',       drive: '~30 min drive' },
+  konark:              { station: 'Puri',                    drive: '~1h drive · or Bhubaneswar ~1.5h' },
+  'bodh gaya':         { station: 'Gaya',                    drive: '~30 min drive' },
+  bodhgaya:            { station: 'Gaya',                    drive: '~30 min drive' },
+  'jim corbett':       { station: 'Ramnagar',                drive: 'small terminus · or Kathgodam ~3h drive' },
+  corbett:             { station: 'Ramnagar',                drive: 'small terminus · or Kathgodam ~3h drive' },
+  kaziranga:           { station: 'Furkating or Guwahati',   drive: '~2h / ~4h drive' },
+  cherrapunji:         { station: 'Guwahati',                drive: '~3.5h drive · no rail in Meghalaya' },
+  meghalaya:           { station: 'Guwahati',                drive: '~3-4h drive · no rail in Meghalaya' },
+  shillong:            { station: 'Guwahati',                drive: '~3.5h drive · no rail in Meghalaya' },
+  tawang:              { station: 'Rangapara North',         drive: '~10h mountain drive' },
+  mahabalipuram:       { station: 'Chengalpattu',            drive: '~30 min drive · or Chennai ~1.5h' },
+  pondicherry:         { station: 'Pondicherry',             drive: 'small station · most route via Chennai (~3h drive)' },
+  puducherry:          { station: 'Pondicherry',             drive: 'small station · most route via Chennai (~3h drive)' },
+  'statue of unity':   { station: 'Kevadia',                 drive: 'limited service · or Vadodara ~2h drive' },
+  'rann of kutch':     { station: 'Bhuj',                    drive: '~1h drive' },
+  kutch:               { station: 'Bhuj',                    drive: '~1h drive' },
+  gir:                 { station: 'Veraval',                 drive: '~1.5h drive · or Junagadh ~2h' },
+  'gir national park': { station: 'Veraval',                 drive: '~1.5h drive · or Junagadh ~2h' },
+  kashmir:             { station: 'Jammu Tawi',              drive: '~7h drive to Srinagar · rail extension to Banihal' },
+};
+
+function nearestStationFor(city) {
+  if (!city) return null;
+  const k = city.toLowerCase().trim();
+  return NEAREST_STATION[k] || null;
+}
+
 function getRouteKey(a, b) {
   return [a, b].map(s => s.toLowerCase().trim()).sort().join('|');
 }
@@ -885,9 +936,17 @@ function ModeCard({ opt, isCheapest, isFastest, hasReturn, sym, fromCity, toCity
 
   // For flights, surface the nearest commercial airport when the city itself
   // doesn't have one (Wayanad → Calicut, Mahabaleshwar → Pune, etc.) so the
-  // user knows where they'll actually be landing.
-  const fromAirport = opt.mode === 'flight' ? nearestAirportFor(fromCity) : null;
-  const toAirport   = opt.mode === 'flight' ? nearestAirportFor(toCity)   : null;
+  // user knows where they'll actually be landing. Same idea for train mode
+  // with the nearest practical railway station / junction.
+  const fromHub = opt.mode === 'flight' ? nearestAirportFor(fromCity)
+                : opt.mode === 'train'  ? nearestStationFor(fromCity)
+                : null;
+  const toHub   = opt.mode === 'flight' ? nearestAirportFor(toCity)
+                : opt.mode === 'train'  ? nearestStationFor(toCity)
+                : null;
+  const hubLabel = opt.mode === 'flight' ? { from: 'fly via', to: 'fly into', name: 'airport' }
+                 : opt.mode === 'train'  ? { from: 'board at', to: 'arrive at', name: 'station' }
+                 : null;
 
   return (
     <div className="mode-card" style={{
@@ -973,31 +1032,31 @@ function ModeCard({ opt, isCheapest, isFastest, hasReturn, sym, fromCity, toCity
         <p style={{
           fontSize: 11, color: 'var(--text-tertiary)', lineHeight: 1.4,
           display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-          overflow: 'hidden', marginBottom: (fromAirport || toAirport || platforms.length) ? 6 : 0,
+          overflow: 'hidden', marginBottom: (fromHub || toHub || platforms.length) ? 6 : 0,
         }}>
           {opt.note}
         </p>
       )}
 
-      {/* Nearest airport hints — only shown for flight options when the city
-          itself doesn't have a commercial airport. */}
-      {(fromAirport || toAirport) && (
+      {/* Nearest hub hints — surface the nearest commercial airport (flight)
+          or railway station (train) when the city itself doesn't have one. */}
+      {hubLabel && (fromHub || toHub) && (
         <div style={{
           display: 'flex', flexDirection: 'column', gap: 2,
           padding: '6px 8px', marginBottom: platforms.length ? 6 : 0,
           background: cfg.color + '0d', borderRadius: 6,
           borderLeft: `2px solid ${cfg.color}60`,
         }}>
-          {fromAirport && (
+          {fromHub && (
             <div style={{ fontSize: 10, color: 'var(--text-secondary)', lineHeight: 1.35 }}>
               <span style={{ fontWeight: 700, color: cfg.color }}>From {fromCity}:</span>{' '}
-              fly via {fromAirport.airport} · <span style={{ color: 'var(--text-tertiary)' }}>{fromAirport.drive}</span>
+              {hubLabel.from} {fromHub[hubLabel.name]} · <span style={{ color: 'var(--text-tertiary)' }}>{fromHub.drive}</span>
             </div>
           )}
-          {toAirport && (
+          {toHub && (
             <div style={{ fontSize: 10, color: 'var(--text-secondary)', lineHeight: 1.35 }}>
               <span style={{ fontWeight: 700, color: cfg.color }}>To {toCity}:</span>{' '}
-              fly into {toAirport.airport} · <span style={{ color: 'var(--text-tertiary)' }}>{toAirport.drive}</span>
+              {hubLabel.to} {toHub[hubLabel.name]} · <span style={{ color: 'var(--text-tertiary)' }}>{toHub.drive}</span>
             </div>
           )}
         </div>

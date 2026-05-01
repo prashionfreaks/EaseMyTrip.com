@@ -9,7 +9,7 @@ import {
   Clock, CheckCircle2, Trash2, Bell,
   ArrowRight, Map, Pin, PinOff,
 } from 'lucide-react';
-import { getTripCurrencySymbol } from '../lib/itinerary';
+import { getTripCurrencySymbol, getDestinationCurrency } from '../lib/itinerary';
 import DestinationPicker from '../components/DestinationPicker';
 import { getDestinationImage } from '../lib/destinationImages';
 import { TripCardSkeleton, SkeletonStyles } from '../components/Skeleton';
@@ -905,7 +905,15 @@ export default function Dashboard() {
             <label className="form-label">Destination *</label>
             <DestinationPicker
               value={newTrip.destination}
-              onChange={val => setNewTrip(p => ({ ...p, destination: val }))}
+              onChange={val => setNewTrip(p => ({
+                ...p,
+                destination: val,
+                // Auto-pick currency from destination so Indian places land
+                // on INR and overseas places on USD without the user having
+                // to remember to change the dropdown. They can still
+                // override afterwards.
+                currency: getDestinationCurrency(val),
+              }))}
             />
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>

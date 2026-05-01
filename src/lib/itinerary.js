@@ -882,12 +882,58 @@ const DEST_ALIASES = {
   meghalaya: 'meghalaya', shillong: 'meghalaya', cherrapunji: 'meghalaya',
 };
 
+// Comprehensive list of Indian city / state / region keywords. Used only
+// for currency detection so any Indian destination — including ones the
+// built-in template engine doesn't know about — defaults to INR.
+// (INDIAN_DEST_KEYS above is narrower because it gates which destinations
+// have curated day-by-day templates; the currency check should be looser.)
+const INDIAN_CITY_KEYWORDS = [
+  // Tier 1 metros
+  'mumbai', 'bombay', 'delhi', 'bangalore', 'bengaluru', 'chennai', 'kolkata',
+  'hyderabad', 'pune', 'ahmedabad', 'lucknow', 'kochi', 'cochin', 'jaipur',
+  'agra', 'mangalore', 'amritsar', 'chandigarh', 'bhopal', 'indore', 'nagpur',
+  'coimbatore', 'visakhapatnam', 'vizag', 'patna', 'ranchi', 'guwahati',
+  'bhubaneswar', 'cuttack', 'thiruvananthapuram', 'trivandrum', 'surat',
+  'vadodara', 'baroda', 'rajkot', 'jodhpur', 'gurgaon', 'gurugram', 'noida',
+  // Tier 2 / heritage
+  'varanasi', 'ayodhya', 'mathura', 'vrindavan', 'tirupati', 'madurai',
+  'rameshwaram', 'kanyakumari', 'pondicherry', 'puducherry', 'mahabalipuram',
+  'udaipur', 'jaisalmer', 'pushkar', 'mount abu', 'khajuraho', 'sanchi',
+  'orchha', 'gwalior', 'ujjain', 'aurangabad', 'ajanta', 'ellora',
+  'puri', 'konark', 'bodh gaya', 'bodhgaya', 'gaya', 'nalanda',
+  // Hill stations
+  'shimla', 'manali', 'mussoorie', 'nainital', 'rishikesh', 'haridwar',
+  'dharamshala', 'mcleod ganj', 'mcleodganj', 'kasol', 'spiti', 'auli',
+  'mahabaleshwar', 'lonavala', 'matheran', 'ooty', 'kodaikanal', 'munnar',
+  'darjeeling', 'kalimpong', 'gangtok', 'pelling', 'tawang', 'ziro',
+  'shillong', 'cherrapunji', 'mawlynnong',
+  // Beach / island / nature
+  'goa', 'gokarna', 'alleppey', 'alappuzha', 'kovalam', 'thekkady', 'wayanad',
+  'coorg', 'kodagu', 'chikmagalur', 'hampi', 'badami',
+  'andaman', 'port blair', 'lakshadweep', 'havelock',
+  // Wildlife
+  'jim corbett', 'corbett', 'kaziranga', 'gir', 'ranthambore', 'bandhavgarh',
+  'kanha', 'pench', 'periyar', 'sundarbans',
+  // Gujarat heritage
+  'rann of kutch', 'kutch', 'bhuj', 'statue of unity', 'dwarka', 'somnath',
+  'diu', 'daman',
+  // Generic Kashmir / Ladakh / NE
+  'kashmir', 'srinagar', 'gulmarg', 'pahalgam', 'sonmarg',
+  'ladakh', 'leh', 'kargil', 'nubra', 'pangong',
+  'meghalaya', 'sikkim', 'assam', 'arunachal', 'nagaland', 'manipur',
+  'tripura', 'mizoram', 'kohima', 'aizawl', 'imphal', 'agartala',
+  // States / regions
+  'india', 'rajasthan', 'kerala', 'punjab', 'gujarat', 'maharashtra',
+  'karnataka', 'tamil nadu', 'andhra pradesh', 'telangana', 'odisha', 'orissa',
+  'uttar pradesh', 'uttarakhand', 'himachal pradesh', 'himachal',
+  'jharkhand', 'bihar', 'west bengal', 'chhattisgarh', 'haryana',
+  'madhya pradesh',
+];
+
 export function getDestinationCurrency(destination) {
   if (!destination) return 'USD';
   const lower = destination.toLowerCase();
-  for (const [key, val] of Object.entries(DEST_ALIASES)) {
-    if (lower.includes(key) && INDIAN_DEST_KEYS.has(val)) return 'INR';
-  }
+  if (INDIAN_CITY_KEYWORDS.some(k => lower.includes(k))) return 'INR';
   return 'USD';
 }
 
