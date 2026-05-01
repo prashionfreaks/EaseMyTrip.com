@@ -23,6 +23,86 @@ export async function generateItinerary(destination, startDate, endDate, opts = 
   return { days: applyStay(built.days, stay), currency: built.currency };
 }
 
+// ─── Staged generation: skeleton + per-day fill ──────────────────
+//
+// The two functions below split the AI generation into a fast skeleton
+// (date + neighborhood + theme per day, ~3-5s) and per-day fills (4-6 timed
+// items per day, run in parallel client-side, ~3-5s each). The Itinerary
+// page renders the skeleton immediately and streams in items as each day's
+// fill resolves, instead of blocking on a single 20-30s call.
+
+export async function generateItinerarySkeleton(destination, startDate, endDate) {
+  if (!isSupabaseConfigured) throw new Error('AI not configured');
+  const start = parseISO(startDate);
+  const numDays = Math.max(1, Math.round((parseISO(endDate) - start) / 86400000) + 1);
+  const { key } = matchDestination(destination);
+  const currency = INDIAN_DEST_KEYS.has(key) ? 'INR' : 'USD';
+
+  const { data, error } = await supabase.functions.invoke('generate-itinerary', {
+    body: { mode: 'skeleton', destination, startDate, endDate, numDays },
+  });
+  if (error) throw new Error(error.message || 'Edge function error');
+  if (!Array.isArray(data?.skeleton)) throw new Error('Invalid skeleton response');
+
+  const skeleton = data.skeleton.map((d, i) => ({
+    date: d.date || format(addDays(start, i), 'yyyy-MM-dd'),
+    location: String(d.location || destination).slice(0, 120),
+    theme: String(d.theme || '').slice(0, 120),
+  }));
+  return { skeleton, currency, numDays };
+}
+
+export async function generateItineraryDay(destination, day, opts = {}) {
+  if (!isSupabaseConfigured) throw new Error('AI not configured');
+  const { date, location, theme } = day;
+  const { isFirstDay = false, isLastDay = false, currency = 'USD' } = opts;
+
+  const { data, error } = await supabase.functions.invoke('generate-itinerary', {
+    body: {
+      mode: 'fill',
+      destination, date, location, theme, currency, isFirstDay, isLastDay,
+    },
+  });
+  if (error) throw new Error(error.message || 'Edge function error');
+  if (!Array.isArray(data?.items)) throw new Error('Invalid fill response');
+
+  return data.items.map((item, j) => ({
+    id: 'it' + (Date.now() + j),
+    time: item.time || '09:00',
+    title: item.title || 'Activity',
+    type: item.type || 'activity',
+    duration: Number(item.duration) || 60,
+    notes: item.notes || '',
+    cost: Number(item.cost) || 0,
+  }));
+}
+
+// Inject the user's confirmed stay into a single day's items (the first day).
+// Mirrors `applyStay` but operates on items rather than a full days array, so
+// the staged generator can apply it as each fill resolves.
+export function applyStayToDayItems(items, stay) {
+  if (!stay || !Array.isArray(items)) return items || [];
+  const accIdx = items.findIndex(it => it.type === 'accommodation');
+  const stayItem = {
+    id: 'it-stay-' + Date.now(),
+    time: '15:00',
+    title: `Check in — ${stay.name}`,
+    type: 'accommodation',
+    duration: 30,
+    notes: [stay.area && `Area: ${stay.area}`, stay.notes].filter(Boolean).join(' · '),
+    cost: 0,
+  };
+  if (accIdx >= 0) {
+    const original = items[accIdx];
+    return items.map((it, i) =>
+      i === accIdx ? { ...stayItem, time: original.time || '15:00', cost: original.cost || 0 } : it
+    );
+  }
+  const next = [...items];
+  next.splice(Math.min(1, next.length), 0, stayItem);
+  return next;
+}
+
 // Replace the first accommodation entry on Day 1 with the user's confirmed
 // stay so the itinerary reflects reality. If no accommodation slot exists,
 // inject one. Idempotent — safe to call with stay=null.

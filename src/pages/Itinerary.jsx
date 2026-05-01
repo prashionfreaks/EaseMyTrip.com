@@ -6,7 +6,10 @@ import {
   ChevronDown, ChevronUp, DollarSign, StickyNote, Sparkles,
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
-import { generateItinerary, hasAIKey, getTripCurrencySymbol } from '../lib/itinerary';
+import {
+  generateItinerary, generateItinerarySkeleton, generateItineraryDay,
+  applyStayToDayItems, hasAIKey, getTripCurrencySymbol,
+} from '../lib/itinerary';
 
 const typeConfig = {
   transport:     { icon: Plane,           color: 'var(--brand)',  label: 'Transport',     badge: 'badge-blue' },
@@ -29,18 +32,106 @@ export default function Itinerary() {
     setGenerating(true);
     setGenError(null);
     try {
-      const { days, currency } = await generateItinerary(
-        activeTrip.destination,
-        activeTrip.startDate,
-        activeTrip.endDate,
-        { stay: activeTrip.stay }, // confirmed stay anchors the check-in items
-      );
+      // Without an AI key we have nothing to wait on — fall back to the
+      // single-shot built-in generator and update once.
+      if (!hasAIKey()) {
+        const { days, currency } = await generateItinerary(
+          activeTrip.destination,
+          activeTrip.startDate,
+          activeTrip.endDate,
+          { stay: activeTrip.stay },
+        );
+        updateTrip(activeTrip.id, t => ({
+          ...t, itinerary: days, budget: { ...t.budget, currency },
+        }));
+        setCollapsedDays(new Set());
+        return;
+      }
+
+      // Skeleton-then-fill: get day-level outline first, render it
+      // immediately, then stream in per-day items as each fill resolves.
+      let skeleton, currency;
+      try {
+        ({ skeleton, currency } = await generateItinerarySkeleton(
+          activeTrip.destination,
+          activeTrip.startDate,
+          activeTrip.endDate,
+        ));
+      } catch (err) {
+        // Fallback for the deploy gap before the Edge Function ships
+        // skeleton/fill modes — fall back to the legacy single-shot path
+        // so the user still gets an itinerary, just without progressive
+        // rendering.
+        console.warn('Skeleton mode unavailable, using legacy path:', err.message);
+        const { days, currency: legacyCurrency } = await generateItinerary(
+          activeTrip.destination,
+          activeTrip.startDate,
+          activeTrip.endDate,
+          { stay: activeTrip.stay },
+        );
+        updateTrip(activeTrip.id, t => ({
+          ...t, itinerary: days, budget: { ...t.budget, currency: legacyCurrency },
+        }));
+        setCollapsedDays(new Set());
+        return;
+      }
+
+      const baseId = Date.now();
+      const skeletonDays = skeleton.map((d, i) => ({
+        id: 'day' + (baseId + i),
+        date: d.date,
+        location: d.location,
+        theme: d.theme,
+        items: [],
+        _filling: true,
+      }));
       updateTrip(activeTrip.id, t => ({
-        ...t,
-        itinerary: days,
-        budget: { ...t.budget, currency },
+        ...t, itinerary: skeletonDays, budget: { ...t.budget, currency },
       }));
       setCollapsedDays(new Set());
+
+      // Run fills with bounded concurrency so a 14-day trip doesn't fan
+      // out 14 simultaneous Anthropic calls. 4 in flight is plenty fast
+      // and stays well below practical rate limits.
+      const stay = activeTrip.stay && activeTrip.stay.confirmed ? activeTrip.stay : null;
+      const concurrency = Math.min(4, skeleton.length);
+      let nextIdx = 0;
+
+      async function worker() {
+        while (true) {
+          const i = nextIdx++;
+          if (i >= skeleton.length) return;
+          const dayId = skeletonDays[i].id;
+          try {
+            let items = await generateItineraryDay(
+              activeTrip.destination,
+              skeleton[i],
+              {
+                isFirstDay: i === 0,
+                isLastDay: i === skeleton.length - 1,
+                currency,
+              },
+            );
+            if (i === 0 && stay) items = applyStayToDayItems(items, stay);
+            updateTrip(activeTrip.id, t => ({
+              ...t,
+              itinerary: (t.itinerary || []).map(d =>
+                d.id === dayId ? { ...d, items, _filling: false } : d
+              ),
+            }));
+          } catch (err) {
+            console.warn(`Day ${i + 1} fill failed:`, err);
+            updateTrip(activeTrip.id, t => ({
+              ...t,
+              itinerary: (t.itinerary || []).map(d =>
+                d.id === dayId ? { ...d, items: [], _filling: false, _failed: true } : d
+              ),
+            }));
+          }
+        }
+      }
+
+      await Promise.all(Array.from({ length: concurrency }, () => worker()));
     } catch (err) {
       setGenError(err.message || 'Failed to generate itinerary');
     } finally {
@@ -93,6 +184,16 @@ if (!activeTrip) {
     50%  { transform: translateX(4px)  rotate(5deg);  opacity: 1; }
     100% { transform: translateX(-8px) rotate(-5deg); opacity: 0.7; }
   }
+  @keyframes shimmer {
+    0%   { background-position: -200px 0; }
+    100% { background-position: calc(200px + 100%) 0; }
+  }
+  .day-skeleton-row {
+    height: 40px; border-radius: var(--radius-md);
+    background: linear-gradient(90deg, var(--bg-tertiary) 0%, var(--bg-accent) 50%, var(--bg-tertiary) 100%);
+    background-size: 200px 100%; background-repeat: no-repeat;
+    animation: shimmer 1.4s linear infinite;
+  }
 `}</style>
       <div className="page-header">
         <div>
@@ -122,7 +223,7 @@ if (!activeTrip) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {itinerary.map((day, dayIdx) => {
               const isExpanded = !collapsedDays.has(day.id);
-              const dayTotal = day.items.reduce((sum, it) => sum + it.cost, 0);
+              const dayTotal = (day.items || []).reduce((sum, it) => sum + (Number(it.cost) || 0), 0);
 
               return (
                 <div key={day.id} className="card">
@@ -148,9 +249,17 @@ if (!activeTrip) {
                       <div style={{ textAlign: 'left' }}>
                         <h3 style={{ fontSize: 15, fontWeight: 600 }}>
                           {day.date ? format(parseISO(day.date), 'EEEE, MMM d') : `Day ${dayIdx + 1}`}
+                          {day.theme && (
+                            <span style={{ fontWeight: 500, color: 'var(--text-secondary)', marginLeft: 6 }}>
+                              · {day.theme}
+                            </span>
+                          )}
                         </h3>
                         <p style={{ fontSize: 12, color: 'var(--text-tertiary)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                          <MapPin size={11} /> {day.location} · {(day.items || []).length} activities
+                          <MapPin size={11} /> {day.location}
+                          {day._filling
+                            ? <> · <span style={{ color: 'var(--brand)', fontWeight: 600 }}>generating activities…</span></>
+                            : <> · {(day.items || []).length} activities</>}
                           {dayTotal > 0 && <> · <DollarSign size={11} />{sym}{dayTotal.toLocaleString()}</>}
                         </p>
                       </div>
@@ -160,6 +269,18 @@ if (!activeTrip) {
 
                   {isExpanded && (
                     <div className="card-body" style={{ padding: '0 20px 16px' }}>
+                      {day._filling && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingLeft: 24, marginBottom: 12 }}>
+                          {[0, 1, 2, 3].map(i => (
+                            <div key={i} className="day-skeleton-row" style={{ width: `${88 - i * 6}%` }} />
+                          ))}
+                        </div>
+                      )}
+                      {!day._filling && day._failed && (
+                        <p style={{ fontSize: 12, color: 'var(--danger)', padding: '8px 0 12px 24px' }}>
+                          Couldn't generate activities for this day. Add some manually below or retry the suggestion.
+                        </p>
+                      )}
                       {/* Timeline */}
                       <div style={{ position: 'relative', paddingLeft: 24 }}>
                         {/* Vertical line */}
