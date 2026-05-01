@@ -41,11 +41,19 @@ export default function Budget() {
   // AFTER all hooks. Otherwise a transition (sign-out, trip deletion via
   // realtime, etc.) flips the hook count and React throws / blanks the UI.
   // ──────────────────────────────────────────────────────────────────────
-  const budget = activeTrip?.budget || { total: 0, spent: 0, currency: 'INR' };
+  // Normalize budget so a malformed Supabase row (null/undefined `total`,
+  // string amounts) can't blank the page when `.toLocaleString()` is called
+  // on it later. Same defensive treatment for expense amounts.
+  const rawBudget = activeTrip?.budget || {};
+  const budget = {
+    total: Number(rawBudget.total) || 0,
+    spent: Number(rawBudget.spent) || 0,
+    currency: rawBudget.currency || 'INR',
+  };
   const expenses = activeTrip?.expenses || [];
   const members = activeTrip?.members || [];
   const sym = getTripCurrencySymbol(activeTrip);
-  const totalSpent = expenses.reduce((sum, e) => sum + e.amount, 0);
+  const totalSpent = expenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
   const remaining = budget.total - totalSpent;
   const pct = budget.total > 0 ? (totalSpent / budget.total) * 100 : 0;
 
@@ -327,7 +335,7 @@ export default function Budget() {
                     borderBottom: '1px solid var(--border-light)',
                     background: isCreditor ? 'rgba(16,185,129,0.03)' : section === 'outstanding' ? 'rgba(239,68,68,0.03)' : 'transparent',
                   }}>
-                    <div className="user-avatar" style={{ background: member.color, flexShrink: 0 }}>{member.name[0]}</div>
+                    <div className="user-avatar" style={{ background: member.color, flexShrink: 0 }}>{safeInitial(member.name)}</div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p style={{ fontWeight: 600, fontSize: 14, color: 'var(--text-primary)' }}>{member.name}</p>
                       <p style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 1 }}>

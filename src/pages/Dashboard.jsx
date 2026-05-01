@@ -13,7 +13,30 @@ import { getTripCurrencySymbol } from '../lib/itinerary';
 import DestinationPicker from '../components/DestinationPicker';
 import { getDestinationImage } from '../lib/destinationImages';
 import { TripCardSkeleton, SkeletonStyles } from '../components/Skeleton';
-import { format, differenceInDays, parseISO } from 'date-fns';
+import { format, differenceInDays, parseISO, addDays } from 'date-fns';
+
+// Build empty day-stub records spanning [startDate, endDate]. The Itinerary
+// page reads `activeTrip.itinerary.length` for "N days planned", so this
+// surfaces the user's selected date range immediately at trip creation
+// rather than zero until they hit "Suggest Itinerary".
+function buildEmptyItinerary(startDate, endDate, location) {
+  if (!startDate || !endDate) return [];
+  try {
+    const start = parseISO(startDate);
+    const end = parseISO(endDate);
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return [];
+    const numDays = Math.max(1, differenceInDays(end, start) + 1);
+    const baseId = Date.now();
+    return Array.from({ length: numDays }, (_, i) => ({
+      id: 'day' + (baseId + i),
+      date: format(addDays(start, i), 'yyyy-MM-dd'),
+      location: location || '',
+      items: [],
+    }));
+  } catch {
+    return [];
+  }
+}
 
 function countOutstandingDues(trips, currentUserId) {
   let count = 0;
@@ -595,16 +618,21 @@ export default function Dashboard() {
   async function handleCreate() {
     if (!newTrip.name.trim() || !newTrip.destination.trim()) return;
     setCreating(true);
+    const startDate = newTrip.startDate || '2026-06-01';
+    const endDate = newTrip.endDate || '2026-06-10';
+    const destination = newTrip.destination.trim();
     await addTrip({
       name: newTrip.name.trim(),
-      destination: newTrip.destination.trim(),
-      coverImage: getDestinationImage(newTrip.destination.trim()),
-      startDate: newTrip.startDate || '2026-06-01',
-      endDate: newTrip.endDate || '2026-06-10',
+      destination,
+      coverImage: getDestinationImage(destination),
+      startDate,
+      endDate,
       status: 'planning',
       members: [{ ...currentUser, role: 'organizer' }],
       budget: { total: newTrip.budget ? parseFloat(newTrip.budget) : 0, spent: 0, currency: newTrip.currency || 'INR' },
-      polls: [], itinerary: [], expenses: [], routes: [], activity: [], contingencies: [], messages: [],
+      polls: [],
+      itinerary: buildEmptyItinerary(startDate, endDate, destination),
+      expenses: [], routes: [], activity: [], contingencies: [], messages: [], paidSettlements: [],
     });
     setCreating(false);
     setNewTrip({ name: '', destination: '', startDate: '', endDate: '', budget: '', currency: 'INR' });

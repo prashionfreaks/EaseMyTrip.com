@@ -65,6 +65,70 @@ const BOOKING_PLATFORMS = {
   ],
 };
 
+// Cities without their own commercial airport (or with very limited service)
+// mapped to the nearest practical airport plus drive time. Lookup is
+// case-insensitive on the normalized city name.
+const NEAREST_AIRPORT = {
+  wayanad:             { airport: 'Calicut (Kozhikode)',          drive: '~2.5h drive' },
+  mahabaleshwar:       { airport: 'Pune',                          drive: '~3h drive' },
+  manali:              { airport: 'Bhuntar (Kullu)',               drive: '~1h drive · or Chandigarh ~7h' },
+  shimla:              { airport: 'Chandigarh',                    drive: '~4h drive · Shimla airport has limited service' },
+  coorg:               { airport: 'Mangalore',                     drive: '~3h drive · or Bangalore ~5h' },
+  munnar:              { airport: 'Cochin (Kochi)',                drive: '~4h drive' },
+  alleppey:            { airport: 'Cochin (Kochi)',                drive: '~1.5h drive' },
+  thekkady:            { airport: 'Madurai or Cochin',             drive: '~4h / ~5h drive' },
+  mussoorie:           { airport: 'Dehradun (Jolly Grant)',        drive: '~1.5h drive' },
+  nainital:            { airport: 'Pantnagar',                     drive: '~1.5h drive · or Delhi ~7h' },
+  rishikesh:           { airport: 'Dehradun (Jolly Grant)',        drive: '~30 min drive' },
+  haridwar:            { airport: 'Dehradun (Jolly Grant)',        drive: '~1h drive' },
+  pushkar:             { airport: 'Jaipur',                        drive: '~2.5h drive' },
+  'mount abu':         { airport: 'Udaipur',                       drive: '~3h drive · or Ahmedabad ~4.5h' },
+  spiti:               { airport: 'Bhuntar (Kullu)',               drive: '~8h mountain drive' },
+  'spiti valley':      { airport: 'Bhuntar (Kullu)',               drive: '~8h mountain drive' },
+  kasol:               { airport: 'Bhuntar (Kullu)',               drive: '~1.5h drive' },
+  dharamshala:         { airport: 'Gaggal (Kangra)',               drive: '~45 min drive' },
+  'mcleod ganj':       { airport: 'Gaggal (Kangra)',               drive: '~1.5h drive' },
+  'ajanta & ellora':   { airport: 'Aurangabad',                    drive: '~30 min – 2h drive' },
+  ajanta:              { airport: 'Aurangabad',                    drive: '~2h drive' },
+  ellora:              { airport: 'Aurangabad',                    drive: '~30 min drive' },
+  khajuraho:           { airport: 'Khajuraho',                     drive: 'small airport · seasonal flights from Delhi/Varanasi' },
+  hampi:               { airport: 'Hubli',                         drive: '~3h drive · or Bangalore ~6h' },
+  konark:              { airport: 'Bhubaneswar',                   drive: '~1.5h drive' },
+  puri:                { airport: 'Bhubaneswar',                   drive: '~1h drive' },
+  'bodh gaya':         { airport: 'Gaya',                          drive: '~30 min drive · or Patna ~2.5h' },
+  bodhgaya:            { airport: 'Gaya',                          drive: '~30 min drive · or Patna ~2.5h' },
+  'jim corbett':       { airport: 'Pantnagar',                     drive: '~1.5h drive · or Delhi ~5h' },
+  corbett:             { airport: 'Pantnagar',                     drive: '~1.5h drive · or Delhi ~5h' },
+  kaziranga:           { airport: 'Jorhat',                        drive: '~1.5h drive · or Guwahati ~4h' },
+  tawang:              { airport: 'Tezpur',                        drive: '~10h mountain drive · or Guwahati ~12h' },
+  cherrapunji:         { airport: 'Shillong (Umroi)',              drive: '~2h drive · or Guwahati ~3.5h' },
+  mahabalipuram:       { airport: 'Chennai',                       drive: '~1.5h drive' },
+  kanyakumari:         { airport: 'Trivandrum',                    drive: '~2h drive' },
+  pondicherry:         { airport: 'Pondicherry',                   drive: 'small airport · most fly into Chennai (~3h drive)' },
+  puducherry:          { airport: 'Pondicherry',                   drive: 'small airport · most fly into Chennai (~3h drive)' },
+  mysore:              { airport: 'Mysore',                        drive: 'limited airport · or Bangalore ~3.5h drive' },
+  'statue of unity':   { airport: 'Vadodara',                      drive: '~2h drive · or Surat ~2.5h' },
+  'rann of kutch':     { airport: 'Bhuj',                          drive: '~1h drive · or Ahmedabad ~5h' },
+  kutch:               { airport: 'Bhuj',                          drive: '~1h drive' },
+  gir:                 { airport: 'Rajkot',                        drive: '~3h drive' },
+  'gir national park': { airport: 'Rajkot',                        drive: '~3h drive' },
+  jaisalmer:           { airport: 'Jaisalmer',                     drive: 'small airport · or Jodhpur ~5h drive' },
+  ladakh:              { airport: 'Leh',                           drive: 'flights from Delhi only' },
+  leh:                 { airport: 'Leh',                           drive: 'flights from Delhi only' },
+  kashmir:             { airport: 'Srinagar',                      drive: 'flights from Delhi/Mumbai' },
+  meghalaya:           { airport: 'Shillong (Umroi)',              drive: 'limited · most fly into Guwahati (~3h drive)' },
+  shillong:            { airport: 'Shillong (Umroi)',              drive: 'limited · most fly into Guwahati (~3h drive)' },
+  ayodhya:             { airport: 'Ayodhya (Maryada Purushottam)', drive: 'small airport · or Lucknow ~3h drive' },
+  'andaman islands':   { airport: 'Port Blair',                    drive: 'flights from Chennai/Kolkata/Delhi' },
+  andaman:             { airport: 'Port Blair',                    drive: 'flights from Chennai/Kolkata/Delhi' },
+};
+
+function nearestAirportFor(city) {
+  if (!city) return null;
+  const k = city.toLowerCase().trim();
+  return NEAREST_AIRPORT[k] || null;
+}
+
 function getRouteKey(a, b) {
   return [a, b].map(s => s.toLowerCase().trim()).sort().join('|');
 }
@@ -819,6 +883,12 @@ function ModeCard({ opt, isCheapest, isFastest, hasReturn, sym, fromCity, toCity
   const isHighlighted = isCheapest || isFastest;
   const platforms = BOOKING_PLATFORMS[opt.mode] || [];
 
+  // For flights, surface the nearest commercial airport when the city itself
+  // doesn't have one (Wayanad → Calicut, Mahabaleshwar → Pune, etc.) so the
+  // user knows where they'll actually be landing.
+  const fromAirport = opt.mode === 'flight' ? nearestAirportFor(fromCity) : null;
+  const toAirport   = opt.mode === 'flight' ? nearestAirportFor(toCity)   : null;
+
   return (
     <div className="mode-card" style={{
       borderColor: isHighlighted ? cfg.color + '50' : 'var(--border-light)',
@@ -903,10 +973,34 @@ function ModeCard({ opt, isCheapest, isFastest, hasReturn, sym, fromCity, toCity
         <p style={{
           fontSize: 11, color: 'var(--text-tertiary)', lineHeight: 1.4,
           display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-          overflow: 'hidden', marginBottom: platforms.length ? 6 : 0,
+          overflow: 'hidden', marginBottom: (fromAirport || toAirport || platforms.length) ? 6 : 0,
         }}>
           {opt.note}
         </p>
+      )}
+
+      {/* Nearest airport hints — only shown for flight options when the city
+          itself doesn't have a commercial airport. */}
+      {(fromAirport || toAirport) && (
+        <div style={{
+          display: 'flex', flexDirection: 'column', gap: 2,
+          padding: '6px 8px', marginBottom: platforms.length ? 6 : 0,
+          background: cfg.color + '0d', borderRadius: 6,
+          borderLeft: `2px solid ${cfg.color}60`,
+        }}>
+          {fromAirport && (
+            <div style={{ fontSize: 10, color: 'var(--text-secondary)', lineHeight: 1.35 }}>
+              <span style={{ fontWeight: 700, color: cfg.color }}>From {fromCity}:</span>{' '}
+              fly via {fromAirport.airport} · <span style={{ color: 'var(--text-tertiary)' }}>{fromAirport.drive}</span>
+            </div>
+          )}
+          {toAirport && (
+            <div style={{ fontSize: 10, color: 'var(--text-secondary)', lineHeight: 1.35 }}>
+              <span style={{ fontWeight: 700, color: cfg.color }}>To {toCity}:</span>{' '}
+              fly into {toAirport.airport} · <span style={{ color: 'var(--text-tertiary)' }}>{toAirport.drive}</span>
+            </div>
+          )}
+        </div>
       )}
 
       {/* Booking links */}

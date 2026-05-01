@@ -419,7 +419,7 @@ export default function ChatPage() {
               });
             }}
             style={{
-              width: 30, height: 30, borderRadius: 8, border: 'none',
+              width: 36, height: 36, borderRadius: 10, border: 'none',
               background: 'transparent', cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               color: 'var(--text-tertiary)', flexShrink: 0,
@@ -427,7 +427,7 @@ export default function ChatPage() {
             }}
             title="Mention someone"
           >
-            <AtSign size={15} />
+            <AtSign size={16} />
           </button>
 
           <textarea
