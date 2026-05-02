@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTrips } from '../context/TripContext';
 import { Send, MessageCircle, Heart, AtSign } from 'lucide-react';
-import { format, parseISO, isToday, isYesterday, differenceInMinutes } from 'date-fns';
+import { format, parseISO, isToday, isYesterday, differenceInMinutes } from '../lib/date';
 
 function dateSeparatorLabel(dateStr) {
   const d = parseISO(dateStr);

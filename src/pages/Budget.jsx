@@ -8,7 +8,7 @@ import {
   Plane, Hotel, UtensilsCrossed, Ticket, ShoppingBag, Receipt,
   PieChart, CheckCircle2, AlertCircle, Pencil, Trash2,
 } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO } from '../lib/date';
 import { getTripCurrencySymbol } from '../lib/itinerary';
 
 const initial = '?';

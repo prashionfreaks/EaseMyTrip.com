@@ -7,7 +7,7 @@ import {
   MoreHorizontal,
 } from 'lucide-react';
 
-import { format, parseISO } from 'date-fns';
+import { format, parseISO } from '../lib/date';
 // ChatPage is the default tab — import it statically so the first tap on
 // a trip card never has to wait on a lazy-chunk fetch (which was painting
 // blank until the chunk arrived). All other tabs stay code-split.

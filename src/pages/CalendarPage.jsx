@@ -6,7 +6,7 @@ import {
   startOfMonth, endOfMonth, startOfWeek, endOfWeek,
   eachDayOfInterval, isSameMonth, isToday, isWithinInterval,
   getDay, addDays, subDays, differenceInDays, isAfter, isSameDay,
-} from 'date-fns';
+} from '../lib/date';
 
 const COUNTRIES = [
   { code: 'IN', name: 'India', flag: '🇮🇳' },

@@ -1,11 +1,16 @@
-import { format, addDays, parseISO } from 'date-fns';
+import { format, addDays, parseISO } from './date';
 import { supabase, isSupabaseConfigured } from './supabase';
-import { matchDestinationInfo } from '../data/destinationInfo';
 
 // Pull top must-see attractions for a destination so the AI prompt can
 // anchor on them — otherwise the model sometimes skips iconic spots
 // (e.g. omitting Jagannath Temple from a Puri itinerary).
-function mustSeeFor(destination) {
+//
+// destinationInfo.js is ~100 kB raw, so we dynamic-import it here. Static
+// import would pull the whole DB into the main bundle (lib/itinerary is
+// eagerly imported by Dashboard for getTripCurrencySymbol). This keeps
+// it in its own chunk that only loads when AI generation runs.
+async function mustSeeFor(destination) {
+  const { matchDestinationInfo } = await import('../data/destinationInfo');
   const info = matchDestinationInfo(destination);
   if (!info) return [];
   const fromAttractions = (info.attractions || []).map(a => a.name);
@@ -54,7 +59,7 @@ export async function generateItinerarySkeleton(destination, startDate, endDate)
   const { key } = matchDestination(destination);
   const currency = INDIAN_DEST_KEYS.has(key) ? 'INR' : 'USD';
 
-  const mustSee = mustSeeFor(destination);
+  const mustSee = await mustSeeFor(destination);
   const { data, error } = await supabase.functions.invoke('generate-itinerary', {
     body: { mode: 'skeleton', destination, startDate, endDate, numDays, mustSee },
   });
@@ -74,7 +79,7 @@ export async function generateItineraryDay(destination, day, opts = {}) {
   const { date, location, theme } = day;
   const { isFirstDay = false, isLastDay = false, currency = 'USD' } = opts;
 
-  const mustSee = mustSeeFor(destination);
+  const mustSee = await mustSeeFor(destination);
   const { data, error } = await supabase.functions.invoke('generate-itinerary', {
     body: {
       mode: 'fill',

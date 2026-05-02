@@ -13,7 +13,7 @@ import { getTripCurrencySymbol, getDestinationCurrency } from '../lib/itinerary'
 import DestinationPicker from '../components/DestinationPicker';
 import { getDestinationImage } from '../lib/destinationImages';
 import { TripCardSkeleton, SkeletonStyles } from '../components/Skeleton';
-import { format, differenceInDays, parseISO, addDays } from 'date-fns';
+import { format, differenceInDays, parseISO, addDays } from '../lib/date';
 
 // Build empty day-stub records spanning [startDate, endDate]. The Itinerary
 // page reads `activeTrip.itinerary.length` for "N days planned", so this

@@ -5,7 +5,7 @@ import {
   Plus, Map, MapPin, Plane, Hotel, Camera, UtensilsCrossed,
   ChevronDown, ChevronUp, DollarSign, StickyNote, Sparkles,
 } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO } from '../lib/date';
 import {
   generateItinerary, generateItinerarySkeleton, generateItineraryDay,
   applyStayToDayItems, hasAIKey, getTripCurrencySymbol,

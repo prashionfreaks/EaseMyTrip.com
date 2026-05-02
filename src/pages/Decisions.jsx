@@ -6,7 +6,7 @@ import {
   Plus, Vote, CheckCircle2, Clock, Users, X, ChevronDown,
   ThumbsUp, BarChart3, AlertCircle, Lock
 } from 'lucide-react';
-import { format, parseISO, isPast } from 'date-fns';
+import { format, parseISO, isPast } from '../lib/date';
 
 export default function Decisions({ embedded = false }) {
   const { activeTrip, vote, currentUser, addPoll, updateTrip } = useTrips();

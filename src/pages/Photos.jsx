@@ -5,7 +5,7 @@ import {
   Camera, Upload, X, Download, Trash2, ChevronLeft, ChevronRight,
   ZoomIn, AlertCircle,
 } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO } from '../lib/date';
 
 // Compress + resize image to a Blob (max 1200px wide, quality 0.82).
 // Returning a Blob (not a data URL) avoids `fetch(dataUrl)` later, which

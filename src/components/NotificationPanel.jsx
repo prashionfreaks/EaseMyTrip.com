@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useTrips } from '../context/TripContext';
 import { toast } from '../lib/toast';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO } from '../lib/date';
 import { X, ArrowRight, CheckCircle2, Bell, BellRing, Send, Check, AlertCircle } from 'lucide-react';
 
 /** Greedy settlement algorithm — same logic as Budget.jsx */
