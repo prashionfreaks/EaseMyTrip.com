@@ -11,8 +11,16 @@ node_modules
 dist
 .env
 .env.*
+# .env.test is checked in — empty Supabase vars boot the app into demo
+# mode for the Playwright suite, no real secrets involved.
+!.env.test
 dist-ssr
 *.local
+
+# Playwright
+/test-results/
+/playwright-report/
+/playwright/.cache/
 
 # Editor directories and files
 .vscode/*

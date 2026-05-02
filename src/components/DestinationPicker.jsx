@@ -103,10 +103,17 @@ const DESTINATIONS = [
 
 export default function DestinationPicker({ value, onChange }) {
   const [query, setQuery] = useState(value || '');
+  const [lastExternalValue, setLastExternalValue] = useState(value);
   const [showDropdown, setShowDropdown] = useState(false);
   const wrapperRef = useRef(null);
 
-  useEffect(() => { setQuery(value || ''); }, [value]);
+  // Sync incoming `value` prop into local query without an effect — React
+  // bails out and re-renders immediately when state changes during render,
+  // so this is the official "don't use an effect to mirror props" pattern.
+  if (value !== lastExternalValue) {
+    setLastExternalValue(value);
+    setQuery(value || '');
+  }
 
   useEffect(() => {
     function handleClick(e) {

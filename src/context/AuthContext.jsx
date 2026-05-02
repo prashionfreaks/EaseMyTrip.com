@@ -13,16 +13,15 @@ const INACTIVITY_TIMEOUT = 10 * 60 * 1000; // 10 minutes
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  // Initial values are derived directly from the module-level
+  // `isSupabaseConfigured` constant so demo mode is ready on first paint —
+  // no setState-in-effect, no flicker.
+  const [user, setUser] = useState(isSupabaseConfigured ? null : DEMO_USER);
+  const [loading, setLoading] = useState(isSupabaseConfigured);
   const [isRecovery, setIsRecovery] = useState(false);
 
   useEffect(() => {
-    if (!isSupabaseConfigured) {
-      setUser(DEMO_USER);
-      setLoading(false);
-      return;
-    }
+    if (!isSupabaseConfigured) return;
 
     // 10 s safety net — long enough to ride out a slow getSession on poor
     // networks, short enough that a truly hung Supabase doesn't lock the UI

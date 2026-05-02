@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense, useCallback } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense, useCallback } from 'react';
 import { Routes, Route, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { useTrips } from './context/TripContext';
 import { useAuth } from './context/AuthContext';
@@ -57,7 +57,10 @@ export default function App() {
   const [signingOut, setSigningOut] = useState(false);
   const { setActiveTripId, trips, tripsLoaded, joinTripViaInvite, activeTrip, currentUser } = useTrips();
   const { user, loading, isDemo, displayName, initials, signOut } = useAuth();
-  const [inviteProcessed, setInviteProcessed] = useState(false);
+  // Idempotency flag for the join-via-invite handshake. Lives in a ref
+  // because nothing ever renders from it — using state would force a
+  // setState-in-effect after the join already happened.
+  const inviteProcessedRef = useRef(false);
 
   const location = useLocation();
   const routerNavigate = useNavigate();
@@ -75,12 +78,12 @@ export default function App() {
 
   // Process pending join after user is logged in and trips context is ready
   useEffect(() => {
-    if (!user || !tripsLoaded || inviteProcessed) return;
+    if (!user || !tripsLoaded || inviteProcessedRef.current) return;
     const pendingTripId = localStorage.getItem('pendingJoinTrip');
     if (!pendingTripId) return;
 
     localStorage.removeItem('pendingJoinTrip');
-    setInviteProcessed(true);
+    inviteProcessedRef.current = true;
 
     if (joinTripViaInvite) {
       joinTripViaInvite(pendingTripId).then(tripId => {
@@ -90,7 +93,7 @@ export default function App() {
       const match = trips.find(t => t.id === pendingTripId);
       if (match) { setActiveTripId(match.id); routerNavigate('/'); }
     }
-  }, [user, tripsLoaded, trips, inviteProcessed, setActiveTripId, joinTripViaInvite, routerNavigate]);
+  }, [user, tripsLoaded, trips, setActiveTripId, joinTripViaInvite, routerNavigate]);
 
   const navigate = useCallback((page, tripId) => {
     if (tripId) setActiveTripId(tripId);

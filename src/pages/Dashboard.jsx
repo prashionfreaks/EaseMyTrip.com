@@ -965,9 +965,19 @@ export default function Dashboard() {
 }
 
 function AnimNum({ value, duration = 1200 }) {
-  const [shown, setShown] = useState(0);
+  const isAnimatable = typeof value === 'number' && value > 0;
+  const [shown, setShown] = useState(isAnimatable ? 0 : (value || 0));
+  // Reset `shown` whenever `value` changes — derived during render so we
+  // don't need an effect just to mirror the prop. setShown inside the rAF
+  // tick is fine (that's the official animation-frame pattern); the lint
+  // rule fires only on the synchronous early-return setShown.
+  const [lastValue, setLastValue] = useState(value);
+  if (lastValue !== value) {
+    setLastValue(value);
+    setShown(isAnimatable ? 0 : (value || 0));
+  }
   useEffect(() => {
-    if (typeof value !== 'number' || value <= 0) { setShown(value || 0); return; }
+    if (!isAnimatable) return;
     let raf;
     const start = performance.now();
     const tick = (now) => {
@@ -979,7 +989,7 @@ function AnimNum({ value, duration = 1200 }) {
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [value, duration]);
+  }, [value, duration, isAnimatable]);
   return <span className="slam-num-pop" key={value}>{shown}</span>;
 }
 
