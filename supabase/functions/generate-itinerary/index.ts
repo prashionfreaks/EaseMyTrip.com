@@ -36,6 +36,19 @@ serve(async (req) => {
   if (!destination) return json({ error: 'Invalid destination' }, 400, cors);
   const safeDest = destination.replace(/[^\p{L}\p{N}\s,.'\-]/gu, '').slice(0, 120);
 
+  // Top must-see attractions sent by the client (pulled from
+  // destinationInfo.js). Lets us anchor the prompt on iconic spots so the
+  // model doesn't drop something obvious like Jagannath Temple from a Puri
+  // itinerary.
+  const rawMustSee = Array.isArray(body?.mustSee) ? body.mustSee : [];
+  const mustSee = rawMustSee
+    .map((s: unknown) => String(s ?? '').replace(/[^\p{L}\p{N}\s,.'\-&()]/gu, '').trim().slice(0, 80))
+    .filter(Boolean)
+    .slice(0, 8);
+  const mustSeeLine = mustSee.length
+    ? ` The traveller MUST experience these iconic places — distribute them across the days as appropriate, do not omit any: ${mustSee.join(', ')}.`
+    : '';
+
   const dateRe = /^\d{4}-\d{2}-\d{2}$/;
   let prompt = '';
   let maxTokens = 4096;
@@ -47,7 +60,7 @@ serve(async (req) => {
     if (!dateRe.test(startDate) || !dateRe.test(endDate) || !numDays) {
       return json({ error: 'Invalid parameters' }, 400, cors);
     }
-    prompt = `Create a high-level day-by-day skeleton for a trip to ${safeDest} from ${startDate} to ${endDate} (${numDays} days). For each day pick the specific neighborhood / town / zone the traveller will be based in or focus on, plus a brief 2-4 word theme describing the day's focus (e.g. "Arrival & Old Town", "Day trip to X", "Beach & seafood"). Vary the locations across the trip so consecutive days don't repeat. Order chronologically. Return ONLY a valid JSON array — no markdown, no commentary. Structure: [{"date":"YYYY-MM-DD","location":"specific area","theme":"2-4 word theme"}]`;
+    prompt = `Create a high-level day-by-day skeleton for a trip to ${safeDest} from ${startDate} to ${endDate} (${numDays} days). For each day pick the specific neighborhood / town / zone the traveller will be based in or focus on, plus a brief 2-4 word theme describing the day's focus (e.g. "Arrival & Old Town", "Day trip to X", "Beach & seafood"). Vary the locations across the trip so consecutive days don't repeat. Order chronologically.${mustSeeLine} Return ONLY a valid JSON array — no markdown, no commentary. Structure: [{"date":"YYYY-MM-DD","location":"specific area","theme":"2-4 word theme"}]`;
     maxTokens = 1024;
   } else if (mode === 'fill') {
     const date = String(body?.date ?? '').slice(0, 10);
@@ -64,7 +77,10 @@ serve(async (req) => {
     const arrivalNote = isFirstDay ? ' This is the FIRST day of the trip — start with arrival/transport and check-in items.' : '';
     const departureNote = isLastDay ? ' This is the LAST day of the trip — include a departure/transport item near the end.' : '';
     const symbol = currency === 'INR' ? '₹500' : '$12';
-    prompt = `For day ${date} in ${safeLoc}${safeTheme ? ` (theme: ${safeTheme})` : ''} of a trip to ${safeDest}, plan 4-6 timed items.${arrivalNote}${departureNote} Return ONLY a JSON array — no markdown, no commentary. Structure: [{"time":"09:00","title":"...","type":"activity","duration":120,"notes":"tip","cost":20}]. Types: activity|transport|accommodation|food. time is 24h HH:MM. Realistic ${currency} costs (numeric, no currency symbol). For food items include the eatery / restaurant name in the title (e.g. "Lunch at Café XYZ") and add a per-person rate in notes (e.g. "~${symbol} per person · try the signature dish").`;
+    const dayMustSeeLine = mustSee.length
+      ? ` If any of these iconic ${safeDest} spots fit naturally with today's location/theme, include them with their proper name in the title: ${mustSee.join(', ')}.`
+      : '';
+    prompt = `For day ${date} in ${safeLoc}${safeTheme ? ` (theme: ${safeTheme})` : ''} of a trip to ${safeDest}, plan 4-6 timed items.${arrivalNote}${departureNote}${dayMustSeeLine} Return ONLY a JSON array — no markdown, no commentary. Structure: [{"time":"09:00","title":"...","type":"activity","duration":120,"notes":"tip","cost":20}]. Types: activity|transport|accommodation|food. time is 24h HH:MM. Realistic ${currency} costs (numeric, no currency symbol). For food items include the eatery / restaurant name in the title (e.g. "Lunch at Café XYZ") and add a per-person rate in notes (e.g. "~${symbol} per person · try the signature dish").`;
     maxTokens = 1024;
   } else {
     // Legacy 'full' mode — keep prompt identical to original so existing

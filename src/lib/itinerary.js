@@ -1,5 +1,21 @@
 import { format, addDays, parseISO } from 'date-fns';
 import { supabase, isSupabaseConfigured } from './supabase';
+import { matchDestinationInfo } from '../data/destinationInfo';
+
+// Pull top must-see attractions for a destination so the AI prompt can
+// anchor on them — otherwise the model sometimes skips iconic spots
+// (e.g. omitting Jagannath Temple from a Puri itinerary).
+function mustSeeFor(destination) {
+  const info = matchDestinationInfo(destination);
+  if (!info) return [];
+  const fromAttractions = (info.attractions || []).map(a => a.name);
+  const fromFamousFor = (info.famousFor || []).filter(s =>
+    // Skip vague tags like "Beach Parties" / "Café Culture" — keep proper nouns / sights.
+    /^[A-Z]/.test(s) && !/(culture|life|cuisine|parties|nomad|hub|festival)$/i.test(s)
+  );
+  // Cap to keep the prompt small. Attractions take priority over famousFor.
+  return [...new Set([...fromAttractions, ...fromFamousFor])].slice(0, 6);
+}
 
 // AI generation is proxied through the `generate-itinerary` Edge Function —
 // the Anthropic API key stays server-side. When Supabase isn't configured
@@ -38,8 +54,9 @@ export async function generateItinerarySkeleton(destination, startDate, endDate)
   const { key } = matchDestination(destination);
   const currency = INDIAN_DEST_KEYS.has(key) ? 'INR' : 'USD';
 
+  const mustSee = mustSeeFor(destination);
   const { data, error } = await supabase.functions.invoke('generate-itinerary', {
-    body: { mode: 'skeleton', destination, startDate, endDate, numDays },
+    body: { mode: 'skeleton', destination, startDate, endDate, numDays, mustSee },
   });
   if (error) throw new Error(error.message || 'Edge function error');
   if (!Array.isArray(data?.skeleton)) throw new Error('Invalid skeleton response');
@@ -57,10 +74,11 @@ export async function generateItineraryDay(destination, day, opts = {}) {
   const { date, location, theme } = day;
   const { isFirstDay = false, isLastDay = false, currency = 'USD' } = opts;
 
+  const mustSee = mustSeeFor(destination);
   const { data, error } = await supabase.functions.invoke('generate-itinerary', {
     body: {
       mode: 'fill',
-      destination, date, location, theme, currency, isFirstDay, isLastDay,
+      destination, date, location, theme, currency, isFirstDay, isLastDay, mustSee,
     },
   });
   if (error) throw new Error(error.message || 'Edge function error');

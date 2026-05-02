@@ -803,6 +803,61 @@ export const DESTINATION_INFO = {
     quickFacts: { language: 'Dzongkha', currency: 'Bhutanese Ngultrum (Nu)', capital: 'Thimphu', knownAs: 'Land of the Thunder Dragon', timezone: 'BTT (UTC+6)' },
     cuisine: ['Ema Datshi (Chilli Cheese)', 'Phaksha Paa (Pork with Chillies)', 'Red Rice', 'Jasha Maru (Spiced Chicken)', 'Hoentay (Dumplings)', 'Ara (Butter Tea)', 'Suja (Butter Tea)'],
   },
+
+  puri: {
+    tagline: 'Holy seaside city of Lord Jagannath — temple, beach, and the soul of Odisha',
+    famousFor: ['Jagannath Temple', 'Rath Yatra', 'Puri Beach', 'Char Dham Pilgrimage', 'Pattachitra Art', 'Konark Sun Temple (nearby)', 'Chilika Lake'],
+    attractions: [
+      { name: 'Shree Jagannath Temple', desc: 'One of the four Char Dham of Hindu pilgrimage. The 12th-century Kalinga-style temple houses Lord Jagannath, brother Balabhadra, and sister Subhadra. The 65m shikhar dominates the skyline; the kitchen is the largest in the world, feeding 100,000 devotees daily during festivals. Non-Hindus are not permitted inside the inner sanctum.' },
+      { name: 'Puri Beach', desc: 'A 5km golden-sand beach along the Bay of Bengal — India\'s first Blue Flag beach. Famous for its dramatic sunrises, the annual Puri Beach Festival, and the giant sand sculptures of artist Sudarsan Pattnaik.' },
+      { name: 'Konark Sun Temple', desc: '35km away — a UNESCO World Heritage 13th-century temple shaped like Surya\'s chariot, with 24 ornately-carved stone wheels and seven horses. One of the architectural wonders of India and often paired with a Puri trip.' },
+      { name: 'Chilika Lake', desc: 'Asia\'s largest brackish-water lagoon (~1,100 sq km) about 50km south. Spot Irrawaddy dolphins, migratory flamingos, and the island shrine of Kalijai. Boat rides from Satapada or Barkul.' },
+      { name: 'Raghurajpur Heritage Crafts Village', desc: 'A short drive inland — every household practices traditional Pattachitra (palm-leaf and cloth painting), stone carving, papier-mâché masks, or Gotipua dance. India\'s first heritage crafts village.' },
+      { name: 'Gundicha Temple', desc: 'The "Garden House" temple where Lord Jagannath visits during Rath Yatra. Sits 3km from the main temple — devotees pull the 45-foot chariots along this route every July before millions of pilgrims.' },
+    ],
+    history: [
+      'Puri is one of the four sacred dhams (along with Badrinath, Dwarka, and Rameswaram) — every Hindu is expected to visit at least once in their lifetime.',
+      'The Jagannath Temple was built by King Anantavarman Chodaganga of the Eastern Ganga dynasty in the 12th century, replacing earlier shrines on the same site.',
+      'The annual Rath Yatra (Chariot Festival), dating back at least 800 years, gave English the word "juggernaut" — describing the unstoppable wooden chariots that crush devotees beneath their wheels.',
+      'Puri\'s temple was sacked 18 times by various Muslim invaders between the 14th–18th centuries, with the deities hidden by priests in remote forests each time. They were always restored and ritually reconsecrated.',
+      'Puri served as the centre of the Bhakti movement in eastern India through the 15th-century saint Chaitanya Mahaprabhu, whose followers still throng the temple daily.',
+    ],
+    bestTime: { period: 'October–February', reason: 'Cool, dry coastal weather (20–28°C) ideal for temple visits and the beach. Rath Yatra (June–July) is spectacular but extremely crowded — book accommodation 6+ months ahead. Avoid May–June heat and July–September monsoons.' },
+    quickFacts: { language: 'Odia, Hindi, English', currency: 'Indian Rupee (₹)', capital: 'Coastal city of Odisha', knownAs: 'Shree Kshetra / Purushottama Kshetra', timezone: 'IST (UTC+5:30)' },
+    cuisine: ['Mahaprasad (temple offering — 56 dishes)', 'Chenna Poda (caramelised cottage cheese cake)', 'Khaja (layered sweet)', 'Dahi Bara Aludum', 'Macha Besara (mustard fish curry)', 'Pakhala Bhata (fermented rice)', 'Rasagola (Odia\'s claim to the original)'],
+    eateries: [
+      { name: 'Wildgrass Restaurant', area: 'V.I.P. Road, Puri', rating: 4.5, reviews: 4280, type: 'Odia & multi-cuisine garden dining', price: '₹₹', mustTry: 'Macha Besara + Pakhala thali' },
+      { name: 'Chung Wah', area: 'Grand Road, Puri', rating: 4.3, reviews: 2810, type: 'Indo-Chinese', price: '₹₹', mustTry: 'Crispy Veg Manchurian' },
+      { name: 'Honey Bee Bakery & Pizzeria', area: 'C.T. Road, Puri', rating: 4.4, reviews: 2150, type: 'Cafe & wood-fired pizza', price: '₹₹', mustTry: 'Margherita + tropical smoothie bowl' },
+      { name: 'Peace Restaurant', area: 'C.T. Road, Puri', rating: 4.2, reviews: 1840, type: 'Backpacker multi-cuisine', price: '₹', mustTry: 'Israeli platter with hummus' },
+    ],
+    stays: [
+      { name: 'Mayfair Heritage', area: 'C.T. Road, Puri', rating: 4.6, reviews: 1920, type: 'Heritage beach resort', price: '₹₹₹₹', highlight: 'Direct beach access, palm-shaded pool, sea-view rooms' },
+      { name: 'Hotel Toshali Sands', area: 'Konark Marine Drive', rating: 4.3, reviews: 1640, type: 'Mid-range resort', price: '₹₹₹', highlight: 'Cottages on the Puri-Konark road, easy day trip to Konark' },
+      { name: 'Hotel Holiday Resort', area: 'C.T. Road, Puri', rating: 4.2, reviews: 2870, type: 'Budget hotel', price: '₹₹', highlight: 'Family-run, walking distance to beach and Jagannath Temple' },
+      { name: 'Z Hostel Puri', area: 'C.T. Road, Puri', rating: 4.4, reviews: 920, type: 'Hostel', price: '₹', highlight: 'Beachfront dorms, sociable rooftop, sunrise yoga' },
+    ],
+  },
+
+  konark: {
+    tagline: 'Where the sun-god\'s stone chariot has rolled for 800 years',
+    famousFor: ['Sun Temple', 'UNESCO World Heritage Site', 'Stone Chariot Wheels', 'Konark Dance Festival', 'Chandrabhaga Beach'],
+    attractions: [
+      { name: 'Konark Sun Temple', desc: 'Built around 1250 CE by King Narasimhadeva I, this UNESCO temple is sculpted as a colossal chariot of Surya the Sun-god — pulled by seven horses and rolling on 24 intricately-carved stone wheels (each a working sundial). The original main shikhara collapsed; what remains is the dance hall and the porch (Jagamohan).' },
+      { name: 'Konark Archaeological Museum', desc: 'Houses sculptures rescued from the temple complex during 19th-century excavations. Free entry with the temple ticket.' },
+      { name: 'Chandrabhaga Beach', desc: '3km from the temple — a serene Blue Flag beach where the morning sun rises over the Bay of Bengal. The annual Magha Saptami festival in February sees thousands of pilgrims taking a holy dip.' },
+      { name: 'Konark Dance Festival', desc: 'Held every December against the floodlit temple as backdrop — five evenings of classical Indian dance (Odissi, Bharatanatyam, Kathak, Manipuri).' },
+    ],
+    history: [
+      'The Sun Temple was conceived as the divine chariot of Surya — the chariot wheels can tell time, the seven horses represent days of the week, and the spokes mark the hours.',
+      'European sailors used the temple as a navigation landmark and called it the "Black Pagoda" — a counterpart to the white Jagannath Temple of Puri.',
+      'The main 70m shikhara collapsed sometime between the 16th–19th centuries — possibly due to a magnetic lodestone in the ceiling that disturbed the iron clamps holding the structure.',
+      'The temple was rediscovered and partially restored under British engineers in the late 19th century; the porch was filled with sand to prevent further collapse.',
+    ],
+    bestTime: { period: 'October–February', reason: 'Pleasant coastal weather. December\'s Konark Dance Festival is a highlight. Sunrise visits to the temple are unforgettable year-round, but summer afternoons can exceed 40°C.' },
+    quickFacts: { language: 'Odia, Hindi', currency: 'Indian Rupee (₹)', capital: 'Temple town of Odisha', knownAs: 'Black Pagoda / Surya Kshetra', timezone: 'IST (UTC+5:30)' },
+    cuisine: ['Mahaprasad', 'Chenna Poda', 'Khaja', 'Dalma (lentil-vegetable stew)', 'Macha Besara', 'Rasagola'],
+  },
 };
 
 // Destination key aliases for fuzzy matching
