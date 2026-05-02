@@ -210,7 +210,6 @@ export default function App() {
       </div>
 
       <Sidebar
-        currentPage={currentPage}
         onNavigate={navigate}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}

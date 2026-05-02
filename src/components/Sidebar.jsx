@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { NavLink } from 'react-router-dom';
 import { useTrips } from '../context/TripContext';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -6,11 +7,15 @@ import {
 } from 'lucide-react';
 
 
+// Page-level nav items — rendered as NavLink so middle-click /
+// ctrl-click / "Copy link address" all behave like real navigation.
+// Trip-list items stay as buttons further down because clicking one
+// mutates activeTripId state, which isn't represented in the URL today.
 const navItems = [
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/', label: 'Dashboard', icon: LayoutDashboard },
 ];
 
-export default function Sidebar({ currentPage, onNavigate, isOpen, onClose }) {
+export default function Sidebar({ onNavigate, isOpen, onClose }) {
   const { activeTrip, trips, currentUser } = useTrips();
   const { displayName, initials, signOut, isDemo } = useAuth();
   const [signingOut, setSigningOut] = useState(false);
@@ -35,14 +40,16 @@ export default function Sidebar({ currentPage, onNavigate, isOpen, onClose }) {
           {navItems.map(item => {
             const Icon = item.icon;
             return (
-              <button
-                key={item.id}
-                className={`nav-item ${currentPage === item.id ? 'active' : ''}`}
-                onClick={() => { onNavigate(item.id); onClose(); }}
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end
+                className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+                onClick={onClose}
               >
                 <Icon className="nav-icon" />
                 {item.label}
-              </button>
+              </NavLink>
             );
           })}
 
