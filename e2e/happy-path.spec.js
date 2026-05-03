@@ -10,6 +10,15 @@ import { test, expect } from '@playwright/test';
 // HTTP 200 came back.
 
 test.describe('TripSync happy path', () => {
+  // Suppress the first-visit Quick Tour modal so it doesn't intercept clicks
+  // on dashboard buttons. The tour is gated on localStorage; setting the
+  // sentinel before navigation skips the auto-open.
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem('tripsync.quickTour.seen.v1', '1');
+    });
+  });
+
   test('demo dashboard loads with sample trips', async ({ page }) => {
     await page.goto('/');
     // sampleData.js seeds three trips; "Japan Adventure" is the first.

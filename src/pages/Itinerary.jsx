@@ -227,7 +227,7 @@ if (!activeTrip) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {itinerary.map((day, dayIdx) => {
               const isExpanded = !collapsedDays.has(day.id);
-              const dayTotal = (day.items || []).reduce((sum, it) => sum + (Number(it.cost) || 0), 0);
+              const dayTotal = day.items.reduce((sum, it) => sum + it.cost, 0);
 
               return (
                 <div key={day.id} className="card">

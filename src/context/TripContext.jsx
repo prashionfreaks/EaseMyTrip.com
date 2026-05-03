@@ -32,23 +32,80 @@ function colorFromId(id) {
   return colors[Math.abs(h) % colors.length];
 }
 
-/** Ensure every trip has all expected arrays so downstream code never hits undefined/null */
-function normalizeTrip(trip) {
+/** Coerce to a finite number, falling back to `fallback` for null/undefined/NaN/strings. */
+function num(v, fallback = 0) {
+  const n = typeof v === 'number' ? v : Number(v);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+/**
+ * Single ingest validator for trip data — runs on every path that pulls a
+ * trip into local state (initial fetch, realtime UPDATE, cached restore,
+ * demo-mode localStorage). Coerces the JSON blob's untyped numerics and
+ * fills missing arrays/objects so downstream code can trust the shape and
+ * stop sprinkling Number(x) || 0 everywhere.
+ */
+function parseTrip(trip) {
+  if (!trip || typeof trip !== 'object') return trip;
   const t = { ...trip };
+
   const arrayFields = ['members', 'polls', 'expenses', 'itinerary', 'routes',
     'activity', 'contingencies', 'messages', 'photos', 'paidSettlements', 'checklist',
     'dueReminders'];
   for (const f of arrayFields) {
     if (!Array.isArray(t[f])) t[f] = [];
   }
-  if (!t.budget || typeof t.budget !== 'object') t.budget = { total: 0, spent: 0, currency: 'INR' };
+
+  // Budget: total/spent are read with .toLocaleString() and divided by — must be numeric.
+  const rawBudget = t.budget && typeof t.budget === 'object' ? t.budget : {};
+  t.budget = {
+    total: num(rawBudget.total),
+    spent: num(rawBudget.spent),
+    currency: typeof rawBudget.currency === 'string' && rawBudget.currency ? rawBudget.currency : 'INR',
+  };
+
+  // Expenses: amount drives all balance math; splitAmong must be an array.
+  t.expenses = t.expenses.map(e => ({
+    ...e,
+    amount: num(e?.amount),
+    splitAmong: Array.isArray(e?.splitAmong) ? e.splitAmong : [],
+  }));
+
+  // Settlement payments — amount feeds Budget's per-member paid totals.
+  // amount==null is a load-bearing sentinel for legacy "marked paid without
+  // an amount" rows (Budget.jsx treats those as full settlements), so we
+  // pass null through and only coerce real values.
+  t.paidSettlements = t.paidSettlements.map(p => ({
+    ...p,
+    amount: p?.amount == null ? null : num(p.amount),
+  }));
+
+  // Itinerary items: cost and duration are aggregated per-day.
+  t.itinerary = t.itinerary.map(day => ({
+    ...day,
+    items: Array.isArray(day?.items) ? day.items.map(it => ({
+      ...it,
+      cost: num(it?.cost),
+      duration: num(it?.duration),
+    })) : [],
+  }));
+
+  // Polls: votes is an array of member ids; options must be an array.
+  t.polls = t.polls.map(p => ({
+    ...p,
+    options: Array.isArray(p?.options) ? p.options.map(o => ({
+      ...o,
+      votes: Array.isArray(o?.votes) ? o.votes : [],
+    })) : [],
+  }));
+
   return t;
 }
 
 function loadLocalTrips() {
   try {
     const s = localStorage.getItem('tripsync-trips');
-    if (s) return JSON.parse(s).map(normalizeTrip);
+    if (s) return JSON.parse(s).map(parseTrip);
   } catch { /* ignore */ }
   return sampleTrips;
 }
@@ -61,7 +118,7 @@ function loadCachedTrips(userId) {
     if (!s) return null;
     const parsed = JSON.parse(s);
     if (parsed.userId !== userId || !Array.isArray(parsed.trips)) return null;
-    return parsed.trips.map(normalizeTrip);
+    return parsed.trips.map(parseTrip);
   } catch { return null; }
 }
 
@@ -122,7 +179,7 @@ export function TripProvider({ children }) {
       const fetched = (rows || [])
         .map(r => r.trips)
         .filter(Boolean)
-        .map(t => normalizeTrip({ ...(t.data || {}), id: t.id }));
+        .map(t => parseTrip({ ...(t.data || {}), id: t.id }));
       setTrips(fetched);
       saveCachedTrips(userId, fetched);
     } catch (err) {
@@ -202,7 +259,7 @@ export function TripProvider({ children }) {
         }
         setTrips(prev =>
           prev.map(t => t.id === tripId
-            ? normalizeTrip({ ...incoming, id: tripId })
+            ? parseTrip({ ...incoming, id: tripId })
             : t)
         );
       })
