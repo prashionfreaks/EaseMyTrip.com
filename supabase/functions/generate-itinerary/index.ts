@@ -28,6 +28,11 @@ serve(async (req) => {
   try { body = await req.json() as Record<string, unknown>; }
   catch { return json({ error: 'Invalid JSON' }, 400, cors); }
 
+  // Warmup ping — client fires this on Itinerary page mount to thaw the
+  // Deno isolate before the user clicks Suggest. Skip the Anthropic call
+  // entirely; the cold-start cost was already paid getting here.
+  if (body?.mode === 'warmup') return json({ ok: true }, 200, cors);
+
   const rawMode = String(body?.mode ?? 'full');
   const mode: 'skeleton' | 'fill' | 'full' =
     rawMode === 'skeleton' || rawMode === 'fill' ? rawMode : 'full';

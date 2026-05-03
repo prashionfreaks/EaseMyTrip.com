@@ -27,6 +27,32 @@ async function mustSeeFor(destination) {
 // (demo mode), we fall back to the built-in templates.
 export function hasAIKey() { return isSupabaseConfigured; }
 
+// Per-call ceiling on Anthropic round-trips. Without this, a stalled upstream
+// can hang a day card for minutes (Supabase Edge default is ~150 s). At 15 s
+// the fill is genuinely broken and the user is better served with a retry
+// affordance than a spinner.
+const AI_CALL_TIMEOUT_MS = 15000;
+
+function withTimeout(promise, ms, label) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms)
+    ),
+  ]);
+}
+
+// Cheap no-op invoke to thaw the Edge Function's Deno isolate before the
+// real generation calls. Cuts ~1-2 s off the first user-visible request
+// when the function has been idle. Fire-and-forget; never throws.
+let warmupFired = false;
+export function warmupItineraryAI() {
+  if (!isSupabaseConfigured || warmupFired) return;
+  warmupFired = true;
+  supabase.functions.invoke('generate-itinerary', { body: { mode: 'warmup' } })
+    .catch(() => { /* expected — warmup payload is intentionally invalid */ });
+}
+
 export async function generateItinerary(destination, startDate, endDate, opts = {}) {
   const start = parseISO(startDate);
   const numDays = Math.max(1, Math.round((parseISO(endDate) - start) / 86400000) + 1);
@@ -60,9 +86,13 @@ export async function generateItinerarySkeleton(destination, startDate, endDate)
   const currency = INDIAN_DEST_KEYS.has(key) ? 'INR' : 'USD';
 
   const mustSee = await mustSeeFor(destination);
-  const { data, error } = await supabase.functions.invoke('generate-itinerary', {
-    body: { mode: 'skeleton', destination, startDate, endDate, numDays, mustSee },
-  });
+  const { data, error } = await withTimeout(
+    supabase.functions.invoke('generate-itinerary', {
+      body: { mode: 'skeleton', destination, startDate, endDate, numDays, mustSee },
+    }),
+    AI_CALL_TIMEOUT_MS,
+    'Skeleton generation',
+  );
   if (error) throw new Error(error.message || 'Edge function error');
   if (!Array.isArray(data?.skeleton)) throw new Error('Invalid skeleton response');
 
@@ -80,12 +110,16 @@ export async function generateItineraryDay(destination, day, opts = {}) {
   const { isFirstDay = false, isLastDay = false, currency = 'USD' } = opts;
 
   const mustSee = await mustSeeFor(destination);
-  const { data, error } = await supabase.functions.invoke('generate-itinerary', {
-    body: {
-      mode: 'fill',
-      destination, date, location, theme, currency, isFirstDay, isLastDay, mustSee,
-    },
-  });
+  const { data, error } = await withTimeout(
+    supabase.functions.invoke('generate-itinerary', {
+      body: {
+        mode: 'fill',
+        destination, date, location, theme, currency, isFirstDay, isLastDay, mustSee,
+      },
+    }),
+    AI_CALL_TIMEOUT_MS,
+    `Day fill (${date})`,
+  );
   if (error) throw new Error(error.message || 'Edge function error');
   if (!Array.isArray(data?.items)) throw new Error('Invalid fill response');
 
@@ -152,13 +186,19 @@ function applyStay(days, stay) {
 }
 
 async function generateWithClaude(destination, startDate, endDate, numDays, startDateObj, stay) {
-  const { data, error } = await supabase.functions.invoke('generate-itinerary', {
-    body: {
-      destination, startDate, endDate, numDays,
-      // Pass the confirmed stay so the model can plan around its area.
-      stay: stay ? { name: stay.name, area: stay.area, notes: stay.notes } : null,
-    },
-  });
+  // Legacy single-shot path produces the whole itinerary in one call, so it
+  // can take longer than skeleton/fill — give it 2× the per-call budget.
+  const { data, error } = await withTimeout(
+    supabase.functions.invoke('generate-itinerary', {
+      body: {
+        destination, startDate, endDate, numDays,
+        // Pass the confirmed stay so the model can plan around its area.
+        stay: stay ? { name: stay.name, area: stay.area, notes: stay.notes } : null,
+      },
+    }),
+    AI_CALL_TIMEOUT_MS * 2,
+    'Full itinerary generation',
+  );
   if (error) throw new Error(error.message || 'Edge function error');
   if (!Array.isArray(data?.days)) throw new Error('Invalid response');
   return data.days.map((day, i) => ({

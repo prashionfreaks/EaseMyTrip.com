@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTrips } from '../context/TripContext';
 import Modal from '../components/Modal';
 import {
@@ -8,7 +8,7 @@ import {
 import { format, parseISO } from '../lib/date';
 import {
   generateItinerary, generateItinerarySkeleton, generateItineraryDay,
-  applyStayToDayItems, hasAIKey, getTripCurrencySymbol,
+  applyStayToDayItems, hasAIKey, getTripCurrencySymbol, warmupItineraryAI,
 } from '../lib/itinerary';
 
 const typeConfig = {
@@ -26,6 +26,10 @@ export default function Itinerary() {
   const [generating, setGenerating] = useState(false);
   const [genError, setGenError] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
+
+  // Pre-thaw the Edge Function isolate when the user opens Itinerary so the
+  // first real generation call doesn't pay the cold-start tax.
+  useEffect(() => { warmupItineraryAI(); }, []);
 
   async function runGenerate() {
     setShowConfirm(false);
