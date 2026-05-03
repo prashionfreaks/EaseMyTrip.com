@@ -49,6 +49,12 @@ function parseTrip(trip) {
   if (!trip || typeof trip !== 'object') return trip;
   const t = { ...trip };
 
+  // _updatedAt is the optimistic-concurrency cursor — the server's
+  // updated_at when we last saw this trip. flushSync uses it as the
+  // .eq() guard so a stale write can't overwrite a fresher edit. Stored
+  // as metadata on the trip; stripped before writing back to the data jsonb.
+  if (trip._updatedAt) t._updatedAt = String(trip._updatedAt);
+
   const arrayFields = ['members', 'polls', 'expenses', 'itinerary', 'routes',
     'activity', 'contingencies', 'messages', 'photos', 'paidSettlements', 'checklist',
     'dueReminders'];
@@ -179,7 +185,7 @@ export function TripProvider({ children }) {
       const fetched = (rows || [])
         .map(r => r.trips)
         .filter(Boolean)
-        .map(t => parseTrip({ ...(t.data || {}), id: t.id }));
+        .map(t => parseTrip({ ...(t.data || {}), id: t.id, _updatedAt: t.updated_at }));
       setTrips(fetched);
       saveCachedTrips(userId, fetched);
     } catch (err) {
@@ -259,7 +265,7 @@ export function TripProvider({ children }) {
         }
         setTrips(prev =>
           prev.map(t => t.id === tripId
-            ? parseTrip({ ...incoming, id: tripId })
+            ? parseTrip({ ...incoming, id: tripId, _updatedAt: payload.new.updated_at })
             : t)
         );
       })
@@ -279,16 +285,67 @@ export function TripProvider({ children }) {
     clearTimeout(syncTimers.current[tripId]);
     pendingPayload.current[tripId] = null;
     if (!(await ensureSession())) { pendingSync.current[tripId] = false; return; }
-    const { id, ...data } = payload;
-    const { error } = await supabase.from('trips').update({
+    // _updatedAt is metadata for optimistic concurrency — strip before
+    // writing so it doesn't pollute the data jsonb blob.
+    const { id, _updatedAt: baseUpdatedAt, ...data } = payload;
+    const newUpdatedAt = new Date().toISOString();
+
+    let query = supabase.from('trips').update({
       name: payload.name,
       destination: payload.destination,
       status: payload.status,
       data,
-      updated_at: new Date().toISOString(),
+      updated_at: newUpdatedAt,
     }).eq('id', id);
+    // Optimistic concurrency: only commit if the row hasn't moved since
+    // we last saw it. Trips loaded before this code shipped won't carry
+    // _updatedAt — fall through to last-write-wins for those rather than
+    // refusing to save.
+    if (baseUpdatedAt) query = query.eq('updated_at', baseUpdatedAt);
+
+    const { data: rows, error } = await query.select('id, updated_at');
     pendingSync.current[tripId] = false;
-    if (error) console.error('[syncToDB] error:', error);
+
+    if (error) {
+      console.error('[syncToDB] error:', error);
+      return;
+    }
+
+    if (baseUpdatedAt && (!rows || rows.length === 0)) {
+      // Conflict: a concurrent edit moved updated_at while we were in the
+      // 400ms debounce window. Refetch the latest and replace local state
+      // so the next user edit builds on a fresh base. The pending change
+      // is dropped — preferable to silently overwriting a teammate's edit.
+      console.warn('[syncToDB] conflict on', tripId, '— refetching');
+      const { data: fresh } = await supabase
+        .from('trips')
+        .select('id, data, updated_at')
+        .eq('id', tripId)
+        .single();
+      if (fresh) {
+        setTrips(prev => prev.map(t => t.id === tripId
+          ? parseTrip({ ...(fresh.data || {}), id: fresh.id, _updatedAt: fresh.updated_at })
+          : t));
+        toast.info(
+          'Another teammate just updated this trip — your latest change wasn’t saved. Reload and try again.',
+          { duration: 7000 },
+        );
+      }
+      return;
+    }
+
+    // Success — capture the server's new updated_at so the next edit
+    // chains correctly. Also patch any pendingPayload that was queued
+    // mid-flight (user edited again before this response arrived).
+    const written = rows && rows[0];
+    if (written?.updated_at) {
+      setTrips(prev => prev.map(t => t.id === tripId
+        ? { ...t, _updatedAt: written.updated_at }
+        : t));
+      if (pendingPayload.current[tripId]) {
+        pendingPayload.current[tripId]._updatedAt = written.updated_at;
+      }
+    }
   }
 
   // Debounced DB sync — with safety guard to never overwrite good data with empty data
