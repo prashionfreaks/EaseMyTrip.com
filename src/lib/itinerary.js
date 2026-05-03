@@ -972,9 +972,13 @@ export function getCurrencySymbol(code) {
 }
 
 /** Resolve the right symbol for a trip — prefers the currency the user picked
- *  at trip creation, falls back to destination heuristic for older trips. */
+ *  at trip creation, falls back to destination heuristic for older trips.
+ *  Indian destinations always render as INR even if an older trip has the
+ *  USD default saved (we used to default budget.currency to 'USD'). */
 export function getTripCurrencySymbol(trip) {
-  return getCurrencySymbol(trip?.budget?.currency || getDestinationCurrency(trip?.destination));
+  const destCurrency = getDestinationCurrency(trip?.destination);
+  if (destCurrency === 'INR') return getCurrencySymbol('INR');
+  return getCurrencySymbol(trip?.budget?.currency || destCurrency);
 }
 
 function matchDestination(destination) {

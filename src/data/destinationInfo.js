@@ -186,6 +186,12 @@ export const DESTINATION_INFO = {
     bestTime: { period: 'February–April', reason: 'Least rainfall in the year with lower humidity. Singapore is hot year-round (28–34°C), so there\'s no true "bad" time to visit.' },
     quickFacts: { language: 'English, Mandarin, Malay, Tamil', currency: 'Singapore Dollar (SGD)', capital: 'Singapore City', knownAs: 'The Lion City', timezone: 'SST (UTC+8)' },
     cuisine: ['Hainanese Chicken Rice', 'Chilli Crab', 'Laksa', 'Char Kway Teow', 'Kaya Toast & Soft Eggs', 'Bak Kut Teh'],
+    stays: [
+      { name: 'Marina Bay Sands', area: 'Marina Bay', rating: 4.6, reviews: 41200, type: 'Iconic luxury hotel', price: 'S$S$S$S$', highlight: 'Rooftop infinity pool 57 floors up, casino, ArtScience Museum at the door' },
+      { name: 'Raffles Singapore', area: 'City Hall', rating: 4.7, reviews: 4820, type: 'Heritage palace hotel', price: 'S$S$S$S$', highlight: 'Colonial-era suites, Long Bar (home of the Singapore Sling)' },
+      { name: 'Naumi Hotel', area: 'Bras Basah', rating: 4.5, reviews: 1980, type: 'Boutique', price: 'S$S$S$', highlight: 'Rooftop pool overlooking the skyline, walkable to Fort Canning' },
+      { name: 'lyf Funan', area: 'Civic District', rating: 4.4, reviews: 2240, type: 'Co-living hotel', price: 'S$S$', highlight: 'Smart rooms, communal kitchen, 5 min to Marina Bay on foot' },
+    ],
   },
 
   thailand: {
@@ -212,6 +218,12 @@ export const DESTINATION_INFO = {
       { name: 'Thip Samai', area: 'Phra Nakhon, Bangkok', rating: 4.4, reviews: 12300, type: 'Pad Thai Institution', price: '฿', mustTry: 'Pad Thai Haw Kai (egg wrap)' },
       { name: 'Nahm', area: 'Sathorn, Bangkok', rating: 4.5, reviews: 2180, type: 'Thai Fine Dining', price: '฿฿฿฿', mustTry: 'Chef David Thompson Tasting Menu' },
       { name: "Rock's Restaurant", area: 'Chiang Mai', rating: 4.5, reviews: 3420, type: 'Northern Thai', price: '฿฿', mustTry: 'Khao Soi with Braised Chicken' },
+    ],
+    stays: [
+      { name: 'Mandarin Oriental Bangkok', area: 'Riverside, Bangkok', rating: 4.8, reviews: 5210, type: 'Legendary luxury hotel', price: '฿฿฿฿', highlight: 'Chao Phraya river suites, Authors\' Lounge afternoon tea' },
+      { name: 'Riva Surya', area: 'Phra Athit, Bangkok', rating: 4.5, reviews: 2860, type: 'Boutique riverside', price: '฿฿฿', highlight: 'Khao San Road in walking distance, infinity pool over the river' },
+      { name: 'Pimalai Resort & Spa', area: 'Koh Lanta', rating: 4.7, reviews: 1240, type: 'Beach resort', price: '฿฿฿฿', highlight: 'Two-bay private beach, jungle spa villas' },
+      { name: 'Tamarind Village', area: 'Old City, Chiang Mai', rating: 4.6, reviews: 1640, type: 'Heritage Lanna boutique', price: '฿฿฿', highlight: 'Bamboo-grove courtyard, walk to Sunday Walking Street market' },
     ],
   },
 
@@ -273,6 +285,12 @@ export const DESTINATION_INFO = {
       { name: 'Trishna', area: 'Fort', rating: 4.5, reviews: 4820, type: 'Seafood', price: '₹₹₹', mustTry: 'Hyderabadi Butter Pepper Garlic Crab' },
       { name: 'The Bombay Canteen', area: 'Lower Parel', rating: 4.5, reviews: 5480, type: 'Modern Indian', price: '₹₹₹', mustTry: 'Kejriwal Toast + Eggs Kejriwal' },
     ],
+    stays: [
+      { name: 'The Taj Mahal Palace', area: 'Colaba', rating: 4.7, reviews: 8420, type: 'Heritage palace hotel', price: '₹₹₹₹', highlight: 'Gateway of India views, restored Heritage Wing rooms' },
+      { name: 'The Oberoi Mumbai', area: 'Nariman Point', rating: 4.7, reviews: 3640, type: 'Luxury hotel', price: '₹₹₹₹', highlight: 'Marine Drive views, Ziya tasting menu, 24/7 butler' },
+      { name: 'Abode Bombay', area: 'Colaba', rating: 4.6, reviews: 1180, type: 'Boutique B&B', price: '₹₹₹', highlight: 'Restored 1910 building, walking distance to Gateway' },
+      { name: 'The Hosteller Mumbai', area: 'Bandra West', rating: 4.4, reviews: 2920, type: 'Hostel', price: '₹', highlight: 'Bandra cafe scene at the door, social rooftop' },
+    ],
   },
 
   hyderabad: {
@@ -300,6 +318,12 @@ export const DESTINATION_INFO = {
       { name: 'Bawarchi', area: 'RTC X Roads', rating: 4.3, reviews: 41200, type: 'Biryani', price: '₹', mustTry: 'Mutton Biryani Jumbo' },
       { name: 'Nimrah Café & Bakery', area: 'Charminar', rating: 4.4, reviews: 9300, type: 'Irani Chai & Bakes', price: '₹', mustTry: 'Osmania Biscuit + Irani Chai' },
     ],
+    stays: [
+      { name: 'Taj Falaknuma Palace', area: 'Engine Bowli', rating: 4.8, reviews: 4120, type: 'Palace hotel', price: '₹₹₹₹', highlight: 'Nizam-era 101-seat dining table, horse-drawn carriage arrival' },
+      { name: 'ITC Kohenur', area: 'HITEC City', rating: 4.6, reviews: 5840, type: 'Luxury hotel', price: '₹₹₹₹', highlight: 'Gachibowli skyline views, Dum Pukht heritage Awadhi cuisine' },
+      { name: 'Park Hyatt Hyderabad', area: 'Banjara Hills', rating: 4.6, reviews: 3210, type: 'Luxury hotel', price: '₹₹₹', highlight: 'Banjara Hills shopping, Tellicherry pool, large suites' },
+      { name: 'Lemon Tree Premier HITEC City', area: 'HITEC City', rating: 4.5, reviews: 4920, type: 'Mid-range', price: '₹₹', highlight: 'Walking distance to Inorbit Mall, IT-corridor convenience' },
+    ],
   },
 
   udaipur: {
@@ -321,6 +345,12 @@ export const DESTINATION_INFO = {
     bestTime: { period: 'September–March', reason: 'Post-monsoon (Sep–Nov) reveals lush green hills and full lakes. Winter (Dec–Feb) is cool and ideal for sightseeing.' },
     quickFacts: { language: 'Hindi, Rajasthani', currency: 'Indian Rupee (₹)', capital: 'Former capital of Mewar Kingdom', knownAs: 'City of Lakes / Venice of the East', timezone: 'IST (UTC+5:30)' },
     cuisine: ['Dal Baati Churma', 'Gatte ki Sabzi', 'Laal Maas', 'Malpua', 'Kachori', 'Ker Sangri'],
+    stays: [
+      { name: 'Taj Lake Palace', area: 'Lake Pichola', rating: 4.8, reviews: 5240, type: 'Palace hotel on water', price: '₹₹₹₹', highlight: 'Boat-only access, the floating marble palace from Octopussy' },
+      { name: 'The Oberoi Udaivilas', area: 'Haridasji Ki Magri', rating: 4.9, reviews: 2840, type: 'Palatial luxury resort', price: '₹₹₹₹', highlight: 'Private pool suites, 30 acres on Lake Pichola, peacocks roaming' },
+      { name: 'Jagat Niwas Palace', area: 'Old City', rating: 4.5, reviews: 1820, type: 'Heritage haveli', price: '₹₹₹', highlight: 'Lakefront 17th-century haveli, rooftop dinners over Pichola' },
+      { name: 'Zostel Udaipur', area: 'Hanuman Ghat', rating: 4.4, reviews: 3260, type: 'Hostel', price: '₹', highlight: 'Lake-view rooftop, walking distance to City Palace' },
+    ],
   },
 
   kashmir: {
@@ -342,6 +372,12 @@ export const DESTINATION_INFO = {
     bestTime: { period: 'April–June & Sep–Nov', reason: 'Spring brings almond blossoms and wildflowers; autumn brings golden chinar trees. Winter (Dec–Feb) is magical but very cold (-10°C in Gulmarg).' },
     quickFacts: { language: 'Kashmiri, Urdu, Hindi', currency: 'Indian Rupee (₹)', capital: 'Srinagar (summer) / Jammu (winter)', knownAs: 'Paradise on Earth', timezone: 'IST (UTC+5:30)' },
     cuisine: ['Wazwan (36-course feast)', 'Rogan Josh', 'Yakhni', 'Gushtaba', 'Kahwa Tea', 'Modur Pulao', 'Sheermal'],
+    stays: [
+      { name: 'The Lalit Grand Palace', area: 'Gupkar Road, Srinagar', rating: 4.5, reviews: 2840, type: 'Heritage palace hotel', price: '₹₹₹₹', highlight: 'Erstwhile royal residence, 14 acres of chinar gardens' },
+      { name: 'Sukoon Houseboat', area: 'Dal Lake, Srinagar', rating: 4.7, reviews: 920, type: 'Luxury houseboat', price: '₹₹₹', highlight: 'Hand-carved walnut interiors, shikara breakfast on the lake' },
+      { name: 'The Khyber Himalayan Resort', area: 'Gulmarg', rating: 4.7, reviews: 1640, type: 'Mountain resort', price: '₹₹₹₹', highlight: 'Ski-in ski-out, L\'Occitane spa, views of Apharwat peaks' },
+      { name: 'Hotel Hilltop', area: 'Pahalgam', rating: 4.3, reviews: 2120, type: 'Mid-range hotel', price: '₹₹', highlight: 'Lidder valley views, near Amarnath base camp' },
+    ],
   },
 
   kerala: {
@@ -369,6 +405,12 @@ export const DESTINATION_INFO = {
       { name: 'Kayees Biryani', area: 'Mattancherry, Kochi', rating: 4.5, reviews: 5460, type: 'Biryani (since 1957)', price: '₹', mustTry: 'Mutton Biryani' },
       { name: "Paragon Restaurant", area: 'Kozhikode', rating: 4.5, reviews: 16200, type: 'Malabar', price: '₹₹', mustTry: 'Malabar Fish Biryani' },
     ],
+    stays: [
+      { name: 'Taj Malabar Resort & Spa', area: 'Willingdon Island, Kochi', rating: 4.6, reviews: 3120, type: 'Luxury harbour resort', price: '₹₹₹₹', highlight: 'Backwater views, Jiva spa, sunset cruise on Vembanad Lake' },
+      { name: 'Kumarakom Lake Resort', area: 'Kumarakom', rating: 4.7, reviews: 2840, type: 'Backwater resort', price: '₹₹₹₹', highlight: 'Meandering pool villas, traditional Kettuvallam stays' },
+      { name: 'Spice Tree Munnar', area: 'Munnar', rating: 4.6, reviews: 1680, type: 'Hill resort', price: '₹₹₹', highlight: 'Tea-garden cottages at 5,000 ft, infinity pool over the valley' },
+      { name: 'Brunton Boatyard', area: 'Fort Kochi', rating: 4.5, reviews: 1980, type: 'Heritage boutique', price: '₹₹₹', highlight: 'Restored shipyard, Chinese fishing-net views from every room' },
+    ],
   },
 
   shimla: {
@@ -390,6 +432,12 @@ export const DESTINATION_INFO = {
     bestTime: { period: 'March–June & Oct–Nov', reason: 'Summer (Mar–Jun) is cool and green; autumn is crisp. Winter (Dec–Feb) brings snowfall and skiing but cold temperatures.' },
     quickFacts: { language: 'Hindi, Pahari', currency: 'Indian Rupee (₹)', capital: 'Capital of Himachal Pradesh', knownAs: 'Queen of Hills', timezone: 'IST (UTC+5:30)' },
     cuisine: ['Siddu (steamed bread)', 'Chha Gosht', 'Aktori', 'Babru (black sesame kachori)', 'Madra (chickpea curry)', 'Kaale Chane ka Khatta'],
+    stays: [
+      { name: 'Wildflower Hall', area: 'Mashobra (12 km from Shimla)', rating: 4.7, reviews: 2940, type: 'Luxury Himalayan retreat', price: '₹₹₹₹', highlight: 'Lord Kitchener\'s former estate, heated pool overlooking the snow line' },
+      { name: 'The Oberoi Cecil', area: 'The Mall, Shimla', rating: 4.6, reviews: 1840, type: 'Heritage luxury', price: '₹₹₹₹', highlight: '1884 building, six-storey atrium, walk to Christ Church' },
+      { name: 'Clarkes Hotel', area: 'The Mall', rating: 4.4, reviews: 2120, type: 'Heritage mid-range', price: '₹₹₹', highlight: 'Shimla\'s oldest hotel (1898), Mall Road at the door' },
+      { name: 'Zostel Shimla', area: 'Mashobra', rating: 4.4, reviews: 1640, type: 'Hostel', price: '₹', highlight: 'Pine forest cabins, valley sunrise from the deck' },
+    ],
   },
 
   manali: {
@@ -410,6 +458,12 @@ export const DESTINATION_INFO = {
     bestTime: { period: 'October–June', reason: 'Autumn (Oct–Nov) for clear skies and snow. Winter for skiing. Spring (Mar–June) for apple blossoms and trekking. Monsoon (July–Sep) brings heavy rain and landslides.' },
     quickFacts: { language: 'Hindi, Kulvi, Manali dialect', currency: 'Indian Rupee (₹)', capital: 'Sub-district of Kullu', knownAs: 'Valley of the Gods', timezone: 'IST (UTC+5:30)' },
     cuisine: ['Sidu', 'Trout Fish (locally caught)', 'Bhey (lotus stem)', 'Patande (pancake)', 'Chha Gosht', 'Sepu Vadi'],
+    stays: [
+      { name: 'The Himalayan', area: 'Hadimba Road', rating: 4.5, reviews: 2840, type: 'Castle-style mountain hotel', price: '₹₹₹₹', highlight: 'Turreted stone facade, view of Hadimba forest, in-room fireplaces' },
+      { name: 'Span Resort & Spa', area: 'Kullu-Manali Highway', rating: 4.6, reviews: 1820, type: 'Riverside resort', price: '₹₹₹₹', highlight: 'Beas-river cottages, heated pool, on the way to Solang Valley' },
+      { name: 'Apple Country Resort', area: 'Banon Resorts Road', rating: 4.4, reviews: 1640, type: 'Mid-range', price: '₹₹', highlight: 'Apple-orchard cottages, walking distance to Old Manali cafés' },
+      { name: 'Zostel Manali', area: 'Old Manali', rating: 4.5, reviews: 4220, type: 'Hostel', price: '₹', highlight: 'Manu temple lane, social rooftop, free walking tours' },
+    ],
   },
 
   wayanad: {
@@ -430,6 +484,12 @@ export const DESTINATION_INFO = {
     bestTime: { period: 'October–May', reason: 'Post-monsoon (Oct–Jan) has clear skies for wildlife and trekking. Monsoon (June–September) turns it vivid green but trekking is risky.' },
     quickFacts: { language: 'Malayalam, Tribal languages', currency: 'Indian Rupee (₹)', capital: 'Kalpetta', knownAs: 'Land of Forests', timezone: 'IST (UTC+5:30)' },
     cuisine: ['Bamboo Biryani', 'Kanji (rice porridge)', 'Tribal Forest Honey', 'Puttu & Kadala', 'Black Pepper Chicken', 'Wild Boar Curry'],
+    stays: [
+      { name: 'Vythiri Village', area: 'Lakkidi', rating: 4.5, reviews: 2640, type: 'Rainforest resort', price: '₹₹₹₹', highlight: 'Tree-house suites, natural pool fed by a stream' },
+      { name: 'Banasura Hill Resort', area: 'Padinjarathara', rating: 4.5, reviews: 1840, type: 'Eco hill resort', price: '₹₹₹', highlight: 'Asia\'s largest mud architecture, view of Banasura dam' },
+      { name: 'Wayanad Wild', area: 'Vythiri', rating: 4.6, reviews: 920, type: 'Boutique jungle stay', price: '₹₹₹', highlight: 'CGH Earth property in a wildlife corridor, no TV — just forest sounds' },
+      { name: 'Coffee Acres Plantation', area: 'Kalpetta', rating: 4.4, reviews: 740, type: 'Plantation homestay', price: '₹₹', highlight: 'Working coffee estate, bonfire dinners, family-run' },
+    ],
   },
 
   ladakh: {
@@ -451,6 +511,12 @@ export const DESTINATION_INFO = {
     bestTime: { period: 'June–September', reason: 'The only window when mountain passes are open and weather is stable. July–August is warmest but busy. Frozen river Chadar trek runs in January–February.' },
     quickFacts: { language: 'Ladakhi, Hindi, Urdu', currency: 'Indian Rupee (₹)', capital: 'Leh', knownAs: 'Land of High Passes', timezone: 'IST (UTC+5:30)' },
     cuisine: ['Tsampa (roasted barley)', 'Thukpa (noodle soup)', 'Skyu (pasta stew)', 'Chhurpi (yak cheese)', 'Butter Tea (Po Cha)', 'Khambir Bread'],
+    stays: [
+      { name: 'The Grand Dragon Ladakh', area: 'Old Leh Road', rating: 4.5, reviews: 2640, type: 'Luxury hotel', price: '₹₹₹₹', highlight: 'Oxygen-enriched rooms (a real perk at 3,500m), heated floors' },
+      { name: 'Stok Palace Heritage Hotel', area: 'Stok village', rating: 4.7, reviews: 540, type: 'Royal palace stay', price: '₹₹₹₹', highlight: 'Suites inside the residence of Ladakh\'s royal family, 19th-century murals' },
+      { name: 'The Zen Ladakh', area: 'Sankar, Leh', rating: 4.4, reviews: 920, type: 'Mid-range hotel', price: '₹₹', highlight: 'Garden courtyard, walking distance to Leh Market and Shanti Stupa trail' },
+      { name: 'Zostel Plus Leh', area: 'Changspa', rating: 4.5, reviews: 1840, type: 'Hostel', price: '₹', highlight: 'Pet-friendly, mountain views, walking distance to Shanti Stupa' },
+    ],
   },
 
   meghalaya: {
@@ -472,6 +538,12 @@ export const DESTINATION_INFO = {
     bestTime: { period: 'October–May', reason: 'Dry season brings clear skies and full visibility of waterfalls and rivers. Monsoon (June–September) is dramatic but roads flood and bridges get dangerous.' },
     quickFacts: { language: 'Khasi, Garo, Bengali, English', currency: 'Indian Rupee (₹)', capital: 'Shillong', knownAs: 'Abode of Clouds', timezone: 'IST (UTC+5:30)' },
     cuisine: ['Jadoh (pork rice)', 'Dohneiiong (black sesame pork)', 'Tungtap (fish chutney)', 'Kwai (betel nut)', 'Nakham Bitchi (fish soup)', 'Pukhlein (rice cake)'],
+    stays: [
+      { name: 'Ri Kynjai Serenity by the Lake', area: 'Umiam Lake, Shillong', rating: 4.6, reviews: 1340, type: 'Lakeside resort', price: '₹₹₹₹', highlight: 'Khasi-themed cottages over Umiam Lake, infinity pool with mist views' },
+      { name: 'Polo Orchid Resort', area: 'Cherrapunji', rating: 4.4, reviews: 1620, type: 'Hill resort', price: '₹₹₹', highlight: 'Cliff-edge cottages over Cherrapunji valley, easy access to Nohkalikai Falls' },
+      { name: 'Cherrapunjee Holiday Resort', area: 'Laitkynsew', rating: 4.3, reviews: 920, type: 'Eco resort', price: '₹₹', highlight: 'Closest stay to Double Decker Living Root Bridge trail' },
+      { name: 'iROOMZ Hotel Centre Point', area: 'Police Bazaar, Shillong', rating: 4.2, reviews: 1840, type: 'City hotel', price: '₹₹', highlight: 'Police Bazaar at the door, walkable to Don Bosco Museum' },
+    ],
   },
 
   ooty: {
@@ -491,6 +563,12 @@ export const DESTINATION_INFO = {
     bestTime: { period: 'April–June & Sep–Nov', reason: 'Summer (Apr–Jun) is peak season with mild weather and the flower show. Post-monsoon (Sep–Nov) is lush and fog-free. Winter gets cold (3–5°C) with frost.' },
     quickFacts: { language: 'Tamil, Kannada, Malayalam', currency: 'Indian Rupee (₹)', capital: 'District HQ of Nilgiris', knownAs: 'Queen of Hill Stations', timezone: 'IST (UTC+5:30)' },
     cuisine: ['Nilgiri Tea', 'Ooty Varkey (biscuit)', 'Homemade Chocolate', 'Toda Tribal Honey', 'Carrot Halwa', 'Nilgiri-style lamb curry'],
+    stays: [
+      { name: 'Taj Savoy Hotel', area: 'Sylks Road, Ooty', rating: 4.5, reviews: 2640, type: 'Heritage colonial hotel', price: '₹₹₹₹', highlight: 'Built 1829, oldest hotel in Ooty, 6 acres of cottages and rose gardens' },
+      { name: 'The Gateway Hotel Church Road', area: 'Church Road, Ooty', rating: 4.3, reviews: 1840, type: 'Mid-range', price: '₹₹₹', highlight: 'Walking distance to Ooty Lake and Botanical Gardens' },
+      { name: 'Sterling Ooty Elk Hill', area: 'Havelock Road', rating: 4.2, reviews: 2120, type: 'Hill resort', price: '₹₹', highlight: 'Pine-tree slopes, family-friendly, cottage rooms' },
+      { name: 'Greenwoods Resort', area: 'Coonoor', rating: 4.4, reviews: 940, type: 'Plantation stay', price: '₹₹', highlight: 'Tea-estate views, walking trails through the gardens' },
+    ],
   },
 
   hampi: {
@@ -512,6 +590,12 @@ export const DESTINATION_INFO = {
     bestTime: { period: 'October–February', reason: 'Cool and pleasant (20–30°C). Summer (Mar–Jun) is brutally hot (40°C+) with burning boulders. Monsoon (Jul–Sep) brings some rain but fewer crowds.' },
     quickFacts: { language: 'Kannada, Hindi, English', currency: 'Indian Rupee (₹)', capital: 'Ancient capital of Vijayanagara Empire', knownAs: 'City of Ruins', timezone: 'IST (UTC+5:30)' },
     cuisine: ['Jolada Rotti (sorghum bread)', 'Obbattu (sweet flatbread)', 'Bisi Bele Bath', 'Banana Leaf Meals', 'Tungabhadra fresh fish', 'Holige'],
+    stays: [
+      { name: 'Evolve Back Hampi', area: 'Kamalapura', rating: 4.8, reviews: 1840, type: 'Luxury heritage resort', price: '₹₹₹₹', highlight: 'Vijayanagara-inspired architecture, private pool villas' },
+      { name: 'Hyatt Place Hampi', area: 'Kaddirampura', rating: 4.5, reviews: 1240, type: 'Mid-range hotel', price: '₹₹₹', highlight: 'Modern comforts close to the ruins, large outdoor pool' },
+      { name: 'Hampi\'s Boulders', area: 'Narayanapet', rating: 4.5, reviews: 740, type: 'Eco riverside resort', price: '₹₹₹', highlight: 'Tungabhadra river beachfront, sloth-bear sanctuary nearby' },
+      { name: 'Padma Guest House', area: 'Hampi Bazaar', rating: 4.4, reviews: 1320, type: 'Budget guesthouse', price: '₹', highlight: 'Family-run, rooftop with Virupaksha temple gopuram view' },
+    ],
   },
 
   varanasi: {
@@ -533,6 +617,12 @@ export const DESTINATION_INFO = {
     bestTime: { period: 'October–March', reason: 'Cool and pleasant weather for ghats and temple visits. Summer (Apr–Jun) is extremely hot and humid. Monsoon (Jul–Sep) brings heavy rain and flooding of lower ghats.' },
     quickFacts: { language: 'Hindi, Bhojpuri', currency: 'Indian Rupee (₹)', capital: 'Sacred city of Uttar Pradesh', knownAs: 'Kashi / City of Light / Benares', timezone: 'IST (UTC+5:30)' },
     cuisine: ['Banarasi Paan', 'Kachori Sabzi', 'Thandai (bhang lassi)', 'Malaiyo (winter dessert)', 'Baati Chokha', 'Tamatar Chaat'],
+    stays: [
+      { name: 'BrijRama Palace', area: 'Darbhanga Ghat', rating: 4.7, reviews: 1840, type: 'Heritage palace on the ghat', price: '₹₹₹₹', highlight: 'Restored 1812 palace, only ghat-front heritage hotel, boat-only entry on busy days' },
+      { name: 'Taj Ganges', area: 'Cantonment', rating: 4.5, reviews: 3120, type: 'Luxury hotel', price: '₹₹₹₹', highlight: '40 acres of gardens, peacocks, away from old-city chaos' },
+      { name: 'Suryauday Haveli', area: 'Shivala Ghat', rating: 4.5, reviews: 940, type: 'Boutique heritage', price: '₹₹₹', highlight: 'Restored Nepali king\'s residence, unobstructed Ganga view from rooftop' },
+      { name: 'Stops Varanasi', area: 'Brahma Ghat', rating: 4.3, reviews: 1240, type: 'Hostel', price: '₹', highlight: 'Old-city alleys, walking distance to Manikarnika and aarti ghats' },
+    ],
   },
 
   ayodhya: {
@@ -553,6 +643,12 @@ export const DESTINATION_INFO = {
     bestTime: { period: 'October–March', reason: 'Pleasant weather for temple visits. Deepotsav (Diwali) in October–November sees lakhs of lamps lit along Sarayu Ghat, making it one of India\'s most spectacular festivals.' },
     quickFacts: { language: 'Hindi, Awadhi', currency: 'Indian Rupee (₹)', capital: 'Sacred city of Uttar Pradesh', knownAs: 'Birthplace of Lord Ram', timezone: 'IST (UTC+5:30)' },
     cuisine: ['Awadhi Biryani', 'Nihari', 'Sheermal', 'Shahi Tukda', 'Panjeeri Ladoo', 'Ram Ladoo'],
+    stays: [
+      { name: 'Taj Vivanta Ayodhya', area: 'Faizabad-Ayodhya Road', rating: 4.5, reviews: 920, type: 'Luxury hotel', price: '₹₹₹₹', highlight: 'Newly opened post-Mandir consecration, 10 min to Ram Mandir' },
+      { name: 'Ramayana Hotel', area: 'Naya Ghat', rating: 4.3, reviews: 640, type: 'Mid-range temple-themed', price: '₹₹', highlight: 'Walking distance to Sarayu aarti, on-site Ramayana museum' },
+      { name: 'Hotel Krinoman', area: 'Civil Lines', rating: 4.2, reviews: 480, type: 'Budget hotel', price: '₹', highlight: 'Family-run, 5 min from Hanuman Garhi' },
+      { name: 'The Lalit Mahal', area: 'Naya Ghat', rating: 4.4, reviews: 380, type: 'Boutique hotel', price: '₹₹₹', highlight: 'Sarayu river views, vegetarian-only kitchen, daily aarti shuttle' },
+    ],
   },
 
   mahabaleshwar: {
@@ -573,6 +669,12 @@ export const DESTINATION_INFO = {
     bestTime: { period: 'October–June', reason: 'Pleasant weather year-round except monsoon (June–September) when the town receives 600cm of rain and roads become treacherous.' },
     quickFacts: { language: 'Marathi, Hindi', currency: 'Indian Rupee (₹)', capital: 'District of Satara, Maharashtra', knownAs: 'Strawberry Capital of India', timezone: 'IST (UTC+5:30)' },
     cuisine: ['Fresh Strawberries & Cream', 'Mapro Strawberry Crush', 'Kanda Bhaji', 'Misal Pav', 'Corn on the Cob (roadside)', 'Amrakhand'],
+    stays: [
+      { name: 'Le Meridien Mahabaleshwar Resort & Spa', area: 'Frederick Road', rating: 4.5, reviews: 1840, type: 'Luxury resort', price: '₹₹₹₹', highlight: 'Heated indoor pool, valley-view villas, full Explore Spa' },
+      { name: 'Evershine Resort', area: 'Mahabaleshwar–Panchgani Road', rating: 4.4, reviews: 1240, type: 'Family resort', price: '₹₹₹', highlight: 'Strawberry-themed kids zone, large pool, walkable to Panchgani' },
+      { name: 'Brightland Resort & Spa', area: 'Pratapsingh Park Road', rating: 4.3, reviews: 1620, type: 'Mid-range', price: '₹₹', highlight: 'Cottages around a courtyard, 5 min to Mall Road' },
+      { name: 'The Lakeview Mahabaleshwar', area: 'Venna Lake', rating: 4.2, reviews: 940, type: 'Lakeside hotel', price: '₹₹', highlight: 'Walking distance to Venna Lake boating' },
+    ],
   },
 
   'south korea': {
@@ -594,6 +696,12 @@ export const DESTINATION_INFO = {
     bestTime: { period: 'March–May & Sep–Nov', reason: 'Spring brings cherry blossoms; autumn brings vivid foliage. Summer is hot and humid with typhoon risk; winter is very cold (-10°C in Seoul).' },
     quickFacts: { language: 'Korean', currency: 'South Korean Won (₩)', capital: 'Seoul', knownAs: 'Land of the Morning Calm', timezone: 'KST (UTC+9)' },
     cuisine: ['Kimchi', 'Korean BBQ (Samgyeopsal)', 'Bibimbap', 'Tteokbokki', 'Ramyeon', 'Japchae', 'Korean Fried Chicken'],
+    stays: [
+      { name: 'Four Seasons Hotel Seoul', area: 'Jongno-gu', rating: 4.7, reviews: 4120, type: 'Luxury hotel', price: '₩₩₩₩', highlight: 'Walking distance to Gwanghwamun and Gyeongbokgung Palace' },
+      { name: 'L7 Myeongdong by Lotte', area: 'Myeongdong', rating: 4.5, reviews: 5640, type: 'Mid-range design hotel', price: '₩₩₩', highlight: 'Rooftop infinity pool with N Seoul Tower view, K-shopping at the door' },
+      { name: 'Nostalgia Hanok Stay', area: 'Bukchon Hanok Village', rating: 4.6, reviews: 820, type: 'Traditional hanok', price: '₩₩₩', highlight: 'Sleep on heated ondol floors in a 100-year-old courtyard home' },
+      { name: 'K-Guesthouse Insadong 5', area: 'Insadong', rating: 4.4, reviews: 1640, type: 'Budget guesthouse', price: '₩', highlight: 'Walkable to Changdeokgung, near Insadong tea-house alleys' },
+    ],
   },
 
   vietnam: {
@@ -615,6 +723,12 @@ export const DESTINATION_INFO = {
     bestTime: { period: 'Nov–Apr (varies by region)', reason: 'North Vietnam: Oct–Apr (dry and cool). Central: Feb–Jul (least rain). South: Dec–Apr (dry season). The country spans 1,650km so weather varies dramatically.' },
     quickFacts: { language: 'Vietnamese', currency: 'Vietnamese Dong (₫)', capital: 'Hanoi', knownAs: 'Land of the Blue Dragon', timezone: 'ICT (UTC+7)' },
     cuisine: ['Phở (beef noodle soup)', 'Bánh Mì', 'Bún Bò Huế', 'Cao Lầu', 'Gỏi Cuốn (fresh spring rolls)', 'Cà Phê Trứng (egg coffee)'],
+    stays: [
+      { name: 'Sofitel Legend Metropole Hanoi', area: 'Old Quarter, Hanoi', rating: 4.7, reviews: 5320, type: 'Heritage colonial luxury', price: '$$$$', highlight: 'Built 1901 — hosted Charlie Chaplin and Graham Greene; rumoured wartime bomb shelter under the bar' },
+      { name: 'Anantara Hoi An Resort', area: 'Hoi An', rating: 4.6, reviews: 2840, type: 'Riverside resort', price: '$$$', highlight: 'Thu Bon River views, walking distance to Ancient Town lanterns' },
+      { name: 'Bhaya Classic Cruise', area: 'Halong Bay', rating: 4.5, reviews: 1320, type: 'Overnight junk boat', price: '$$$', highlight: 'Cabin with private balcony among the limestone karsts' },
+      { name: 'The Common Room Project', area: 'Old Quarter, Hanoi', rating: 4.5, reviews: 1840, type: 'Boutique hostel', price: '$', highlight: 'Café-rooftop, walking distance to Hoan Kiem Lake' },
+    ],
   },
 
   switzerland: {
@@ -636,6 +750,12 @@ export const DESTINATION_INFO = {
     bestTime: { period: 'June–Sep & Dec–Mar', reason: 'Summer for hiking and lake swimming; winter for skiing. Spring and autumn are beautiful but mountain passes may be closed.' },
     quickFacts: { language: 'German, French, Italian, Romansh', currency: 'Swiss Franc (CHF)', capital: 'Bern', knownAs: 'Land of Milk and Honey', timezone: 'CET (UTC+1)' },
     cuisine: ['Fondue', 'Raclette', 'Rösti', 'Zürcher Geschnetzeltes', 'Bircher Muesli', 'Swiss Chocolate', 'Älplermagronen'],
+    stays: [
+      { name: 'The Omnia', area: 'Zermatt', rating: 4.8, reviews: 940, type: 'Mountain design hotel', price: 'CHF CHF CHF CHF', highlight: 'Carved into a rock above Zermatt, Matterhorn from every window' },
+      { name: 'Bürgenstock Hotel', area: 'Lake Lucerne', rating: 4.7, reviews: 1640, type: 'Luxury cliffside resort', price: 'CHF CHF CHF CHF', highlight: 'Cliff-edge infinity pool 500m above Lake Lucerne' },
+      { name: 'Hotel Schweizerhof Bern', area: 'Bern Old Town', rating: 4.6, reviews: 1240, type: 'Heritage city hotel', price: 'CHF CHF CHF', highlight: 'Steps from the train station, walkable to Zytglogge clock tower' },
+      { name: 'Youth Hostel Interlaken', area: 'Interlaken', rating: 4.4, reviews: 2840, type: 'Hostel', price: 'CHF', highlight: 'Modern hostel between two lakes, perfect base for Jungfrau day trips' },
+    ],
   },
 
   austria: {
@@ -656,6 +776,12 @@ export const DESTINATION_INFO = {
     bestTime: { period: 'April–May & Sep–Oct', reason: 'Mild weather, fewer crowds, and spring blossoms around Schönbrunn. Christmas markets (Nov–Dec) are magical. Summer is busy but lively with outdoor concerts.' },
     quickFacts: { language: 'German', currency: 'Euro (€)', capital: 'Vienna', knownAs: 'Land of Music', timezone: 'CET (UTC+1)' },
     cuisine: ['Wiener Schnitzel', 'Sachertorte', 'Tafelspitz', 'Kaiserschmarrn', 'Apfelstrudel', 'Melange (Viennese coffee)', 'Leberkäse'],
+    stays: [
+      { name: 'Hotel Sacher Wien', area: 'Innere Stadt, Vienna', rating: 4.7, reviews: 3640, type: 'Heritage palace hotel', price: '€€€€', highlight: 'Home of the original Sachertorte, opposite the State Opera' },
+      { name: 'Hotel Imperial', area: 'Kärntner Ring, Vienna', rating: 4.7, reviews: 1840, type: 'Luxury heritage', price: '€€€€', highlight: 'Built 1863 as a Württemberg palace, butler service in every suite' },
+      { name: 'Hotel Sacher Salzburg', area: 'Salzburg Old Town', rating: 4.6, reviews: 1240, type: 'Heritage hotel', price: '€€€€', highlight: 'Salzach river-front, view of Hohensalzburg fortress' },
+      { name: 'Wombats City Hostel Vienna', area: 'Mariahilf', rating: 4.4, reviews: 4920, type: 'Hostel', price: '€', highlight: 'Modern dorms 5 min from Westbahnhof, in-house café' },
+    ],
   },
   azerbaijan: {
     tagline: 'The Land of Fire — where East meets West at the crossroads of ancient civilisations',
@@ -676,6 +802,12 @@ export const DESTINATION_INFO = {
     bestTime: { period: 'April–June & Sep–November', reason: 'Spring brings wildflowers to the Caucasus mountains; autumn is warm and clear. Summers are hot in Baku but cool in the highlands.' },
     quickFacts: { language: 'Azerbaijani', currency: 'Azerbaijani Manat (₼)', capital: 'Baku', knownAs: 'Land of Fire', timezone: 'AZT (UTC+4)' },
     cuisine: ['Plov (Saffron Rice)', 'Dolma', 'Kebab', 'Dushbara (Dumplings)', 'Pomegranate Dishes', 'Baklava', 'Black Tea with Jam'],
+    stays: [
+      { name: 'Four Seasons Hotel Baku', area: 'Neftchilar Avenue', rating: 4.7, reviews: 1840, type: 'Luxury hotel', price: '₼₼₼₼', highlight: 'Caspian Sea views, walking distance to Old City' },
+      { name: 'Fairmont Baku at Flame Towers', area: 'Mehdi Huseyn Street', rating: 4.6, reviews: 2640, type: 'Iconic luxury hotel', price: '₼₼₼₼', highlight: 'Inside the southern Flame Tower, panoramic city and bay views' },
+      { name: 'Sahil Hostel & Hotel', area: 'Old City', rating: 4.5, reviews: 1240, type: 'Boutique mid-range', price: '₼₼', highlight: 'Steps from Maiden Tower, hot Azerbaijani breakfast included' },
+      { name: 'Marxal Resort & Spa', area: 'Sheki', rating: 4.6, reviews: 940, type: 'Mountain resort', price: '₼₼₼', highlight: 'Caucasus mountain backdrop, walking distance to Sheki Khan\'s Palace' },
+    ],
   },
 
   australia: {
@@ -697,6 +829,12 @@ export const DESTINATION_INFO = {
     bestTime: { period: 'Sep–Nov & Mar–May', reason: 'Spring and autumn avoid extreme summer heat in the south and the tropical wet season in the north. Queensland\'s Great Barrier Reef is best June–October.' },
     quickFacts: { language: 'English', currency: 'Australian Dollar (A$)', capital: 'Canberra', knownAs: 'Land Down Under', timezone: 'Multiple (AEST UTC+10 to AWST UTC+8)' },
     cuisine: ['Vegemite on Toast', 'Barramundi', 'Meat Pie', 'Tim Tams', 'Pavlova', 'Lamington', 'Flat White Coffee', 'BBQ Shrimp'],
+    stays: [
+      { name: 'Park Hyatt Sydney', area: 'The Rocks, Sydney', rating: 4.8, reviews: 2640, type: 'Luxury harbourfront', price: 'A$ A$ A$ A$', highlight: 'Direct view of the Opera House and Harbour Bridge from every room' },
+      { name: 'QT Sydney', area: 'Market Street, CBD', rating: 4.6, reviews: 3120, type: 'Boutique design hotel', price: 'A$ A$ A$', highlight: 'Heritage State Theatre building, quirky Australian art throughout' },
+      { name: 'Longitude 131°', area: 'Uluru', rating: 4.9, reviews: 480, type: 'Luxury desert tents', price: 'A$ A$ A$ A$', highlight: 'All-inclusive luxury tents with panoramic views of Uluru sunrise' },
+      { name: 'YHA Sydney Harbour', area: 'The Rocks', rating: 4.5, reviews: 4820, type: 'Hostel', price: 'A$', highlight: 'Rooftop with iconic Opera House view, on-site Big Dig Archaeology Centre' },
+    ],
   },
 
   egypt: {
@@ -718,6 +856,12 @@ export const DESTINATION_INFO = {
     bestTime: { period: 'October–April', reason: 'Winter months are pleasantly warm (20–25°C) for sightseeing. Summer temperatures can exceed 45°C in Luxor and Aswan. The Red Sea coast is good year-round.' },
     quickFacts: { language: 'Arabic', currency: 'Egyptian Pound (E£)', capital: 'Cairo', knownAs: 'Gift of the Nile', timezone: 'EET (UTC+2)' },
     cuisine: ['Koshari', 'Ful Medames', 'Molokhia', 'Hawawshi', 'Om Ali (Bread Pudding)', 'Baklava', 'Sugarcane Juice', 'Karkade (Hibiscus Tea)'],
+    stays: [
+      { name: 'Marriott Mena House', area: 'Giza', rating: 4.6, reviews: 8420, type: 'Heritage palace hotel', price: 'E£E£E£E£', highlight: 'Built 1869, the only hotel with the Great Pyramids in the back garden' },
+      { name: 'Four Seasons Hotel Cairo at Nile Plaza', area: 'Garden City, Cairo', rating: 4.7, reviews: 5240, type: 'Luxury hotel', price: 'E£E£E£E£', highlight: 'Direct Nile views, walking distance to Egyptian Museum' },
+      { name: 'Sofitel Winter Palace', area: 'Luxor', rating: 4.5, reviews: 1840, type: 'Heritage Nile hotel', price: 'E£E£E£', highlight: 'Built 1886, where Agatha Christie wrote Death on the Nile, opposite Luxor Temple' },
+      { name: 'Dahab Paradise', area: 'Dahab, Sinai', rating: 4.6, reviews: 740, type: 'Beach hotel', price: 'E£E£', highlight: 'Red Sea snorkelling at the door, walking distance to Blue Hole dive site' },
+    ],
   },
 
   srilanka: {
@@ -739,6 +883,12 @@ export const DESTINATION_INFO = {
     bestTime: { period: 'Dec–Mar (West & South) / May–Sep (East)', reason: 'Sri Lanka has two monsoon seasons affecting opposite coasts — the west and south are best in winter; the east coast shines in summer.' },
     quickFacts: { language: 'Sinhala & Tamil', currency: 'Sri Lankan Rupee (Rs)', capital: 'Sri Jayawardenepura Kotte', knownAs: 'Pearl of the Indian Ocean', timezone: 'SLST (UTC+5:30)' },
     cuisine: ['Rice & Curry', 'Hoppers (Appa)', 'Kottu Roti', 'String Hoppers', 'Fish Ambul Thiyal', 'Pol Sambol', 'Ceylon Tea', 'King Coconut'],
+    stays: [
+      { name: 'Cape Weligama', area: 'Weligama, Southern Coast', rating: 4.7, reviews: 1240, type: 'Cliff-top luxury resort', price: 'Rs Rs Rs Rs', highlight: 'Crescent infinity pool over the Indian Ocean, all-villa property' },
+      { name: 'Heritance Tea Factory', area: 'Nuwara Eliya', rating: 4.6, reviews: 2840, type: 'Converted tea factory', price: 'Rs Rs Rs Rs', highlight: '1968 tea factory at 6,800 ft, sleep amid working tea estate' },
+      { name: 'Galle Fort Hotel', area: 'Galle Fort', rating: 4.5, reviews: 940, type: 'Heritage boutique', price: 'Rs Rs Rs', highlight: 'Restored 17th-century Dutch merchant mansion inside the fort walls' },
+      { name: 'Hangover Hostels Hikkaduwa', area: 'Hikkaduwa', rating: 4.5, reviews: 1640, type: 'Beach hostel', price: 'Rs', highlight: 'Beachfront, surf rentals, walking distance to coral sanctuary' },
+    ],
   },
 
   finland: {
@@ -760,6 +910,12 @@ export const DESTINATION_INFO = {
     bestTime: { period: 'Jun–Aug (Midnight Sun) & Dec–Mar (Northern Lights)', reason: 'Summer offers endless daylight and warm lakes for swimming. Winter (especially February–March) gives the best aurora viewing, snow activities, and Christmas magic.' },
     quickFacts: { language: 'Finnish & Swedish', currency: 'Euro (€)', capital: 'Helsinki', knownAs: 'Land of a Thousand Lakes', timezone: 'EET (UTC+2)' },
     cuisine: ['Salmon Soup', 'Reindeer Stew', 'Karjalanpiirakka (Rye Pasties)', 'Mämmi (Easter Dessert)', 'Leipäjuusto (Bread Cheese)', 'Cloudberry Jam', 'Salmiakki (Salty Liquorice)'],
+    stays: [
+      { name: 'Kakslauttanen Arctic Resort', area: 'Saariselkä, Lapland', rating: 4.7, reviews: 3640, type: 'Glass igloo resort', price: '€€€€', highlight: 'Sleep under the aurora in heated thermal-glass igloos' },
+      { name: 'Hotel Kämp', area: 'Helsinki centre', rating: 4.6, reviews: 1840, type: 'Heritage luxury', price: '€€€€', highlight: 'Built 1887, hosted Finland\'s national poets and Sibelius' },
+      { name: 'Arctic TreeHouse Hotel', area: 'Rovaniemi', rating: 4.8, reviews: 1240, type: 'Boutique cabins', price: '€€€€', highlight: 'Hillside cabins facing north, in-room aurora wake-up alarm' },
+      { name: 'Hostel Diana Park', area: 'Helsinki centre', rating: 4.4, reviews: 920, type: 'Hostel', price: '€', highlight: 'Walking distance to Senate Square and the harbour' },
+    ],
   },
 
   costarica: {
@@ -781,6 +937,12 @@ export const DESTINATION_INFO = {
     bestTime: { period: 'Dec–April', reason: 'Dry season on the Pacific coast with sunny skies. The Caribbean coast has different patterns — little rain June–July and September–October. Surfers prefer May–November for bigger swells.' },
     quickFacts: { language: 'Spanish', currency: 'Costa Rican Colón (₡)', capital: 'San José', knownAs: 'Rich Coast / Pura Vida Nation', timezone: 'CST (UTC−6)' },
     cuisine: ['Gallo Pinto (Rice & Beans)', 'Casado', 'Ceviche', 'Olla de Carne', 'Tamales', 'Tres Leches Cake', 'Guaro (Sugar Cane Spirit)', 'Fresh Tropical Fruits'],
+    stays: [
+      { name: 'Nayara Springs', area: 'Arenal Volcano', rating: 4.9, reviews: 1640, type: 'Adults-only luxury resort', price: '$$$$', highlight: 'Private plunge pools fed by hot springs, view of Arenal volcano cone' },
+      { name: 'Tabacón Thermal Resort', area: 'La Fortuna', rating: 4.6, reviews: 4820, type: 'Hot-springs resort', price: '$$$$', highlight: 'Volcanic thermal river running through the property' },
+      { name: 'Lapa Rios Eco Lodge', area: 'Osa Peninsula', rating: 4.7, reviews: 920, type: 'Eco luxury bungalows', price: '$$$$', highlight: '17 thatched bungalows in a primary rainforest reserve, abundant wildlife from your deck' },
+      { name: 'Selina Manuel Antonio', area: 'Manuel Antonio', rating: 4.4, reviews: 1840, type: 'Co-living hostel', price: '$$', highlight: 'Steps to the National Park, surf school and yoga deck' },
+    ],
   },
 
   bhutan: {
@@ -802,6 +964,12 @@ export const DESTINATION_INFO = {
     bestTime: { period: 'March–May & Sep–November', reason: 'Spring brings rhododendrons in bloom and clear mountain views; autumn is crisp and ideal for trekking after the monsoon. Winter is cold but festivals are spectacular.' },
     quickFacts: { language: 'Dzongkha', currency: 'Bhutanese Ngultrum (Nu)', capital: 'Thimphu', knownAs: 'Land of the Thunder Dragon', timezone: 'BTT (UTC+6)' },
     cuisine: ['Ema Datshi (Chilli Cheese)', 'Phaksha Paa (Pork with Chillies)', 'Red Rice', 'Jasha Maru (Spiced Chicken)', 'Hoentay (Dumplings)', 'Ara (Butter Tea)', 'Suja (Butter Tea)'],
+    stays: [
+      { name: 'Amankora Paro', area: 'Paro Valley', rating: 4.9, reviews: 320, type: 'Luxury Aman lodge', price: 'Nu Nu Nu Nu', highlight: 'Stone-and-pine lodge in a pine grove, traditional bukhari stoves' },
+      { name: 'Six Senses Thimphu', area: 'Thimphu Valley', rating: 4.8, reviews: 280, type: 'Luxury wellness lodge', price: 'Nu Nu Nu Nu', highlight: 'Capital views, butler-service villas, wellness-only philosophy' },
+      { name: 'Zhiwa Ling Heritage', area: 'Paro', rating: 4.7, reviews: 540, type: 'Bhutanese heritage hotel', price: 'Nu Nu Nu', highlight: 'Hand-carved wooden interiors, on-site temple, prayer wheel courtyard' },
+      { name: 'Hotel Druk', area: 'Thimphu centre', rating: 4.4, reviews: 720, type: 'Mid-range hotel', price: 'Nu Nu', highlight: 'Centrally located near Tashichho Dzong, traditional dinners on the rooftop' },
+    ],
   },
 
   puri: {
@@ -857,6 +1025,12 @@ export const DESTINATION_INFO = {
     bestTime: { period: 'October–February', reason: 'Pleasant coastal weather. December\'s Konark Dance Festival is a highlight. Sunrise visits to the temple are unforgettable year-round, but summer afternoons can exceed 40°C.' },
     quickFacts: { language: 'Odia, Hindi', currency: 'Indian Rupee (₹)', capital: 'Temple town of Odisha', knownAs: 'Black Pagoda / Surya Kshetra', timezone: 'IST (UTC+5:30)' },
     cuisine: ['Mahaprasad', 'Chenna Poda', 'Khaja', 'Dalma (lentil-vegetable stew)', 'Macha Besara', 'Rasagola'],
+    stays: [
+      { name: 'Lotus Eco Beach Resort', area: 'Ramachandi Beach', rating: 4.5, reviews: 1240, type: 'Eco beach resort', price: '₹₹₹', highlight: 'Beachside cottages between Konark and Puri, casuarina-shaded' },
+      { name: 'Yatrik Niwas (OTDC)', area: 'Konark town', rating: 4.0, reviews: 540, type: 'Government tourist hotel', price: '₹', highlight: 'Walking distance to the Sun Temple, simple but reliable' },
+      { name: 'Mayfair Heritage Puri', area: 'C.T. Road, Puri (35 km)', rating: 4.6, reviews: 1920, type: 'Heritage beach resort', price: '₹₹₹₹', highlight: 'Best regional luxury option, easy day trip to Konark' },
+      { name: 'Nature Camp Konark Retreat', area: 'Ramachandi', rating: 4.3, reviews: 480, type: 'Tented eco camp', price: '₹₹', highlight: 'Beachfront luxury tents, Olive Ridley turtle nesting season Oct–Mar' },
+    ],
   },
 };
 

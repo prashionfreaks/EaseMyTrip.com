@@ -663,12 +663,16 @@ function StayCard({ trip, stays, onSave }) {
               <div>
                 <p style={{
                   fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)',
-                  textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8,
-                  display: 'flex', alignItems: 'center', gap: 5,
+                  textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10,
+                  display: 'flex', alignItems: 'center', gap: 5, justifyContent: 'center',
                 }}>
                   <Sparkles size={10} /> Top picks {trip?.destination ? `in ${trip.destination}` : ''} (Google reviews)
                 </p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+                  gap: 10,
+                }}>
                   {stays.map(s => (
                     <button
                       key={s.name}
@@ -677,64 +681,81 @@ function StayCard({ trip, stays, onSave }) {
                         area: s.area,
                         notes: `${s.type} · ${s.highlight}`,
                       })}
+                      title={s.highlight}
                       style={{
-                        display: 'flex', gap: 10, alignItems: 'flex-start',
-                        padding: '12px 14px', borderRadius: 12,
-                        background: 'var(--bg-tertiary)',
+                        position: 'relative',
+                        display: 'flex', flexDirection: 'column',
+                        alignItems: 'center', justifyContent: 'flex-start',
+                        gap: 6, padding: '14px 12px 12px', borderRadius: 14,
+                        background: 'linear-gradient(180deg, #fff 0%, #fff5f7 100%)',
                         border: '1px solid var(--border-light)',
-                        textAlign: 'left', cursor: 'pointer', width: '100%',
-                        transition: 'box-shadow 0.15s, border-color 0.15s',
+                        textAlign: 'center', cursor: 'pointer', width: '100%',
+                        transition: 'transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease',
                       }}
                       onMouseOver={e => {
                         e.currentTarget.style.borderColor = '#f9a8d4';
-                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(190,24,93,0.08)';
+                        e.currentTarget.style.boxShadow = '0 6px 16px rgba(190,24,93,0.12)';
+                        e.currentTarget.style.transform = 'translateY(-2px)';
                       }}
                       onMouseOut={e => {
                         e.currentTarget.style.borderColor = 'var(--border-light)';
                         e.currentTarget.style.boxShadow = 'none';
+                        e.currentTarget.style.transform = 'translateY(0)';
                       }}
                     >
+                      <span style={{
+                        position: 'absolute', top: 8, right: 8,
+                        fontSize: 9.5, fontWeight: 800, color: '#be185d',
+                        background: '#fce7f3', padding: '2px 7px', borderRadius: 99,
+                        letterSpacing: '0.02em',
+                      }}>
+                        {s.price}
+                      </span>
+
                       <div style={{
-                        flexShrink: 0, width: 36, height: 36, borderRadius: 10,
+                        width: 40, height: 40, borderRadius: '50%',
                         background: 'linear-gradient(135deg, #fce7f3, #fbcfe8)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: 18,
+                        fontSize: 20, marginTop: 4,
                       }}>🛏️</div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 3 }}>
-                          <h4 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{s.name}</h4>
-                          <span style={{
-                            fontSize: 10, fontWeight: 700, color: '#be185d',
-                            background: '#fce7f3', padding: '1px 7px', borderRadius: 99,
-                          }}>
-                            {s.price}
-                          </span>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
-                          <span style={{
-                            display: 'inline-flex', alignItems: 'center', gap: 3,
-                            fontSize: 12, fontWeight: 700, color: '#92400e',
-                          }}>
-                            <Star size={11} fill="#f59e0b" color="#f59e0b" /> {s.rating?.toFixed(1)}
-                          </span>
-                          <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
-                            ({s.reviews?.toLocaleString()} reviews)
-                          </span>
-                          <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>·</span>
-                          <span style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>
-                            {s.type}
-                          </span>
-                        </div>
-                        <p style={{ fontSize: 11.5, color: 'var(--text-secondary)', lineHeight: 1.5, display: 'flex', alignItems: 'center', gap: 4 }}>
-                          <MapPin size={10} /> {s.area} · {s.highlight}
-                        </p>
-                      </div>
-                      <span style={{
-                        fontSize: 11, fontWeight: 700, color: '#be185d',
-                        whiteSpace: 'nowrap', alignSelf: 'center',
+
+                      <h4 style={{
+                        fontSize: 13, fontWeight: 700, color: 'var(--text-primary)',
+                        lineHeight: 1.2,
+                        display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden', minHeight: 32,
                       }}>
-                        Pick this →
+                        {s.name}
+                      </h4>
+
+                      <div style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 4,
+                        fontSize: 11.5, fontWeight: 700, color: '#92400e',
+                      }}>
+                        <Star size={11} fill="#f59e0b" color="#f59e0b" />
+                        {s.rating?.toFixed(1)}
+                        <span style={{ fontWeight: 500, color: 'var(--text-tertiary)', fontSize: 10.5 }}>
+                          ({s.reviews?.toLocaleString()})
+                        </span>
+                      </div>
+
+                      <span style={{
+                        fontSize: 10, fontWeight: 600, color: 'var(--text-secondary)',
+                        background: 'var(--bg-tertiary)',
+                        padding: '2px 8px', borderRadius: 99,
+                        display: 'inline-flex', alignItems: 'center', gap: 3,
+                        maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                      }}>
+                        {s.type}
                       </span>
+
+                      <p style={{
+                        fontSize: 10.5, color: 'var(--text-tertiary)', lineHeight: 1.35,
+                        display: 'inline-flex', alignItems: 'center', gap: 3,
+                        maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                      }}>
+                        <MapPin size={9} /> {s.area}
+                      </p>
                     </button>
                   ))}
                 </div>

@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useTrips } from '../context/TripContext';
 import { useAuth } from '../context/AuthContext';
 import {
-  LayoutDashboard, Compass, LogOut, ChevronRight,
+  LayoutDashboard, Compass, LogOut, ChevronRight, HelpCircle,
 } from 'lucide-react';
+import QuickTourGuide, { hasSeenQuickTour } from './QuickTourGuide';
 
 
 // Page-level nav items — rendered as NavLink so middle-click /
@@ -19,6 +20,14 @@ export default function Sidebar({ onNavigate, isOpen, onClose }) {
   const { activeTrip, trips, currentUser } = useTrips();
   const { displayName, initials, signOut, isDemo } = useAuth();
   const [signingOut, setSigningOut] = useState(false);
+  // Tour state lives in Sidebar so the help icon works on every page,
+  // and a global 'tripsync:open-tour' event lets in-page buttons trigger it too.
+  const [showTour, setShowTour] = useState(() => !hasSeenQuickTour());
+  useEffect(() => {
+    const open = () => setShowTour(true);
+    window.addEventListener('tripsync:open-tour', open);
+    return () => window.removeEventListener('tripsync:open-tour', open);
+  }, []);
 
   return (
     <>
@@ -52,6 +61,14 @@ export default function Sidebar({ onNavigate, isOpen, onClose }) {
               </NavLink>
             );
           })}
+          <button
+            className="nav-item"
+            onClick={() => { setShowTour(true); onClose(); }}
+            style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none', cursor: 'pointer' }}
+          >
+            <HelpCircle className="nav-icon" />
+            Quick Tour
+          </button>
 
           {/* Trip list */}
           {trips.length > 0 && (
@@ -123,6 +140,8 @@ export default function Sidebar({ onNavigate, isOpen, onClose }) {
           )}
         </div>
       </aside>
+
+      {showTour && <QuickTourGuide onClose={() => setShowTour(false)} />}
     </>
   );
 }

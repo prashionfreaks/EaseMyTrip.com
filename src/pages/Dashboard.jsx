@@ -7,7 +7,7 @@ import TripDetail from '../components/TripDetail';
 import {
   Plus, MapPin, Calendar, Vote, Wallet,
   Clock, CheckCircle2, Trash2, Bell,
-  ArrowRight, Map, Pin, PinOff,
+  ArrowRight, Map, Pin, PinOff, HelpCircle,
 } from 'lucide-react';
 import { getTripCurrencySymbol, getDestinationCurrency } from '../lib/itinerary';
 import DestinationPicker from '../components/DestinationPicker';
@@ -700,6 +700,22 @@ export default function Dashboard() {
           )}
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginLeft: 'auto', flexShrink: 0, animation: 'dashFadeUp 0.4s ease' }}>
+          <button
+            className="dash-header-btn"
+            onClick={() => window.dispatchEvent(new CustomEvent('tripsync:open-tour'))}
+            title="Quick tour"
+            aria-label="Open quick tour"
+            style={{
+              width: 40, height: 40, borderRadius: 12,
+              border: '1.5px solid var(--border)',
+              background: 'var(--bg-secondary)',
+              cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: 'var(--text-tertiary)',
+            }}
+          >
+            <HelpCircle size={17} />
+          </button>
           <button
             className="dash-header-btn"
             onClick={() => setShowNotifications(true)}
