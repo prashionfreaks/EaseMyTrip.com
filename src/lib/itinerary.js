@@ -100,21 +100,31 @@ export async function generateItinerarySkeleton(destination, startDate, endDate)
     date: d.date || format(addDays(start, i), 'yyyy-MM-dd'),
     location: String(d.location || destination).slice(0, 120),
     theme: String(d.theme || '').slice(0, 120),
+    // The skeleton pre-assigns mustSee attractions to specific days. The
+    // fill stage then includes the day's assignment as a hard requirement,
+    // which is the only way a 7-day trip reliably surfaces every iconic
+    // spot — without this, each day independently decides "doesn't fit my
+    // theme" and the whole list quietly disappears.
+    musts: Array.isArray(d.musts)
+      ? d.musts.map(m => String(m || '').slice(0, 120)).filter(Boolean).slice(0, 4)
+      : [],
   }));
   return { skeleton, currency, numDays };
 }
 
 export async function generateItineraryDay(destination, day, opts = {}) {
   if (!isSupabaseConfigured) throw new Error('AI not configured');
-  const { date, location, theme } = day;
+  const { date, location, theme, musts = [] } = day;
   const { isFirstDay = false, isLastDay = false, currency = 'USD' } = opts;
 
-  const mustSee = await mustSeeFor(destination);
   const { data, error } = await withTimeout(
     supabase.functions.invoke('generate-itinerary', {
       body: {
         mode: 'fill',
-        destination, date, location, theme, currency, isFirstDay, isLastDay, mustSee,
+        destination, date, location, theme, currency, isFirstDay, isLastDay,
+        // Only this day's pre-assigned musts — not the whole trip's
+        // mustSee. The fill prompt treats these as required.
+        dayMusts: musts,
       },
     }),
     AI_CALL_TIMEOUT_MS,
