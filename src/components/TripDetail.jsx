@@ -59,16 +59,16 @@ function effectiveTripStatus(trip) {
 
 const PRIMARY_TABS = [
   { id: 'chat',      label: 'Chat',      icon: MessageCircle },
-  { id: 'polls',     label: 'Polls',     icon: Vote },
+  { id: 'about',     label: 'About',     icon: Globe },
   { id: 'budget',    label: 'Budget',    icon: Wallet },
   { id: 'itinerary', label: 'Itinerary', icon: Map },
 ];
 
 const MORE_TABS = [
+  { id: 'polls',     label: 'Polls',     icon: Vote },
   { id: 'calendar',  label: 'Calendar',  icon: CalendarRange },
   { id: 'routes',    label: 'Routes',    icon: Route },
   { id: 'photos',    label: 'Photos',    icon: Camera },
-  { id: 'about',     label: 'About',     icon: Globe },
   { id: 'members',   label: 'Members',   icon: Users },
   { id: 'plans',     label: 'Plans',     icon: ShieldAlert },
 ];
@@ -315,10 +315,19 @@ export default function TripDetail({ onInvite, defaultTab = 'chat' }) {
               const activeMore = MORE_TABS.find(t => t.id === activeTab);
               const Icon = activeMore ? activeMore.icon : MoreHorizontal;
               const isActive = !!activeMore;
+              // Sum badges across MORE_TABS items so e.g. an active Polls
+              // count still surfaces on the More button after Polls moved
+              // out of the primary tabs.
+              const moreBadge = MORE_TABS.reduce((sum, t) => sum + (badges[t.id] || 0), 0);
               return (
                 <button className={`trip-tab-btn ${isActive ? 'active' : ''}`} onClick={() => setMoreOpen(o => !o)}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Icon size={15} />
+                    {moreBadge > 0 && (
+                      <span style={{ position: 'absolute', top: -5, right: -7, width: 14, height: 14, background: 'linear-gradient(135deg,#722f37,#b8860b)', color: 'white', fontSize: 8, fontWeight: 800, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1.5px solid var(--bg-secondary)' }}>
+                        {moreBadge}
+                      </span>
+                    )}
                   </div>
                   <span className="tab-label">{activeMore ? activeMore.label : 'More'}</span>
                 </button>
@@ -337,6 +346,7 @@ export default function TripDetail({ onInvite, defaultTab = 'chat' }) {
                 {MORE_TABS.map(tab => {
                   const Icon = tab.icon;
                   const isActive = activeTab === tab.id;
+                  const badge = badges[tab.id];
                   return (
                     <button key={tab.id} onClick={() => { setActiveTab(tab.id); setMoreOpen(false); }}
                       style={{
@@ -348,7 +358,19 @@ export default function TripDetail({ onInvite, defaultTab = 'chat' }) {
                         fontSize: 13, fontWeight: isActive ? 700 : 500,
                         textAlign: 'left',
                       }}>
-                      <Icon size={15} /> {tab.label}
+                      <Icon size={15} />
+                      <span style={{ flex: 1 }}>{tab.label}</span>
+                      {badge > 0 && (
+                        <span style={{
+                          minWidth: 18, height: 18, padding: '0 5px',
+                          background: 'linear-gradient(135deg,#722f37,#b8860b)',
+                          color: 'white', fontSize: 10, fontWeight: 800,
+                          borderRadius: 999,
+                          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                        }}>
+                          {badge}
+                        </span>
+                      )}
                     </button>
                   );
                 })}

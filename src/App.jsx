@@ -173,7 +173,7 @@ export default function App() {
   const bottomNavItems = activeTrip
     ? [
         { id: 'dashboard', icon: LayoutDashboard, label: 'Trips' },
-        { id: 'decisions', icon: Vote, label: 'Polls', badge: activeTrip.polls?.filter(p => p.status === 'active').length || null },
+        { id: 'about', icon: Globe, label: 'About' },
         { id: 'budget', icon: Wallet, label: 'Budget' },
         { id: 'itinerary', icon: Map, label: 'Plan' },
         { id: 'chat', icon: MessageCircle, label: 'Chat' },
@@ -325,7 +325,6 @@ export default function App() {
                   {
                     label: 'Trip',
                     items: [
-                      { id: 'about',    label: 'About',    Icon: Globe },
                       { id: 'members',  label: 'Members',  Icon: Users },
                       { id: 'photos',   label: 'Photos',   Icon: Camera },
                       { id: 'calendar', label: 'Calendar', Icon: CalendarRange },
@@ -334,6 +333,7 @@ export default function App() {
                   {
                     label: 'Plan ahead',
                     items: [
+                      { id: 'decisions',   label: 'Polls',  Icon: Vote },
                       { id: 'routes',      label: 'Routes', Icon: RouteIcon },
                       { id: 'contingency', label: 'Plans',  Icon: ShieldAlert },
                     ],
