@@ -295,14 +295,14 @@ export default function About() {
 
       <div className="page-body" style={{ paddingTop: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
 
-        {/* Quick Facts */}
+        {/* Quick Facts — denser grid (140px min) so 5 facts fit on one row at md+. */}
         <div className="card about-section">
-          <div style={{ background: 'linear-gradient(135deg, #0f766e 0%, #134e4a 100%)', padding: '12px 20px 10px', borderRadius: '14px 14px 0 0', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ background: 'linear-gradient(135deg, #0f766e 0%, #134e4a 100%)', padding: '10px 18px', borderRadius: '14px 14px 0 0', display: 'flex', alignItems: 'center', gap: 8 }}>
             <Info size={14} style={{ color: 'rgba(255,255,255,0.9)' }} />
             <span style={{ fontSize: 12, fontWeight: 700, color: 'white', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Quick Facts</span>
           </div>
-          <div className="card-body">
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 14 }}>
+          <div className="card-body" style={{ padding: '14px 16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8 }}>
               {[
                 { icon: Languages, label: 'Language', value: info.quickFacts.language },
                 { icon: DollarSign, label: 'Currency', value: info.quickFacts.currency },
@@ -311,15 +311,15 @@ export default function About() {
                 { icon: MapPin, label: 'Capital / HQ', value: info.quickFacts.capital },
               ].map(({ icon: Icon, label, value }) => (
                 <div key={label} className="quick-fact-card" style={{
-                  padding: '12px 14px', borderRadius: 10,
+                  padding: '8px 10px', borderRadius: 10,
                   background: 'var(--bg-tertiary)',
                   border: '1px solid var(--border-light)',
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5 }}>
-                    <Icon size={13} className="qf-icon" style={{ color: 'var(--brand)' }} />
-                    <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 2 }}>
+                    <Icon size={11} className="qf-icon" style={{ color: 'var(--brand)' }} />
+                    <span style={{ fontSize: 9.5, fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</span>
                   </div>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.4 }}>{value}</p>
+                  <p style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.3 }}>{value}</p>
                 </div>
               ))}
             </div>
@@ -328,11 +328,11 @@ export default function About() {
 
         {/* Best Time to Visit */}
         <div className="card about-section">
-          <div style={{ background: 'linear-gradient(135deg, #0d9488 0%, #115e59 100%)', padding: '12px 20px 10px', borderRadius: '14px 14px 0 0', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ background: 'linear-gradient(135deg, #0d9488 0%, #115e59 100%)', padding: '10px 18px', borderRadius: '14px 14px 0 0', display: 'flex', alignItems: 'center', gap: 8 }}>
             <Clock size={14} style={{ color: 'rgba(255,255,255,0.9)' }} />
             <span style={{ fontSize: 12, fontWeight: 700, color: 'white', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Best Time to Visit</span>
           </div>
-          <div className="card-body" style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
+          <div className="card-body" style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{
               flexShrink: 0, padding: '8px 16px', borderRadius: 10,
               background: 'var(--success-light)', border: '1px solid var(--success)',
@@ -351,13 +351,20 @@ export default function About() {
           onSave={(stay) => setTripStay(activeTrip.id, stay)}
         />
 
-        {/* Top Attractions */}
+        {/* Top Attractions — 2-col grid; description line-clamped to 3 lines so
+            cards stay equal-height (Common Region) and the eye scans names first
+            (Pareto). Whole card is the tap target — no inline CTA (Fitts + Hick). */}
         <div className="card about-section">
-          <div style={{ background: 'linear-gradient(135deg, #722f37 0%, #4a1e23 100%)', padding: '12px 20px 10px', borderRadius: '14px 14px 0 0', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ background: 'linear-gradient(135deg, #722f37 0%, #4a1e23 100%)', padding: '10px 18px', borderRadius: '14px 14px 0 0', display: 'flex', alignItems: 'center', gap: 8 }}>
             <Star size={14} style={{ color: 'rgba(255,255,255,0.9)' }} />
             <span style={{ fontSize: 12, fontWeight: 700, color: 'white', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Top Attractions</span>
           </div>
-          <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div className="card-body" style={{
+            padding: '14px 16px',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+            gap: 10,
+          }}>
             {info.attractions.map((attr, i) => (
               <a
                 key={attr.name}
@@ -365,34 +372,42 @@ export default function About() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="attr-card"
+                title={attr.desc}
                 style={{
-                  display: 'flex', gap: 14, alignItems: 'flex-start',
-                  padding: '14px 16px', borderRadius: 12,
+                  display: 'grid',
+                  gridTemplateColumns: '26px 1fr',
+                  columnGap: 10, rowGap: 4,
+                  padding: '10px 12px', borderRadius: 12,
                   background: 'var(--bg-tertiary)',
                   border: '1px solid var(--border-light)',
                   textDecoration: 'none', color: 'inherit',
+                  alignItems: 'start',
                 }}
               >
                 <div className="attr-num" style={{
-                  flexShrink: 0, width: 30, height: 30, borderRadius: 8,
+                  gridRow: '1 / span 2',
+                  width: 26, height: 26, borderRadius: 8,
                   background: 'linear-gradient(135deg, var(--purple), #7c3aed)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: 'white', fontSize: 12, fontWeight: 800,
+                  color: 'white', fontSize: 11, fontWeight: 800,
                 }}>
                   {i + 1}
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                    <h4 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{attr.name}</h4>
-                    <span className="attr-maps" style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 3,
-                      fontSize: 10.5, fontWeight: 700, color: 'var(--purple)',
-                    }}>
-                      <ExternalLink size={10} /> Maps
-                    </span>
-                  </div>
-                  <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{attr.desc}</p>
-                </div>
+                <h4 style={{
+                  fontSize: 13.5, fontWeight: 700, color: 'var(--text-primary)',
+                  lineHeight: 1.25,
+                  display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                }}>
+                  {attr.name}
+                </h4>
+                <p style={{
+                  fontSize: 11.5, color: 'var(--text-secondary)', lineHeight: 1.4,
+                  display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                }}>
+                  {attr.desc}
+                </p>
               </a>
             ))}
           </div>
@@ -413,7 +428,16 @@ export default function About() {
                 <Sparkles size={9} /> via Google Reviews
               </span>
             </div>
-            <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {/* 2-col grid; price is corner-pinned, rating/name lead per Pareto.
+                Inline "View on Maps" CTA dropped — whole card is the link
+                (Fitts), and `title=mustTry` exposes the secondary fact on hover
+                without taking screen space (Hick's). */}
+            <div className="card-body" style={{
+              padding: '14px 16px',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+              gap: 10,
+            }}>
               {info.eateries.map(e => (
                 <a
                   key={e.name}
@@ -421,64 +445,67 @@ export default function About() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="eatery-card"
+                  title={`Must try: ${e.mustTry}`}
                   style={{
-                    display: 'flex', gap: 12, alignItems: 'flex-start',
-                    padding: '14px 16px', borderRadius: 12,
+                    position: 'relative',
+                    display: 'flex', flexDirection: 'column', gap: 5,
+                    padding: '12px 12px 10px', borderRadius: 12,
                     background: 'var(--bg-tertiary)',
                     border: '1px solid var(--border-light)',
                     textDecoration: 'none', color: 'inherit',
                   }}
                 >
-                  <div style={{
-                    flexShrink: 0, width: 40, height: 40, borderRadius: 10,
-                    background: 'linear-gradient(135deg, #fef3c7, #fde68a)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 20,
-                    border: '1px solid rgba(245,158,11,0.3)',
+                  <span style={{
+                    position: 'absolute', top: 8, right: 8,
+                    fontSize: 9.5, fontWeight: 800, color: '#b45309',
+                    background: '#fef3c7', padding: '2px 7px', borderRadius: 99,
+                    border: '1px solid #fde68a',
                   }}>
-                    🍴
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3, flexWrap: 'wrap' }}>
-                      <h4 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>
-                        {e.name}
-                      </h4>
-                      <span style={{
-                        fontSize: 10.5, fontWeight: 700, color: '#b45309',
-                        background: '#fef3c7', padding: '2px 8px', borderRadius: 99,
-                        border: '1px solid #fde68a',
-                      }}>
-                        {e.price}
-                      </span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
-                      <RatingStars rating={e.rating} />
-                      <span style={{ fontSize: 12, fontWeight: 700, color: '#92400e' }}>
-                        {e.rating.toFixed(1)}
-                      </span>
-                      <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
-                        ({e.reviews.toLocaleString()} reviews)
-                      </span>
-                      <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>·</span>
-                      <span style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>
-                        {e.type}
-                      </span>
-                    </div>
-                    <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5, display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
-                      <MapPin size={10} style={{ flexShrink: 0 }} /> {e.area}
-                      <span style={{ color: 'var(--text-tertiary)' }}>·</span>
-                      <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
-                        Must try: {e.mustTry}
-                      </span>
-                    </p>
-                  </div>
-                  <span className="eatery-cta" style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 3,
-                    fontSize: 11, fontWeight: 700, color: '#d97706',
-                    whiteSpace: 'nowrap', flexShrink: 0, alignSelf: 'center',
-                  }}>
-                    <ExternalLink size={11} /> View on Maps
+                    {e.price}
                   </span>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingRight: 40 }}>
+                    <div style={{
+                      flexShrink: 0, width: 28, height: 28, borderRadius: 8,
+                      background: 'linear-gradient(135deg, #fef3c7, #fde68a)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 15,
+                      border: '1px solid rgba(245,158,11,0.3)',
+                    }}>🍴</div>
+                    <h4 style={{
+                      fontSize: 13, fontWeight: 700, color: 'var(--text-primary)',
+                      lineHeight: 1.2, flex: 1, minWidth: 0,
+                      display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                    }}>
+                      {e.name}
+                    </h4>
+                  </div>
+
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11.5, fontWeight: 700, color: '#92400e' }}>
+                    <RatingStars rating={e.rating} />
+                    {e.rating.toFixed(1)}
+                    <span style={{ fontWeight: 500, color: 'var(--text-tertiary)', fontSize: 10.5 }}>
+                      ({e.reviews.toLocaleString()})
+                    </span>
+                  </div>
+
+                  <p style={{
+                    fontSize: 10.5, color: 'var(--text-secondary)', lineHeight: 1.35,
+                    fontWeight: 500,
+                    display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                  }}>
+                    {e.type}
+                  </p>
+
+                  <p style={{
+                    fontSize: 10.5, color: 'var(--text-tertiary)',
+                    display: 'inline-flex', alignItems: 'center', gap: 3,
+                    overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis',
+                  }}>
+                    <MapPin size={9} style={{ flexShrink: 0 }} /> {e.area}
+                  </p>
                 </a>
               ))}
             </div>
