@@ -3,7 +3,7 @@ import { useTrips } from '../context/TripContext';
 import Modal from '../components/Modal';
 import {
   Plus, Map, MapPin, Plane, Hotel, Camera, UtensilsCrossed,
-  ChevronDown, ChevronUp, DollarSign, StickyNote, Sparkles,
+  ChevronDown, ChevronUp, StickyNote, Sparkles,
 } from 'lucide-react';
 import { format, parseISO } from '../lib/date';
 import {
@@ -264,7 +264,7 @@ if (!activeTrip) {
                           {day._filling
                             ? <> · <span style={{ color: 'var(--brand)', fontWeight: 600 }}>generating activities…</span></>
                             : <> · {(day.items || []).length} activities</>}
-                          {dayTotal > 0 && <> · <DollarSign size={11} />{sym}{dayTotal.toLocaleString()}</>}
+                          {dayTotal > 0 && <> · {sym}{dayTotal.toLocaleString()}</>}
                         </p>
                       </div>
                     </div>
