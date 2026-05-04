@@ -698,7 +698,7 @@ function StayCard({ trip, stays, onSave }) {
     <div className="card about-section">
       <div style={{
         background: 'linear-gradient(135deg, #be185d 0%, #db2777 100%)',
-        padding: '12px 20px 10px', borderRadius: '14px 14px 0 0',
+        padding: '10px 18px', borderRadius: '14px 14px 0 0',
         display: 'flex', alignItems: 'center', gap: 8,
       }}>
         <BedDouble size={14} style={{ color: 'rgba(255,255,255,0.95)' }} />
@@ -716,48 +716,94 @@ function StayCard({ trip, stays, onSave }) {
         )}
       </div>
 
-      <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '14px 16px' }}>
+        {/* Confirmed state — render directly into the card body (no inner
+            tile-with-its-own-border) so we avoid the "card inside a card"
+            look. UX laws: Common Region (one region, not nested), Pareto
+            (name leads, area is secondary, notes tertiary), Fitts (icon
+            actions in the corner are tappable but out of the reading path). */}
         {stay?.confirmed && !editing && (
           <div style={{
-            display: 'flex', gap: 12, alignItems: 'flex-start',
-            padding: '14px 16px', borderRadius: 12,
-            background: 'linear-gradient(135deg, #fff1f2, #fef2f2)',
-            border: '1px solid #fbcfe8',
+            position: 'relative',
+            display: 'grid',
+            gridTemplateColumns: '44px 1fr',
+            columnGap: 12, rowGap: 4,
+            alignItems: 'start',
           }}>
             <div style={{
-              flexShrink: 0, width: 40, height: 40, borderRadius: 10,
-              background: 'rgba(190,24,93,0.12)',
+              gridRow: '1 / span 3',
+              width: 44, height: 44, borderRadius: 12,
+              background: 'linear-gradient(135deg, #fce7f3, #fbcfe8)',
+              border: '1px solid rgba(190,24,93,0.18)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
-              <BedDouble size={18} style={{ color: '#be185d' }} />
+              <BedDouble size={20} style={{ color: '#be185d' }} />
             </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <h4 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>
-                {stay.name}
-              </h4>
-              {stay.area && (
-                <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2, display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <MapPin size={11} /> {stay.area}
-                </p>
-              )}
-              {stay.notes && (
-                <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 6, lineHeight: 1.5 }}>
-                  {stay.notes}
-                </p>
-              )}
-            </div>
-            <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-              <button onClick={() => startEdit()} className="btn btn-sm" style={{
-                background: 'transparent', color: '#be185d',
-                border: '1px solid #f9a8d4', fontSize: 11, padding: '4px 10px',
+
+            <h4 style={{
+              fontSize: 15, fontWeight: 700, color: 'var(--text-primary)',
+              lineHeight: 1.25,
+              paddingRight: 76, // reserve space for the action icons (top-right)
+            }}>
+              {stay.name}
+            </h4>
+
+            {stay.area ? (
+              <p style={{
+                fontSize: 12, color: 'var(--text-secondary)',
+                display: 'inline-flex', alignItems: 'center', gap: 4,
+                lineHeight: 1.3,
               }}>
-                <Pencil size={11} /> Edit
+                <MapPin size={11} /> {stay.area}
+              </p>
+            ) : <span />}
+
+            {stay.notes ? (
+              <p style={{
+                fontSize: 12.5, color: 'var(--text-secondary)',
+                lineHeight: 1.5, marginTop: 2,
+              }}>
+                {stay.notes}
+              </p>
+            ) : <span />}
+
+            <div style={{
+              position: 'absolute', top: 0, right: 0,
+              display: 'inline-flex', gap: 4,
+            }}>
+              <button
+                onClick={() => startEdit()}
+                title="Edit stay"
+                aria-label="Edit stay"
+                style={{
+                  width: 32, height: 32, borderRadius: 8,
+                  background: 'transparent',
+                  border: '1px solid #f9a8d4',
+                  color: '#be185d', cursor: 'pointer',
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  transition: 'background 0.15s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = '#fce7f3'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+              >
+                <Pencil size={13} />
               </button>
-              <button onClick={clearStay} className="btn btn-sm" style={{
-                background: 'transparent', color: 'var(--text-secondary)',
-                border: '1px solid var(--border)', fontSize: 11, padding: '4px 10px',
-              }}>
-                <X size={11} /> Clear
+              <button
+                onClick={clearStay}
+                title="Mark as not confirmed"
+                aria-label="Clear stay"
+                style={{
+                  width: 32, height: 32, borderRadius: 8,
+                  background: 'transparent',
+                  border: '1px solid var(--border)',
+                  color: 'var(--text-tertiary)', cursor: 'pointer',
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  transition: 'background 0.15s, color 0.15s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-tertiary)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-tertiary)'; }}
+              >
+                <X size={14} />
               </button>
             </div>
           </div>
