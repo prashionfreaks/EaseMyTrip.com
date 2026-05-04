@@ -44,7 +44,25 @@ export function AuthProvider({ children }) {
       if (event === 'USER_UPDATED') setIsRecovery(false);
     });
 
-    return () => subscription.unsubscribe();
+    // BFCache (browser back-forward cache) preserves React state along
+    // with the page. If the user was on LandingPage pre-auth, signed in,
+    // navigated, then pressed back far enough to land on the pre-auth
+    // history entry, BFCache would restore user=null and re-render the
+    // LandingPage even though the session is still valid in sessionStorage.
+    // On every pageshow with persisted=true, re-read the session so the
+    // authenticated tree wins.
+    function handlePageShow(e) {
+      if (!e.persisted) return;
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        setUser(session?.user ?? null);
+      }).catch(() => { /* keep current state */ });
+    }
+    window.addEventListener('pageshow', handlePageShow);
+
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener('pageshow', handlePageShow);
+    };
   }, []);
 
   async function signIn(email, password) {
