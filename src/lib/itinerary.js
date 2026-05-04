@@ -61,7 +61,7 @@ export async function generateItinerary(destination, startDate, endDate, opts = 
   const stay = opts.stay && opts.stay.confirmed ? opts.stay : null;
   if (isSupabaseConfigured) {
     try {
-      const days = await generateWithClaude(destination, startDate, endDate, numDays, start, stay);
+      const days = await generateWithClaude(destination, startDate, endDate, numDays, start, stay, currency);
       return { days: applyStay(days, stay), currency };
     }
     catch (err) { console.warn('Itinerary AI failed, using built-in:', err.message); }
@@ -195,13 +195,15 @@ function applyStay(days, stay) {
   return [day0, ...days.slice(1)];
 }
 
-async function generateWithClaude(destination, startDate, endDate, numDays, startDateObj, stay) {
+async function generateWithClaude(destination, startDate, endDate, numDays, startDateObj, stay, currency = 'USD') {
   // Legacy single-shot path produces the whole itinerary in one call, so it
   // can take longer than skeleton/fill — give it 2× the per-call budget.
+  // Currency is forwarded so the prompt can scale costs correctly (an INR
+  // trip falling back here used to return USD-shaped numbers).
   const { data, error } = await withTimeout(
     supabase.functions.invoke('generate-itinerary', {
       body: {
-        destination, startDate, endDate, numDays,
+        destination, startDate, endDate, numDays, currency,
         // Pass the confirmed stay so the model can plan around its area.
         stay: stay ? { name: stay.name, area: stay.area, notes: stay.notes } : null,
       },

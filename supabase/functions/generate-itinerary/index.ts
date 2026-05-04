@@ -3,6 +3,22 @@ import { corsHeadersFor, requireUser } from '../_shared/cors.ts';
 
 const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY');
 
+// Currency-appropriate cost anchors. Without these, the model anchors
+// on the structure example's `cost` and produces USD-scale numbers
+// (e.g. "20" for an activity in Puri) even when the prompt asks for
+// INR. The sample is the value the structure example shows; the ranges
+// list orients per-category typical mid-range traveler spend.
+const COST_GUIDE: Record<string, { sample: number; ranges: string; perPersonHint: string }> = {
+  INR: { sample: 1500, ranges: 'snack 100-300, meal 400-1500/person, activity 500-3000, accommodation 2000-8000/night, intercity transport 500-10000', perPersonHint: '~₹500' },
+  USD: { sample: 20,   ranges: 'snack 3-8, meal 10-40/person, activity 15-60, accommodation 80-250/night, intercity transport 20-200',                  perPersonHint: '~$12' },
+  EUR: { sample: 25,   ranges: 'snack 3-8, meal 12-40/person, activity 15-50, accommodation 90-220/night, intercity transport 25-200',                 perPersonHint: '~€12' },
+  GBP: { sample: 22,   ranges: 'snack 3-7, meal 12-35/person, activity 15-50, accommodation 90-220/night, intercity transport 25-180',                 perPersonHint: '~£10' },
+  JPY: { sample: 2500, ranges: 'snack 300-800, meal 1200-4000/person, activity 1500-6000, accommodation 8000-25000/night, intercity transport 3000-20000', perPersonHint: '~¥1500' },
+  SGD: { sample: 30,   ranges: 'snack 4-10, meal 15-50/person, activity 20-70, accommodation 140-300/night, intercity transport 30-200',               perPersonHint: '~S$12' },
+  AED: { sample: 100,  ranges: 'snack 15-40, meal 50-180/person, activity 80-300, accommodation 400-1200/night, intercity transport 100-600',          perPersonHint: '~AED 50' },
+};
+const guideFor = (currency: string) => COST_GUIDE[currency.toUpperCase()] ?? COST_GUIDE.USD;
+
 // Three modes:
 //   skeleton — quick day-level outline (date + neighborhood + theme), small
 //              token budget. Used to render the day cards immediately.
@@ -86,22 +102,25 @@ serve(async (req) => {
     const safeTheme = theme.replace(/[^\p{L}\p{N}\s,.'\-]/gu, '').slice(0, 120);
     const arrivalNote = isFirstDay ? ' This is the FIRST day of the trip — start with arrival/transport and check-in items.' : '';
     const departureNote = isLastDay ? ' This is the LAST day of the trip — include a departure/transport item near the end.' : '';
-    const symbol = currency === 'INR' ? '₹500' : '$12';
+    const guide = guideFor(currency);
     const dayMustsLine = dayMusts.length
       ? ` These iconic ${safeDest} spots are pre-assigned to this day and MUST appear as items — use the proper name in the title for each: ${dayMusts.join(', ')}. Plan around them; total items 4-6 (scale up to 6 if needed to fit all of them).`
       : '';
-    prompt = `For day ${date} in ${safeLoc}${safeTheme ? ` (theme: ${safeTheme})` : ''} of a trip to ${safeDest}, plan 4-6 timed items.${arrivalNote}${departureNote}${dayMustsLine} Return ONLY a JSON array — no markdown, no commentary. Structure: [{"time":"09:00","title":"...","type":"activity","duration":120,"notes":"tip","cost":20}]. Types: activity|transport|accommodation|food. time is 24h HH:MM. Realistic ${currency} costs (numeric, no currency symbol). For food items include the eatery / restaurant name in the title (e.g. "Lunch at Café XYZ") and add a per-person rate in notes (e.g. "~${symbol} per person · try the signature dish").`;
+    prompt = `For day ${date} in ${safeLoc}${safeTheme ? ` (theme: ${safeTheme})` : ''} of a trip to ${safeDest}, plan 4-6 timed items.${arrivalNote}${departureNote}${dayMustsLine} Return ONLY a JSON array — no markdown, no commentary. Structure: [{"time":"09:00","title":"...","type":"activity","duration":120,"notes":"tip","cost":${guide.sample}}]. Types: activity|transport|accommodation|food. time is 24h HH:MM. Realistic ${currency} costs (numeric, no currency symbol) — typical ranges: ${guide.ranges}. Use these scales, not USD-equivalent numbers. For food items include the eatery / restaurant name in the title (e.g. "Lunch at Café XYZ") and add a per-person rate in notes (e.g. "${guide.perPersonHint} per person · try the signature dish").`;
     maxTokens = 1024;
   } else {
-    // Legacy 'full' mode — keep prompt identical to original so existing
-    // callers don't see any behavior change.
+    // Legacy 'full' mode — single-shot fallback. Now respects body.currency
+    // (clients always pass it; defaults to USD if missing) so an INR trip
+    // falling back from the staged path doesn't get dollar amounts.
     const startDate = String(body?.startDate ?? '').slice(0, 10);
     const endDate = String(body?.endDate ?? '').slice(0, 10);
     const numDays = Math.max(1, Math.min(30, Number(body?.numDays) || 0));
+    const fullCurrency = String(body?.currency ?? 'USD').toUpperCase().slice(0, 3);
     if (!dateRe.test(startDate) || !dateRe.test(endDate) || !numDays) {
       return json({ error: 'Invalid parameters' }, 400, cors);
     }
-    prompt = `Create a day-by-day travel itinerary for ${safeDest} from ${startDate} to ${endDate} (${numDays} days). Return ONLY a valid JSON array — no markdown. Structure: [{"date":"YYYY-MM-DD","location":"area","items":[{"time":"09:00","title":"...","type":"activity","duration":120,"notes":"tip","cost":20}]}]. Types: activity|transport|accommodation|food. 4–6 items/day. Realistic USD costs. time is 24h HH:MM. For food type items, include the eatery/restaurant name in the title (e.g. "Lunch at Café XYZ") and add per-person rate in notes (e.g. "~$12 per person · try the signature dish").`;
+    const fullGuide = guideFor(fullCurrency);
+    prompt = `Create a day-by-day travel itinerary for ${safeDest} from ${startDate} to ${endDate} (${numDays} days). Return ONLY a valid JSON array — no markdown. Structure: [{"date":"YYYY-MM-DD","location":"area","items":[{"time":"09:00","title":"...","type":"activity","duration":120,"notes":"tip","cost":${fullGuide.sample}}]}]. Types: activity|transport|accommodation|food. 4–6 items/day. Realistic ${fullCurrency} costs (numeric, no currency symbol) — typical ranges: ${fullGuide.ranges}. time is 24h HH:MM. For food type items, include the eatery/restaurant name in the title (e.g. "Lunch at Café XYZ") and add per-person rate in notes (e.g. "${fullGuide.perPersonHint} per person · try the signature dish").`;
     maxTokens = 4096;
   }
 
