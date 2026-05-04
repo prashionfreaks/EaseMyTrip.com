@@ -12,6 +12,55 @@ function mapsUrl(query) {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
 }
 
+// 12-month strip helpers for the Best Time card. Parses period strings
+// like "October–February", "Jun–Aug & Dec–Mar", "Sep–Nov & Mar–May",
+// even with parenthesized notes ("(Midnight Sun)"). Returns a Set of
+// 0-indexed month numbers that fall in any of the recommended ranges.
+const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const MONTHS_FULL = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+function monthIndex(s) {
+  const t = String(s || '').toLowerCase().trim();
+  if (!t) return -1;
+  for (let i = 0; i < MONTHS_FULL.length; i++) {
+    if (t.startsWith(MONTHS_FULL[i].toLowerCase())) return i;
+  }
+  for (let i = 0; i < MONTHS_SHORT.length; i++) {
+    if (t.startsWith(MONTHS_SHORT[i].toLowerCase())) return i;
+  }
+  return -1;
+}
+
+function parseBestMonths(period) {
+  const set = new Set();
+  if (!period) return set;
+  // Drop parenthesized hints like "(Midnight Sun)"; treat / and & as
+  // separate-range delimiters.
+  const cleaned = String(period).replace(/\([^)]*\)/g, ' ').replace(/[/&]/g, '|');
+  const ranges = cleaned.split('|').map(r => r.trim()).filter(Boolean);
+  for (const range of ranges) {
+    const parts = range.split(/[–\-—]|\bto\b/i).map(p => p.trim()).filter(Boolean);
+    if (parts.length === 1) {
+      const i = monthIndex(parts[0]);
+      if (i >= 0) set.add(i);
+    } else if (parts.length >= 2) {
+      const a = monthIndex(parts[0]);
+      const b = monthIndex(parts[parts.length - 1]);
+      if (a >= 0 && b >= 0) {
+        // Walk inclusive, wrapping the year boundary (Oct → Feb covers
+        // Oct, Nov, Dec, Jan, Feb).
+        let i = a;
+        for (let safety = 0; safety < 12; safety++) {
+          set.add(i);
+          if (i === b) break;
+          i = (i + 1) % 12;
+        }
+      }
+    }
+  }
+  return set;
+}
+
 function RatingStars({ rating }) {
   const full = Math.floor(rating);
   const half = rating - full >= 0.3 && rating - full < 0.8;
@@ -326,23 +375,74 @@ export default function About() {
           </div>
         </div>
 
-        {/* Best Time to Visit */}
-        <div className="card about-section">
-          <div style={{ background: 'linear-gradient(135deg, #0d9488 0%, #115e59 100%)', padding: '10px 18px', borderRadius: '14px 14px 0 0', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Clock size={14} style={{ color: 'rgba(255,255,255,0.9)' }} />
-            <span style={{ fontSize: 12, fontWeight: 700, color: 'white', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Best Time to Visit</span>
-          </div>
-          <div className="card-body" style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{
-              flexShrink: 0, padding: '8px 16px', borderRadius: 10,
-              background: 'var(--success-light)', border: '1px solid var(--success)',
-              textAlign: 'center',
-            }}>
-              <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--success)', whiteSpace: 'nowrap' }}>{info.bestTime.period}</span>
+        {/* Best Time to Visit — UX laws applied:
+            Pareto: the period chip is the hero answer; reason is secondary.
+            Doherty Threshold + Jakob's Law: the 12-month strip lets the eye
+            recognize the answer in <100ms (same pattern as booking apps).
+            Aesthetic-Usability: warm green for "go" months, muted for off-season.
+            Common Region: bordered card binds the period, reason, and strip. */}
+        {(() => {
+          const bestMonths = parseBestMonths(info.bestTime.period);
+          const todayMonth = new Date().getMonth();
+          return (
+            <div className="card about-section">
+              <div style={{ background: 'linear-gradient(135deg, #0d9488 0%, #115e59 100%)', padding: '10px 18px', borderRadius: '14px 14px 0 0', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Clock size={14} style={{ color: 'rgba(255,255,255,0.9)' }} />
+                <span style={{ fontSize: 12, fontWeight: 700, color: 'white', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Best Time to Visit</span>
+              </div>
+              <div className="card-body" style={{ padding: '14px 16px' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 12 }}>
+                  <div style={{
+                    flexShrink: 0, padding: '6px 14px', borderRadius: 10,
+                    background: 'var(--success-light)', border: '1px solid var(--success)',
+                    textAlign: 'center',
+                  }}>
+                    <span style={{ fontSize: 13.5, fontWeight: 800, color: 'var(--success)', whiteSpace: 'nowrap' }}>
+                      {info.bestTime.period}
+                    </span>
+                  </div>
+                  <p style={{ fontSize: 12.5, color: 'var(--text-secondary)', lineHeight: 1.55, flex: 1, margin: 0 }}>
+                    {info.bestTime.reason}
+                  </p>
+                </div>
+
+                {/* 12-month strip. Best months light up green; the current
+                    month gets a subtle ring so the user can place themselves
+                    on the calendar at a glance. */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(12, minmax(0, 1fr))',
+                  gap: 3,
+                }}>
+                  {MONTHS_SHORT.map((m, i) => {
+                    const isBest = bestMonths.has(i);
+                    const isToday = i === todayMonth;
+                    return (
+                      <div
+                        key={m}
+                        title={MONTHS_FULL[i] + (isBest ? ' — recommended' : '') + (isToday ? ' (current month)' : '')}
+                        style={{
+                          padding: '5px 0',
+                          textAlign: 'center',
+                          borderRadius: 6,
+                          background: isBest ? 'var(--success-light)' : 'var(--bg-tertiary)',
+                          color: isBest ? 'var(--success)' : 'var(--text-tertiary)',
+                          fontSize: 10.5,
+                          fontWeight: isBest ? 800 : 500,
+                          border: isBest ? '1px solid var(--success)' : '1px solid var(--border-light)',
+                          boxShadow: isToday ? '0 0 0 2px rgba(13, 148, 136, 0.35)' : 'none',
+                          letterSpacing: '0.02em',
+                        }}
+                      >
+                        {m}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
-            <p style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.65 }}>{info.bestTime.reason}</p>
-          </div>
-        </div>
+          );
+        })()}
 
         {/* Where you'll stay */}
         <StayCard
