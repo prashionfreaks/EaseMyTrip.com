@@ -659,7 +659,16 @@ export function TripProvider({ children }) {
       ...trip,
       paidSettlements: [
         ...(trip.paidSettlements || []),
-        { from, to, amount: Number(amount) || 0, paidAt: new Date().toISOString() },
+        {
+          from, to,
+          amount: Number(amount) || 0,
+          paidAt: new Date().toISOString(),
+          // Stamp the expense set at payment time. Any later add/edit/
+          // delete invalidates this snapshot, so a paid record from before
+          // the change can't auto-satisfy a freshly-recomputed settlement.
+          // See lib/settlement.js for the validation rule.
+          expenseSnapshot: (trip.expenses || []).map(e => e.id).sort(),
+        },
       ],
       // The creditor's reminder to the debtor is now obsolete; drop it.
       dueReminders: (trip.dueReminders || []).filter(r =>

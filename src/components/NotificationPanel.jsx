@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect } from 'react';
 import { useTrips } from '../context/TripContext';
 import { toast } from '../lib/toast';
 import { format, parseISO } from '../lib/date';
+import { isSettlementPaid } from '../lib/settlement';
 import { X, ArrowRight, CheckCircle2, Bell, BellRing, Send, Check, AlertCircle } from 'lucide-react';
 
 /** Greedy settlement algorithm — same logic as Budget.jsx */
@@ -87,11 +88,9 @@ export default function NotificationPanel({ onClose }) {
     trips.forEach(trip => {
       if (!trip.expenses?.length || !trip.members?.length) return;
       const settlements = computeSettlements(trip.expenses, trip.members);
-      const paid = new Set((trip.paidSettlements || []).map(p => `${p.from}→${p.to}`));
 
       settlements.forEach(s => {
-        const key = `${s.from}→${s.to}`;
-        if (paid.has(key)) return;
+        if (isSettlementPaid(trip, s)) return;
 
         if (s.from === uid) {
           owedByMe.push({ ...s, trip });

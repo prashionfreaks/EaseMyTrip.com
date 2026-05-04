@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { format, parseISO } from '../lib/date';
 import { getTripCurrencySymbol } from '../lib/itinerary';
+import { isSettlementPaid } from '../lib/settlement';
 
 const initial = '?';
 const safeInitial = (s) => (s && s.length ? s[0] : initial);
@@ -525,14 +526,11 @@ export default function Budget() {
                 settlements.map((s, i) => {
                   const from = getMemberById(activeTrip, s.from);
                   const to = getMemberById(activeTrip, s.to);
-                  // Sum of payments recorded for this exact (from→to) pair.
-                  // Older entries with no `amount` (pre-fix) are counted as
-                  // covering whatever debt existed when they were marked, so
-                  // we treat them as fully settling the pair.
-                  const payments = (activeTrip.paidSettlements || []).filter(p => p.from === s.from && p.to === s.to);
-                  const hasLegacyPayment = payments.some(p => p.amount == null);
-                  const paidAmount = payments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
-                  const isPaid = hasLegacyPayment || paidAmount + 0.01 >= s.amount;
+                  // Snapshot-based: a payment counts only if its expense
+                  // snapshot still matches the current expense set. Adding
+                  // an expense invalidates older paid records for the same
+                  // direction so they don't auto-satisfy a fresh settlement.
+                  const isPaid = isSettlementPaid(activeTrip, s);
                   return (
                     <div key={i} style={{
                       display: 'flex', alignItems: 'center', gap: 12,

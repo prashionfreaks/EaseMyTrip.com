@@ -10,6 +10,7 @@ import {
   ArrowRight, Map, Pin, PinOff, HelpCircle,
 } from 'lucide-react';
 import { getTripCurrencySymbol, getDestinationCurrency } from '../lib/itinerary';
+import { isSettlementPaid } from '../lib/settlement';
 import DestinationPicker from '../components/DestinationPicker';
 import { getDestinationImage } from '../lib/destinationImages';
 import { TripCardSkeleton, SkeletonStyles } from '../components/Skeleton';
@@ -42,7 +43,6 @@ function countOutstandingDues(trips, currentUserId) {
   let count = 0;
   trips.forEach(trip => {
     if (!trip.expenses?.length || !trip.members?.length) return;
-    const paid = new Set((trip.paidSettlements || []).map(p => `${p.from}→${p.to}`));
     const bal = {};
     (trip.members || []).forEach(m => { bal[m.id] = 0; });
     trip.expenses.forEach(exp => {
@@ -62,8 +62,9 @@ function countOutstandingDues(trips, currentUserId) {
     while (i < debtors.length && j < creditors.length) {
       const transfer = Math.min(debtors[i].amount, creditors[j].amount);
       if (transfer > 0.01) {
-        const key = `${debtors[i].uid}→${creditors[j].uid}`;
-        if (!paid.has(key) && (debtors[i].uid === currentUserId || creditors[j].uid === currentUserId)) count++;
+        const settlement = { from: debtors[i].uid, to: creditors[j].uid, amount: transfer };
+        const involvesUser = settlement.from === currentUserId || settlement.to === currentUserId;
+        if (involvesUser && !isSettlementPaid(trip, settlement)) count++;
       }
       debtors[i].amount -= transfer;
       creditors[j].amount -= transfer;
