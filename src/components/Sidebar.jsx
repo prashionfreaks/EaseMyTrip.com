@@ -39,7 +39,7 @@ export default function Sidebar({ onNavigate, isOpen, onClose }) {
             <div className="logo-icon" style={{ background: 'linear-gradient(135deg, #722f37, #b8860b)' }}>
               <Compass size={17} />
             </div>
-            TripSync
+            LetsWander
           </div>
         </div>
 

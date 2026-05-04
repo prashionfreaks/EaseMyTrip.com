@@ -19,7 +19,7 @@ const STEPS = [
   {
     icon: Sparkles,
     emoji: '👋',
-    title: 'Welcome to TripSync',
+    title: 'Welcome to LetsWander',
     body: 'Your slambook for group travel. Plan trips, split costs, and decide together — all in one cozy place.',
     accent: '#722f37',
   },
