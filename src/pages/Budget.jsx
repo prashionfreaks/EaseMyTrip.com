@@ -42,14 +42,20 @@ export default function Budget() {
   // AFTER all hooks. Otherwise a transition (sign-out, trip deletion via
   // realtime, etc.) flips the hook count and React throws / blanks the UI.
   // ──────────────────────────────────────────────────────────────────────
-  // parseTrip() at the ingest boundary guarantees budget.total/spent are
-  // numbers and expenses[].amount is a number — see TripContext.parseTrip.
-  // We can read these directly without per-call coercion.
-  const budget = activeTrip?.budget || { total: 0, spent: 0, currency: 'INR' };
-  const expenses = activeTrip?.expenses || [];
-  const members = activeTrip?.members || [];
+  // parseTrip() at the ingest boundary normalises these — but a blank
+  // page from an undefined drop-through has happened twice now (Itinerary,
+  // here previously), so we keep belt-and-suspenders defensive reads at
+  // the render boundary too.
+  const rawBudget = activeTrip?.budget || {};
+  const budget = {
+    total: Number(rawBudget.total) || 0,
+    spent: Number(rawBudget.spent) || 0,
+    currency: rawBudget.currency || 'INR',
+  };
+  const expenses = Array.isArray(activeTrip?.expenses) ? activeTrip.expenses : [];
+  const members = Array.isArray(activeTrip?.members) ? activeTrip.members : [];
   const sym = getTripCurrencySymbol(activeTrip);
-  const totalSpent = expenses.reduce((sum, e) => sum + e.amount, 0);
+  const totalSpent = expenses.reduce((sum, e) => sum + (Number(e?.amount) || 0), 0);
   const remaining = budget.total - totalSpent;
   const pct = budget.total > 0 ? (totalSpent / budget.total) * 100 : 0;
 

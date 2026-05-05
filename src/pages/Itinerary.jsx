@@ -227,7 +227,12 @@ if (!activeTrip) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {itinerary.map((day, dayIdx) => {
               const isExpanded = !collapsedDays.has(day.id);
-              const dayTotal = day.items.reduce((sum, it) => sum + it.cost, 0);
+              // Defensive: parseTrip normalises items to an array on every
+              // ingest path, but the cost of being wrong here is a blank
+              // screen (no error boundary), so we keep the `|| []` guard at
+              // the render boundary anyway. Same pattern below for .map.
+              const items = Array.isArray(day.items) ? day.items : [];
+              const dayTotal = items.reduce((sum, it) => sum + (Number(it?.cost) || 0), 0);
 
               return (
                 <div key={day.id} className="card">
@@ -293,13 +298,13 @@ if (!activeTrip) {
                           width: 2, background: 'var(--border-light)',
                         }} />
 
-                        {day.items.map((item, i) => {
+                        {items.map((item, i) => {
                           const cfg = typeConfig[item.type] || typeConfig.activity;
                           const Icon = cfg.icon;
                           return (
                             <div key={item.id} style={{
                               position: 'relative',
-                              paddingBottom: i < day.items.length - 1 ? 16 : 0,
+                              paddingBottom: i < items.length - 1 ? 16 : 0,
                             }}>
                               {/* Dot */}
                               <div style={{
