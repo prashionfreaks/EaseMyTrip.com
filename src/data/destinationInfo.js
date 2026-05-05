@@ -1007,6 +1007,40 @@ export const DESTINATION_INFO = {
     ],
   },
 
+  bangalore: {
+    tagline: 'India\'s Garden City turned Silicon Valley — pubs, parks, and a startup pulse',
+    famousFor: ['IT Capital of India', 'Pub Culture', 'Lalbagh Botanical Garden', 'Cubbon Park', 'Vidhana Soudha', 'Filter Coffee', 'Pleasant Year-Round Weather'],
+    attractions: [
+      { name: 'Lalbagh Botanical Garden', desc: 'A 240-acre 18th-century garden begun by Hyder Ali and finished by Tipu Sultan — over 1,800 species of plants and a famous Glass House modeled on London\'s Crystal Palace.' },
+      { name: 'Cubbon Park', desc: 'A 300-acre lung in the heart of the city — home to the State Central Library, the Government Museum, and a Sunday cycling crowd. Vast banyans and pink tabebuia blooms in March.' },
+      { name: 'Vidhana Soudha', desc: 'Karnataka\'s state legislature building (1956) — the largest legislative building in India, in neo-Dravidian granite, dramatically floodlit on weekends.' },
+      { name: 'Bangalore Palace', desc: 'A Tudor-revival royal residence built in 1878 by the Wadiyar dynasty — modeled on Windsor Castle, with carved wooden interiors, Belgian glass, and surprise rock concerts on the lawns.' },
+      { name: 'Commercial Street & MG Road', desc: 'The shopping spine — colonial-era Brigade Road for streetwear, Commercial Street for tailored kurtas and bangles, M.G. Road for the post-pub coffee.' },
+      { name: 'Nandi Hills (day trip)', desc: '60 km north — a 1,478m granite hill where pre-dawn sunrises happen above the cloud line, plus Tipu\'s summer fort and a 9th-century Bhoga Nandeeshwara temple at the base.' },
+    ],
+    history: [
+      'Bangalore was founded in 1537 by Kempe Gowda, a chieftain of the Vijayanagara Empire who built a mud-walled fort and gave the city its grid layout.',
+      'The British took the city in 1799 after defeating Tipu Sultan at Srirangapatna — they made it the cantonment for the Madras Presidency, building the Mall, churches, and bungalow neighborhoods that still define central Bangalore.',
+      'The Indian Institute of Science (1909) and Hindustan Aeronautics (1940) seeded a research-and-engineering culture that, with the founding of Infosys (1981) and Wipro\'s pivot to IT, eventually made Bangalore India\'s tech capital.',
+      'The state legislature renamed the city to Bengaluru in 2014 (the Kannada original), though "Bangalore" remains common in everyday speech and signage.',
+    ],
+    bestTime: { period: 'October–February', reason: 'Cool, pleasant weather (15–28°C) ideal for the parks and outdoor pubs. Summer (Mar–May) is mild but hot (28–34°C) by Indian standards. Monsoon (Jun–Sep) brings reliable rain and beautiful greenery.' },
+    quickFacts: { language: 'Kannada, English, Hindi, Tamil', currency: 'Indian Rupee (₹)', capital: 'Capital of Karnataka', knownAs: 'Garden City / Silicon Valley of India', timezone: 'IST (UTC+5:30)' },
+    cuisine: ['Bisi Bele Bath', 'Masala Dosa (Vidyarthi Bhavan style)', 'Mysore Pak', 'Filter Coffee', 'Ragi Mudde with Saaru', 'Idli-Vada-Sambar', 'Kori Gassi (Mangalorean coastal)'],
+    eateries: [
+      { name: 'Vidyarthi Bhavan', area: 'Gandhi Bazaar, Basavanagudi', rating: 4.5, reviews: 18400, type: 'South Indian (since 1943)', price: '₹', mustTry: 'Masala Dosa with extra ghee + filter coffee' },
+      { name: 'MTR (Mavalli Tiffin Room)', area: 'Lalbagh Road', rating: 4.4, reviews: 12200, type: 'Iconic South Indian (since 1924)', price: '₹', mustTry: 'Rava Idli + Chandrahara' },
+      { name: 'Toit Brewpub', area: 'Indiranagar', rating: 4.4, reviews: 21800, type: 'Microbrewery & gastropub', price: '₹₹₹', mustTry: 'Tintin Toit + wood-fired pizzas' },
+      { name: 'Karavalli', area: 'The Gateway Hotel, Residency Road', rating: 4.6, reviews: 2840, type: 'Coastal Karnataka fine dining', price: '₹₹₹₹', mustTry: 'Meen Moilee + Appam' },
+    ],
+    stays: [
+      { name: 'The Leela Palace Bengaluru', area: 'Old Airport Road', rating: 4.7, reviews: 5840, type: 'Palace hotel', price: '₹₹₹₹', highlight: 'Royal-style atrium, Le Cirque dining, garden suites' },
+      { name: 'Taj West End', area: 'Race Course Road', rating: 4.7, reviews: 4120, type: 'Heritage hotel (since 1887)', price: '₹₹₹₹', highlight: '20 acres of gardens in central Bangalore, Blue Ginger Vietnamese' },
+      { name: 'The Park Bangalore', area: 'M.G. Road', rating: 4.4, reviews: 3640, type: 'Boutique design hotel', price: '₹₹₹', highlight: 'On the M.G. Road metro line, walking distance to Brigade Road and Commercial Street' },
+      { name: 'goSTOPS Bengaluru', area: 'Indiranagar', rating: 4.4, reviews: 1820, type: 'Hostel', price: '₹', highlight: 'Indiranagar pub strip at the door, bookable private capsules' },
+    ],
+  },
+
   konark: {
     tagline: 'Where the sun-god\'s stone chariot has rolled for 800 years',
     famousFor: ['Sun Temple', 'UNESCO World Heritage Site', 'Stone Chariot Wheels', 'Konark Dance Festival', 'Chandrabhaga Beach'],
@@ -1058,6 +1092,7 @@ const ALIASES = {
   'zurich': 'switzerland', 'bern': 'switzerland', 'interlaken': 'switzerland',
   'alleppey': 'kerala', 'munnar': 'kerala', 'kochi': 'kerala', 'thiruvananthapuram': 'kerala',
   'coorg': 'kerala',
+  'bengaluru': 'bangalore', 'blr': 'bangalore', 'nandi hills': 'bangalore',
 };
 
 export function matchDestinationInfo(destination) {
