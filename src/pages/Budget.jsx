@@ -9,7 +9,7 @@ import {
   PieChart, CheckCircle2, AlertCircle, Pencil, Trash2,
 } from 'lucide-react';
 import { format, parseISO } from '../lib/date';
-import { getTripCurrencySymbol } from '../lib/itinerary';
+import { getTripCurrencySymbol, getTripCurrencyCode } from '../lib/itinerary';
 import { isSettlementPaid } from '../lib/settlement';
 
 const initial = '?';
@@ -598,7 +598,7 @@ export default function Budget() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div className="form-group">
-              <label className="form-label">Amount ({activeTrip.budget?.currency || 'USD'})</label>
+              <label className="form-label">Amount ({getTripCurrencyCode(activeTrip)})</label>
               <input className="form-input" type="number" placeholder="0.00" value={newExpense.amount}
                 onChange={e => setNewExpense(p => ({ ...p, amount: e.target.value }))} />
             </div>

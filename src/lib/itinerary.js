@@ -1023,14 +1023,18 @@ export function getCurrencySymbol(code) {
   return CURRENCY_SYMBOLS[code] || code;
 }
 
-/** Resolve the right symbol for a trip — prefers the currency the user picked
- *  at trip creation, falls back to destination heuristic for older trips.
- *  Indian destinations always render as INR even if an older trip has the
- *  USD default saved (we used to default budget.currency to 'USD'). */
-export function getTripCurrencySymbol(trip) {
+/** Resolve the currency code (INR/USD/EUR/...) for a trip. Indian destinations
+ *  always return INR even if an older trip has the legacy USD default saved.
+ *  Single source of truth so labels (Amount (INR)) and symbols (₹) agree. */
+export function getTripCurrencyCode(trip) {
   const destCurrency = getDestinationCurrency(trip?.destination);
-  if (destCurrency === 'INR') return getCurrencySymbol('INR');
-  return getCurrencySymbol(trip?.budget?.currency || destCurrency);
+  if (destCurrency === 'INR') return 'INR';
+  return trip?.budget?.currency || destCurrency;
+}
+
+/** Symbol form of the same resolution. */
+export function getTripCurrencySymbol(trip) {
+  return getCurrencySymbol(getTripCurrencyCode(trip));
 }
 
 function matchDestination(destination) {
