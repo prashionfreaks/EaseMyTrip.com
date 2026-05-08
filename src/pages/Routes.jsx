@@ -28,6 +28,13 @@ const INDIAN_ROUTES = {
   'delhi|kerala':           { dist: 2600, flight: [195, 7000, 'IndiGo / Air India to Kochi · 3h 15m'], train: [2400, 1500, 'Kerala Express · 40h'], bus: [2640, 1200, 'Multi-stop private buses · 44h'], car: [2400, 9500, 'NH44 via Bangalore · ~40h'] },
   'delhi|calicut':          { dist: 2550, flight: [180, 7000, 'IndiGo / Air India · 3h direct'], train: [2280, 1400, 'Mangala Express / Kerala Express · 38h'], bus: [2520, 1100, 'Private AC sleeper · 42h'], car: [2340, 9000, 'NH44 + NH66 · ~39h'] },
   'mumbai|wayanad':         { dist: 1100, flight: [150, 5500, 'Mumbai → Calicut (IndiGo · 1h 40m) + 2.5h drive'], train: [1200, 900, 'Netravati Express to Kozhikode · 20h + cab'], bus: [1080, 700, 'Private AC sleeper to Kozhikode · 18h + cab'], car: [1020, 4500, 'NH66 coastal route · 17h'] },
+  // Vrindavan corridor — air route is via Delhi (or Agra Kheria for limited
+  // service); trains stop at Mathura Junction (~30min drive to Vrindavan).
+  'agra|vrindavan':         { dist: 75,   flight: [0, 0, 'Flight not advisable — too short'], train: [60, 50, 'Agra → Mathura passenger train · ~1h + 30min drive'], bus: [90, 100, 'Agra → Mathura UP Roadways · ~1h 30m'], car: [90, 400, 'NH19 via Mathura · ~1h 30m'] },
+  'delhi|vrindavan':        { dist: 150,  flight: [0, 0, 'Flight not advisable — too short'], train: [180, 350, 'Delhi → Mathura Junction Shatabdi · ~2h + 30min drive'], bus: [240, 250, 'Delhi → Mathura UP Roadways AC · ~4h + auto'], car: [180, 800, 'Yamuna Expressway via Mathura · ~3h'] },
+  'mumbai|vrindavan':       { dist: 1180, flight: [390, 6500, 'Mumbai → Delhi (~2h) + 3.5h drive · or limited Agra Kheria flights'], train: [1200, 1100, 'Bandra Terminus → Mathura Junction · ~20h + drive'], bus: [1320, 1200, 'Mumbai → Mathura private AC sleeper · ~22h'], car: [1140, 5500, 'NH48 + NH3 via Indore · ~19h, two-day drive'] },
+  'pune|vrindavan':         { dist: 1320, flight: [420, 7000, 'Pune → Delhi (~2.5h) + 3.5h drive'], train: [1380, 1200, 'Pune → Mathura via Bhopal change · ~23h'], bus: [1740, 1500, 'Pune → Mathura private buses with change · ~29h'], car: [1320, 6500, 'NH160 + NH48 via Bhopal · ~22h, two-day drive'] },
+  'bangalore|vrindavan':    { dist: 2050, flight: [390, 6500, 'Bangalore → Delhi (~3h) + 3.5h drive'], train: [2280, 1700, 'Karnataka SK Express to Mathura · ~38h'], bus: [2520, 2000, 'Multi-stop private buses · ~42h'], car: [1980, 9500, 'NH44 via Hyderabad + Nagpur · ~33h'] },
 };
 
 const MODE_CONFIG = {
@@ -121,6 +128,19 @@ const NEAREST_AIRPORT = {
   ayodhya:             { airport: 'Ayodhya (Maryada Purushottam)', drive: 'small airport · or Lucknow ~3h drive' },
   'andaman islands':   { airport: 'Port Blair',                    drive: 'flights from Chennai/Kolkata/Delhi' },
   andaman:             { airport: 'Port Blair',                    drive: 'flights from Chennai/Kolkata/Delhi' },
+  // Braj region (Mathura, Vrindavan and surrounds) — no commercial airport;
+  // closest is Agra Kheria with limited schedules, Delhi IGI for full service.
+  vrindavan:           { airport: 'Agra (Kheria)',                 drive: '~1.5h drive · or Delhi (IGI) ~3.5h' },
+  mathura:             { airport: 'Agra (Kheria)',                 drive: '~1h drive · or Delhi (IGI) ~3h' },
+  // Pondicherry has a small airport with very limited service — most travellers route via Chennai.
+  pondicherry:         { airport: 'Chennai',                       drive: '~3h drive · Pondicherry airport has very limited service' },
+  puducherry:          { airport: 'Chennai',                       drive: '~3h drive · Pondicherry airport has very limited service' },
+  // Eastern Himalayas — Bagdogra (IXB) is the gateway airport for Darjeeling and Sikkim.
+  darjeeling:          { airport: 'Bagdogra (IXB)',                drive: '~3h drive' },
+  kalimpong:           { airport: 'Bagdogra (IXB)',                drive: '~3h drive' },
+  gangtok:             { airport: 'Bagdogra (IXB)',                drive: '~4.5h drive · or Pakyong ~30 min (limited service)' },
+  pelling:             { airport: 'Bagdogra (IXB)',                drive: '~5h drive' },
+  sikkim:              { airport: 'Bagdogra (IXB)',                drive: '~3-5h drive depending on destination' },
 };
 
 function nearestAirportFor(city) {
@@ -172,6 +192,16 @@ const NEAREST_STATION = {
   gir:                 { station: 'Veraval',                 drive: '~1.5h drive · or Junagadh ~2h' },
   'gir national park': { station: 'Veraval',                 drive: '~1.5h drive · or Junagadh ~2h' },
   kashmir:             { station: 'Jammu Tawi',              drive: '~7h drive to Srinagar · rail extension to Banihal' },
+  // Braj region — Mathura Junction is the main rail hub; the Vrindavan terminus is narrow-gauge.
+  vrindavan:           { station: 'Mathura Junction',        drive: '~30 min drive · Vrindavan terminus has very limited service' },
+  // Rishikesh has a small terminus (Yog Nagari Rishikesh) — most major trains stop at Haridwar Junction.
+  rishikesh:           { station: 'Haridwar Junction',       drive: '~30 min drive · Rishikesh terminus has very limited service' },
+  // Eastern Himalayas — New Jalpaiguri (NJP) is the major rail hub for Darjeeling and Sikkim.
+  darjeeling:          { station: 'New Jalpaiguri (NJP)',    drive: '~3h drive · Darjeeling toy train terminus is UNESCO but very limited service' },
+  kalimpong:           { station: 'New Jalpaiguri (NJP)',    drive: '~2.5h drive' },
+  gangtok:             { station: 'New Jalpaiguri (NJP)',    drive: '~4h drive · no rail in Sikkim itself' },
+  pelling:             { station: 'New Jalpaiguri (NJP)',    drive: '~5h drive · no rail in Sikkim itself' },
+  sikkim:              { station: 'New Jalpaiguri (NJP)',    drive: '~3-5h drive · no rail in Sikkim itself' },
 };
 
 function nearestStationFor(city) {
