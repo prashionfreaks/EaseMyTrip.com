@@ -1265,6 +1265,40 @@ export const DESTINATION_INFO = {
     ],
   },
 
+  vrindavan: {
+    tagline: 'Krishna\'s eternal playground — where every dawn aarti reaches up to the gopis\' favourite kunj.',
+    famousFor: ['Banke Bihari Temple', 'ISKCON Krishna Balaram Mandir', 'Prem Mandir', 'Lathmar Holi at Barsana', 'Mathura Pedas', 'Nidhivan', 'Yamuna Aarti'],
+    attractions: [
+      { name: 'Banke Bihari Temple', desc: 'The 1864 temple housing the most beloved swayambhu (self-manifested) Krishna idol in India; the curtain closes between brief darshan windows so the deity isn\'t "stared at" continuously — a ritual unique to Vrindavan.' },
+      { name: 'ISKCON Krishna Balaram Mandir', desc: 'The Hare Krishna movement\'s flagship temple (1975), founded by Srila Prabhupada on the spot where Krishna and his brother Balaram are said to have played; the 4:30 AM mangala aarti is hypnotic.' },
+      { name: 'Prem Mandir', desc: 'A 54-acre marble "Temple of Love" (2012) by Jagadguru Kripalu Maharaj; the entire facade colour-shifts in unison during the evening light-and-music show — surprisingly modern despite the traditional silhouette.' },
+      { name: 'Nidhivan', desc: 'A dense kunj (grove) of intertwined tulsi trees where locals say Krishna performs the Raas Lila with the gopis every night; the gates lock at sunset and no one (allegedly) survives staying inside after dark.' },
+      { name: 'Govardhan Hill (25 km)', desc: 'The hill Krishna is said to have lifted on his little finger to shelter Vraj from Indra\'s storm; the 21-km parikrama is barefoot for the devout, and Govardhan Puja the day after Diwali draws hundreds of thousands.' },
+      { name: 'Mathura Janmabhoomi (12 km)', desc: 'The walled prison cell where Krishna is said to have been born to Devaki; the temple complex sits behind heavy security as one of India\'s most contested sites — pair with riverside Vishram Ghat at sunset.' },
+    ],
+    history: [
+      'Vrindavan and Mathura form the heart of the Braj region — the geography of Krishna\'s childhood as told in the Bhagavata Purana (~10th century CE).',
+      'Vrindavan as a living pilgrimage town was effectively rebuilt by 16th-century Gaudiya Vaishnav saints — Roop Goswami, Sanatan Goswami, Jiva Goswami — under the patronage of Akbar; most "ancient" temples date to that revival, not earlier.',
+      'Mathura was sacked repeatedly: by Mahmud of Ghazni (1018), Sikandar Lodi (1500), and Aurangzeb (1670 — when the original Krishna temple was demolished and replaced by the Idgah mosque that still stands alongside the modern shrine).',
+      'Today Vrindavan houses an estimated 5,000+ widows (largely Bengali) who came to live out their lives in the temple town — the subject of Deepa Mehta\'s 2005 film Water and the focus of ongoing welfare programs.',
+    ],
+    bestTime: { period: 'October–March (festivals: Holi in March, Janmashtami in Aug/Sep)', reason: 'Cool 10–25°C makes the on-foot temple circuit pleasant. Lathmar Holi at Barsana is the most chaotic and joyful in India — book accommodation 3 months ahead. Avoid May–June (45°C) and August\'s humidity.' },
+    quickFacts: { language: 'Hindi, Braj Bhasha, English', currency: 'Indian Rupee (₹)', capital: 'Pilgrim town in Uttar Pradesh', knownAs: 'Krishna\'s Playground / Braj Bhoomi', timezone: 'IST (UTC+5:30)' },
+    cuisine: ['Pure-veg town (no meat, no eggs; temple bhog skips onion/garlic)', 'Mathura Peda (signature milk sweet)', 'Brijwasi Lassi with malai', 'Kachori with aloo sabzi', 'Chaat (Mathura is the chaat capital)', 'Raabri', 'Bhog Prasad'],
+    eateries: [
+      { name: 'Brijwasi Royal', area: 'Loi Bazaar', rating: 4.4, reviews: 5800, type: 'Heritage sweet shop (since 1955)', price: '₹₹', mustTry: 'Mathura Peda + Rabri Falooda' },
+      { name: 'MVT Restaurant', area: 'ISKCON Krishna Balaram campus', rating: 4.5, reviews: 3640, type: 'Pure veg multi-cuisine', price: '₹₹', mustTry: 'Govinda Thali + cheesecake (the 80s Iskcon staple)' },
+      { name: 'Govinda\'s Restaurant', area: 'ISKCON, Bhaktivedanta Marg', rating: 4.4, reviews: 4240, type: 'Krishna-conscious veg', price: '₹₹', mustTry: 'Spiritual Thali + Halwa' },
+      { name: 'Mishrambu', area: 'Banke Bihari Lane', rating: 4.5, reviews: 2800, type: 'Tiny lassi & kachori joint', price: '₹', mustTry: 'Malaiyo (winter only) + Kachori-Sabzi' },
+    ],
+    stays: [
+      { name: 'The Radha Brij Vasundhara', area: 'Chhatikara Road', rating: 4.5, reviews: 1840, type: 'Heritage-style resort', price: '₹₹₹₹', highlight: '5-acre garden grounds, walking distance to Prem Mandir, vegetarian-only kitchen' },
+      { name: 'Nidhivan Sarovar Portico', area: 'Mathura Road', rating: 4.4, reviews: 2240, type: 'Mid-range chain hotel', price: '₹₹₹', highlight: 'Pure-veg restaurant, easy auto access to Banke Bihari, free shuttle to ISKCON' },
+      { name: 'ISKCON Guesthouse (MVT)', area: 'Krishna Balaram Mandir campus', rating: 4.3, reviews: 1640, type: 'Devotee guesthouse', price: '₹₹', highlight: 'Inside the ISKCON complex; book 2–3 months ahead for Janmashtami; mangala aarti at the door' },
+      { name: 'Kridha Residency', area: 'Vrindavan Bypass', rating: 4.2, reviews: 940, type: 'Boutique mid-range', price: '₹₹', highlight: 'Auto access to all temples, included breakfast, well-kept pool' },
+    ],
+  },
+
   andaman: {
     tagline: 'India\'s pristine archipelago — coral reefs, white-sand beaches, and a colonial prison where the freedom struggle was forged.',
     famousFor: ['Radhanagar Beach (Havelock)', 'Scuba Diving', 'Cellular Jail', 'Ross Island Ruins', 'Bioluminescent Plankton', 'Indigenous Tribes', 'Limestone Caves'],
@@ -1345,6 +1379,9 @@ const ALIASES = {
   'kasol': 'manali', 'kullu': 'manali',
   // Maharashtra hill stations grouped under Mahabaleshwar.
   'panchgani': 'mahabaleshwar',
+  // Braj region — Vrindavan covers the whole Krishna pilgrimage circuit.
+  'mathura': 'vrindavan', 'barsana': 'vrindavan', 'gokul': 'vrindavan',
+  'govardhan': 'vrindavan', 'braj': 'vrindavan', 'brij': 'vrindavan',
 };
 
 export function matchDestinationInfo(destination) {
