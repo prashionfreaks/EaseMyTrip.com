@@ -1,0 +1,22 @@
+# Supabase Edge Function configuration.
+#
+# verify_jwt = false on all three functions because each one already
+# validates the caller's JWT via requireUser() in _shared/cors.ts. The
+# platform-level check is redundant AND it rejects browser CORS
+# preflight (OPTIONS) requests, which don't carry Authorization
+# headers — preflights then 401 with UNAUTHORIZED_NO_AUTH_HEADER and
+# the actual POST never fires.
+#
+# After editing this file, redeploy:
+#   supabase functions deploy generate-itinerary
+#   supabase functions deploy places-autocomplete
+#   supabase functions deploy send-invite-email
+
+[functions.generate-itinerary]
+verify_jwt = false
+
+[functions.places-autocomplete]
+verify_jwt = false
+
+[functions.send-invite-email]
+verify_jwt = false
