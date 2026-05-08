@@ -1066,6 +1066,237 @@ export const DESTINATION_INFO = {
       { name: 'Nature Camp Konark Retreat', area: 'Ramachandi', rating: 4.3, reviews: 480, type: 'Tented eco camp', price: '₹₹', highlight: 'Beachfront luxury tents, Olive Ridley turtle nesting season Oct–Mar' },
     ],
   },
+
+  delhi: {
+    tagline: 'Seven cities, seven empires, one chaotic capital — where Mughal forts, colonial avenues, and Punjabi street food share the same block.',
+    famousFor: ['Red Fort', 'India Gate', 'Old Delhi Street Food', 'Qutub Minar', 'Lutyens\' Delhi', 'Chandni Chowk', 'Political Capital'],
+    attractions: [
+      { name: 'Red Fort (Lal Qila)', desc: 'Shah Jahan\'s 1648 sandstone fortress and the Mughal seat of power for two centuries — the Indian Prime Minister hoists the national flag from its ramparts every Independence Day.' },
+      { name: 'Qutub Minar', desc: 'A 73m sandstone-and-marble victory tower (1193), the world\'s tallest brick minaret, surrounded by the ruins of Delhi\'s first Sultanate and a 4th-century iron pillar that famously refuses to rust.' },
+      { name: 'Humayun\'s Tomb', desc: 'The 1572 Mughal garden tomb that prototyped the Taj Mahal — a charbagh layout, double-domed mausoleum, and one of the calmest UNESCO sites in central Delhi.' },
+      { name: 'Jama Masjid', desc: 'India\'s largest mosque (1656), capacity 25,000; climb the south minaret for an unmatched rooftop view across Old Delhi\'s tangled lanes.' },
+      { name: 'India Gate & Rajpath', desc: 'A 42m WWI memorial arch on the ceremonial axis through Lutyens\' planned imperial capital — the All-India War Memorial with the names of 70,000 Indian soldiers carved into its sandstone.' },
+    ],
+    history: [
+      'Delhi has been continuously inhabited since the 6th century BCE; archaeologists count seven distinct cities built and rebuilt across this Yamuna plain over 2,500 years.',
+      'The Delhi Sultanate (1206–1526) made it the seat of the first major Muslim empire in India; the Mughals (1526–1857) elevated it to a global capital with monuments that still define the skyline.',
+      'The British shifted India\'s capital here from Calcutta in 1911; Edwin Lutyens designed New Delhi as a planned imperial city of bungalows, hexagonal roundabouts, and one ceremonial axis — completed in 1931.',
+      'Partition in 1947 brought 500,000 Punjabi refugees within months; Delhi\'s population doubled, the demographic shifted permanently, and Punjabi-Mughlai cuisine became its defining street food.',
+    ],
+    bestTime: { period: 'October–March', reason: '15–25°C is perfect for sightseeing. Avoid May–June (45°C+ heatwaves) and the post-Diwali smog peak in November. February and the cherry-blossom-like blooms of February-March are the gold standard.' },
+    quickFacts: { language: 'Hindi, Urdu, Punjabi, English', currency: 'Indian Rupee (₹)', capital: 'Capital of India', knownAs: 'Dilli Dilwalon Ki / The City of Djinns', timezone: 'IST (UTC+5:30)' },
+    cuisine: ['Butter Chicken', 'Chole Bhature', 'Daulat Ki Chaat (winter only)', 'Paranthe Wali Gali parathas', 'Galouti Kebab', 'Kulfi Falooda', 'Nihari'],
+    eateries: [
+      { name: 'Karim\'s', area: 'Jama Masjid, Old Delhi', rating: 4.3, reviews: 24600, type: 'Mughlai (since 1913)', price: '₹₹', mustTry: 'Mutton Burra + Tandoori Roti' },
+      { name: 'Indian Accent', area: 'The Lodhi, Lodhi Road', rating: 4.7, reviews: 6800, type: 'Modern Indian fine dining', price: '₹₹₹₹', mustTry: 'Blue Cheese Naan + Pulled Kathal Phulka Tacos' },
+      { name: 'Bukhara', area: 'ITC Maurya, Diplomatic Enclave', rating: 4.6, reviews: 8200, type: 'North-West Frontier (since 1977)', price: '₹₹₹₹', mustTry: 'Dal Bukhara + Sikandari Raan' },
+      { name: 'Saravana Bhavan', area: 'Janpath, Connaught Place', rating: 4.3, reviews: 5400, type: 'South Indian veg', price: '₹', mustTry: 'Mysore Masala Dosa + Filter Coffee' },
+    ],
+    stays: [
+      { name: 'The Imperial New Delhi', area: 'Janpath', rating: 4.7, reviews: 4200, type: 'Heritage colonial hotel (1931)', price: '₹₹₹₹', highlight: 'Original Art Deco bones, 5,000-piece colonial art collection, walking distance to Connaught Place' },
+      { name: 'The Oberoi New Delhi', area: 'Dr Zakir Hussain Marg', rating: 4.7, reviews: 2800, type: 'Luxury hotel', price: '₹₹₹₹', highlight: 'Golf course views, Threesixty all-day dining, post-renovation glass-and-marble lobby' },
+      { name: 'Haveli Dharampura', area: 'Old Delhi', rating: 4.6, reviews: 1240, type: 'Restored 1887 haveli', price: '₹₹₹', highlight: 'Mughal-era courtyard, kathak performances, Chandni Chowk\'s Paranthe Wali Gali at the door' },
+      { name: 'Bloomrooms @ New Delhi Railway Station', area: 'Paharganj', rating: 4.2, reviews: 3800, type: 'Budget design hotel', price: '₹', highlight: 'Backpacker base, walkable to Old Delhi, metro on the doorstep' },
+    ],
+  },
+
+  jaipur: {
+    tagline: 'India\'s Pink City — Rajput palaces, sandstone bazaars, and royal romance under sherbet-tinted walls.',
+    famousFor: ['Pink City', 'Hawa Mahal', 'Amber Fort', 'Block-printed Textiles', 'Royal Rajputs', 'Bazaar Shopping', 'City Palace'],
+    attractions: [
+      { name: 'Amber (Amer) Fort', desc: 'A 16th-century honey-stoned hill fort with the mirror-mosaic Sheesh Mahal — light a single candle inside and the entire chamber glitters like a star field; reached on foot, jeep, or by 4WD.' },
+      { name: 'Hawa Mahal', desc: 'The 1799 sandstone façade with 953 latticed windows so royal women could watch street processions unseen — five storeys, just one room deep, the most photographed wall in Rajasthan.' },
+      { name: 'City Palace & Chandra Mahal', desc: 'Working royal residence and museum complex; houses the largest pair of silver vessels in the world (Guinness-listed), used by Maharaja Madho Singh II to carry Ganges water to Britain in 1902.' },
+      { name: 'Jantar Mantar', desc: 'Maharaja Sawai Jai Singh II\'s 18th-century astronomical observatory; UNESCO; the 27m Samrat Yantra is the world\'s largest stone sundial — accurate to within two seconds.' },
+      { name: 'Nahargarh Fort', desc: 'Sunset view over the Pink City from wedge-cut walls; the in-fort Padao Café is famous for its golden-hour chai and the Pink City lights coming on as you sip.' },
+    ],
+    history: [
+      'Founded 1727 by Maharaja Sawai Jai Singh II — India\'s first planned city, laid out by Vidyadhar Bhattacharya on a nine-square Vastu Shastra grid still legible from Google Earth.',
+      'Painted pink in 1876 to welcome the Prince of Wales (later Edward VII); the colour was preserved by city ordinance and is still mandated for façades within the walled city.',
+      'The Rajput state of Jaipur was one of the first to ally with the Mughals — Raja Man Singh became Akbar\'s general and brought Persian art into the local Hindu tradition, visible in Amber Fort\'s painted ceilings.',
+      'Maharaja Sawai Man Singh II (1922–1949) was the last ruling king; his palace is now the Rambagh Palace hotel and his polo team made Jaipur a hub of the sport — annual matches still happen in winter.',
+    ],
+    bestTime: { period: 'October–March', reason: 'Crisp 10–25°C is perfect for fort-climbing. Diwali (Oct/Nov) lights the Pink City spectacularly; the Jaipur Literature Festival in late January is the world\'s largest free literary event. Avoid April–June: 40–45°C makes the sandstone uninhabitable.' },
+    quickFacts: { language: 'Hindi, Marwari, English', currency: 'Indian Rupee (₹)', capital: 'Capital of Rajasthan', knownAs: 'Pink City / Paris of India', timezone: 'IST (UTC+5:30)' },
+    cuisine: ['Dal Baati Churma', 'Laal Maans', 'Pyaaz Kachori', 'Ghevar (festival sweet)', 'Rajasthani Thali', 'Ker Sangri', 'Mawa Kachori'],
+    eateries: [
+      { name: 'Laxmi Misthan Bhandar (LMB)', area: 'Johari Bazaar', rating: 4.4, reviews: 7600, type: 'Rajasthani veg + sweets', price: '₹₹', mustTry: 'Royal Rajasthani Thali + Ghevar' },
+      { name: '1135 AD', area: 'Amber Fort, Jaleb Chowk', rating: 4.3, reviews: 3800, type: 'Royal Mughlai dining inside the fort', price: '₹₹₹₹', mustTry: 'Murgh Khada Masala in the Sheesh Mahal-style courtyard' },
+      { name: 'Bar Palladio', area: 'Narain Niwas Palace, Kanota Bagh', rating: 4.5, reviews: 1840, type: 'Italian-Rajput pavilion', price: '₹₹₹₹', mustTry: 'Tagliolini al Ragu in the cobalt-tiled garden' },
+      { name: 'Rawat Mishtan Bhandar', area: 'Sindhi Camp', rating: 4.5, reviews: 5800, type: 'Pyaaz kachori specialist (since 1957)', price: '₹', mustTry: 'Pyaaz Kachori with sweet curd + green chutney' },
+    ],
+    stays: [
+      { name: 'Rambagh Palace', area: 'Bhawani Singh Road', rating: 4.8, reviews: 3400, type: 'Royal palace hotel (1835)', price: '₹₹₹₹', highlight: 'The maharaja\'s former residence, polo lawn, peacocks, Suvarna Mahal dining hall' },
+      { name: 'Samode Haveli', area: 'Gangapole', rating: 4.7, reviews: 1860, type: 'Restored 18th-c. haveli', price: '₹₹₹₹', highlight: 'Frescoed ceilings, courtyard pool, located inside the walled city' },
+      { name: 'Hotel Pearl Palace', area: 'Hari Kishan Somani Marg', rating: 4.6, reviews: 4200, type: 'Boutique mid-range', price: '₹₹', highlight: 'Peacock Rooftop Restaurant, family-run, repeatedly ranked Jaipur\'s top mid-range stay' },
+      { name: 'Zostel Jaipur', area: 'Bani Park', rating: 4.4, reviews: 2240, type: 'Hostel', price: '₹', highlight: 'Auto rides to Hawa Mahal, social rooftop, walking-tour partnerships' },
+    ],
+  },
+
+  agra: {
+    tagline: 'A city built around the world\'s greatest love story — and a fort that watched it all unfold.',
+    famousFor: ['Taj Mahal', 'Mughal Heritage', 'Agra Fort', 'Petha (sweet)', 'Mughlai Cuisine', 'Marble Pietra Dura'],
+    attractions: [
+      { name: 'Taj Mahal', desc: 'Shah Jahan\'s 1632–1653 white marble mausoleum for Mumtaz Mahal; UNESCO; sunrise visits beat the crowds and catch the marble shifting from pink to gold to white as the sun climbs.' },
+      { name: 'Agra Fort', desc: 'Red sandstone Mughal fort and UNESCO site; Shah Jahan was imprisoned here by his son Aurangzeb and reportedly died gazing at the Taj from the Musamman Burj balcony — the view is unchanged.' },
+      { name: 'Mehtab Bagh', desc: 'The 16th-century "Moonlight Garden" directly across the Yamuna from the Taj — the perfect dawn or sunset framing, far quieter than the main complex, and the angle most photographers prefer.' },
+      { name: 'Itimad-ud-Daulah ("Baby Taj")', desc: 'The 1628 marble tomb that prototyped the Taj Mahal — intricate pietra dura inlay, sublime proportions, and crowds typically in the single digits.' },
+      { name: 'Fatehpur Sikri (40 km)', desc: 'Akbar\'s planned capital (1571–1585), abandoned within 14 years for lack of water; UNESCO; Buland Darwaza is the tallest gateway in the world at 54m.' },
+    ],
+    history: [
+      'Agra was founded by Sikandar Lodi in 1504; rose to glory under three Mughal emperors — Akbar, Jahangir, and Shah Jahan — who all chose it as their capital before Delhi reclaimed the role.',
+      'The Taj Mahal took 22 years and 20,000 workers to build; legend says Shah Jahan severed the chief architect\'s hands so he could never replicate it (almost certainly apocryphal, but the story endures).',
+      'Aurangzeb shifted the Mughal capital to Delhi in 1648; Agra began a long decline that accelerated under Maratha and British rule, until tourism revived it in the late 20th century.',
+      'In 1857 the Indian Rebellion saw fierce fighting around Agra; the Fort\'s armoury museum still preserves bullet holes and weapons from the siege of the British residency.',
+    ],
+    bestTime: { period: 'October–March', reason: 'Pleasant 10–28°C. Best Taj photography is at sunrise or full-moon nights (5 nights/month, advance permits via ASI). Avoid May–June heat (45°C) and August\'s humidity.' },
+    quickFacts: { language: 'Hindi, Urdu, English', currency: 'Indian Rupee (₹)', capital: 'Mughal-era capital', knownAs: 'City of the Taj', timezone: 'IST (UTC+5:30)' },
+    cuisine: ['Petha (translucent ash-gourd sweet)', 'Bedhai-Jalebi (breakfast)', 'Mughlai Biryani', 'Dalmoth Namkeen', 'Bhalla-Papdi Chaat', 'Galouti Kebab'],
+    eateries: [
+      { name: 'Pinch of Spice', area: 'Fatehabad Road', rating: 4.3, reviews: 5800, type: 'Modern Indian', price: '₹₹₹', mustTry: 'Murgh Lazeez + Galouti Kebab' },
+      { name: 'Esphahan', area: 'The Oberoi Amarvilas', rating: 4.7, reviews: 1240, type: 'Mughlai fine dining', price: '₹₹₹₹', mustTry: 'Slow-cooked Lal Maas + live ghazals, Taj views from the patio' },
+      { name: 'Shankara Vegis', area: 'Taj Ganj', rating: 4.2, reviews: 2400, type: 'Backpacker veg café', price: '₹', mustTry: 'Banana Lassi + Masala Dosa' },
+      { name: 'Joney\'s Place', area: 'Taj Ganj', rating: 4.0, reviews: 1860, type: 'Tiny rooftop joint (since 1978)', price: '₹', mustTry: 'Special Lassi — Lonely-Planet famous since the 80s' },
+    ],
+    stays: [
+      { name: 'The Oberoi Amarvilas', area: 'Taj East Gate Road', rating: 4.8, reviews: 2640, type: 'Luxury Taj-view hotel', price: '₹₹₹₹', highlight: 'Every room sees the Taj; 600m from East Gate; sunken pool with fountain alleys' },
+      { name: 'ITC Mughal', area: 'Taj Ganj', rating: 4.5, reviews: 4800, type: 'Heritage luxury', price: '₹₹₹₹', highlight: 'Mughal-revival architecture, Kaya Kalp spa, golf-cart shuttle to the Taj' },
+      { name: 'Hotel Taj Resorts', area: 'Fatehabad Road', rating: 4.3, reviews: 3200, type: 'Mid-range', price: '₹₹', highlight: '10 min from Taj East Gate, rooftop dining with partial Taj view' },
+      { name: 'Joey\'s Hostel Agra', area: 'Tota ka Tal', rating: 4.4, reviews: 2840, type: 'Hostel', price: '₹', highlight: 'Walkable to the Taj, terrace with a Taj glimpse, free breakfast' },
+    ],
+  },
+
+  rishikesh: {
+    tagline: 'Where the Ganges meets the Himalayas — and the world comes for yoga, white water, and a quieter mind.',
+    famousFor: ['Yoga Capital of the World', 'White-water Rafting', 'The Beatles Ashram', 'Ganga Aarti', 'Lakshman Jhula', 'Adventure Sports', 'Vegetarian-only Town'],
+    attractions: [
+      { name: 'Triveni Ghat', desc: 'The sacred riverside ghat where the Ganga, Yamuna, and the mythical Saraswati are said to meet; the evening Ganga Aarti at sundown — diya lamps floating on the river — is one of India\'s most hypnotic rituals.' },
+      { name: 'Lakshman Jhula & Ram Jhula', desc: 'Twin pedestrian suspension bridges over the Ganges; gateway to the café-and-ashram strip on the east bank — also where every wandering sadhu seems to congregate at golden hour.' },
+      { name: 'Beatles Ashram (Chaurasi Kutia)', desc: 'Where the Beatles stayed with Maharishi Mahesh Yogi in 1968 and wrote half of the White Album; long abandoned, then reclaimed by graffiti artists, now a paid heritage walk through psychedelic ruins.' },
+      { name: 'Neelkanth Mahadev Temple', desc: '32 km uphill on a jungle road; the spot where Shiva is said to have drunk poison from the Samudra Manthan churning of the cosmic ocean — his throat turned blue, hence "Neel-kanth".' },
+      { name: 'Shivpuri Rafting Stretch', desc: 'Class III+ Ganges rapids on a 16km run starting from Shivpuri (40 min from town); peak season Sep–Jun; rafting closes in monsoon when the river runs at lethal volume.' },
+    ],
+    history: [
+      'Mentioned in the Mahabharata as the place where the sage Raibhya Rishi performed austerities — the town\'s name comes from "Rishi-Kesh" (a name of Vishnu meaning lord of the senses).',
+      'Adi Shankaracharya is said to have visited in the 8th century to revive Hindu philosophy; multiple ashrams trace their lineage to this period.',
+      'Swami Sivananda founded the Divine Life Society here in 1936, kick-starting Rishikesh\'s reputation as a global yoga centre — many of the most-translated yoga texts in the West were written in this ashram.',
+      'The Beatles\' 1968 stay with Maharishi Mahesh Yogi fixed Rishikesh in Western consciousness as the world\'s yoga capital — and indirectly seeded the multi-billion-dollar global wellness industry.',
+    ],
+    bestTime: { period: 'September–November & February–April', reason: 'Sep–Nov: post-monsoon clarity, ideal rafting flows, 18–28°C. Feb–Apr: wildflower season, the International Yoga Festival is in March. Skip June–August monsoon (rafting suspended; landslides on the road from Haridwar).' },
+    quickFacts: { language: 'Hindi, English', currency: 'Indian Rupee (₹)', capital: 'Pilgrim town in Uttarakhand', knownAs: 'Yoga Capital of the World', timezone: 'IST (UTC+5:30)' },
+    cuisine: ['Pure-veg only town (no meat, no eggs, no alcohol)', 'Sattvic Thali', 'Aloo Poori', 'Banana-Nutella Pancakes (Beatles-cafe staple)', 'Buddha Bowls', 'Filter Coffee', 'Masala Chai by the river'],
+    eateries: [
+      { name: 'Little Buddha Cafe', area: 'Lakshman Jhula', rating: 4.3, reviews: 4200, type: 'Multi-cuisine treetop café', price: '₹₹', mustTry: 'Banana lassi + falafel wrap on the river-view deck' },
+      { name: 'Ramana\'s Garden Cafe', area: 'Tapovan', rating: 4.6, reviews: 1640, type: 'Organic farm-to-table', price: '₹₹', mustTry: 'Buddha bowl + apple-cinnamon pancake (proceeds fund a children\'s home)' },
+      { name: 'Sattva Cafe', area: 'Tapovan', rating: 4.4, reviews: 2880, type: 'Yogi-friendly vegan', price: '₹₹', mustTry: 'Sattvic Thali + millet porridge' },
+      { name: 'Chotiwala (since 1958)', area: 'Swarg Ashram', rating: 4.0, reviews: 6800, type: 'Iconic pilgrim thali', price: '₹', mustTry: 'Special Thali — the two human "mascots" with chotis still sit at the door' },
+    ],
+    stays: [
+      { name: 'Ananda in the Himalayas', area: 'Narendra Nagar (25 km)', rating: 4.8, reviews: 1840, type: 'Destination wellness resort', price: '₹₹₹₹', highlight: 'Maharaja\'s palace setting, 7-day Ayurveda + yoga programs, repeatedly ranked Asia\'s top spa' },
+      { name: 'Atali Ganga', area: 'Shivpuri', rating: 4.7, reviews: 920, type: 'Adventure boutique resort', price: '₹₹₹₹', highlight: 'Riverside camping reimagined; rafting put-in at the doorstep' },
+      { name: 'Vasundhara Sthali', area: 'Tapovan', rating: 4.5, reviews: 740, type: 'Mid-range yoga retreat', price: '₹₹', highlight: 'Walking distance to Lakshman Jhula; included morning yoga' },
+      { name: 'Live Free Hostel', area: 'Tapovan', rating: 4.3, reviews: 1240, type: 'Hostel', price: '₹', highlight: 'Backpacker hub; organize raft, cliff-jump, and bungee in-house' },
+    ],
+  },
+
+  darjeeling: {
+    tagline: 'Toy trains, mist-soaked tea gardens, and the third-highest mountain in the world for a backdrop.',
+    famousFor: ['Darjeeling Tea', 'Toy Train (UNESCO)', 'Tiger Hill Sunrise', 'Kanchenjunga Views', 'Himalayan Mountaineering', 'Tibetan-Refugee Culture', 'Colonial Hill Station'],
+    attractions: [
+      { name: 'Tiger Hill', desc: 'An 11km drive pre-dawn; sunrise lights up Kanchenjunga (8,586m, world\'s third-highest) in pink-then-gold; on the clearest mornings, Mt Everest is visible 175km away to the west.' },
+      { name: 'Darjeeling Himalayan Railway', desc: 'The 1881 narrow-gauge "toy train" — UNESCO; the Joy Ride from Darjeeling to Ghoom (highest railway station in India at 7,407 ft) and back via the Batasia Loop is a 2-hour time machine.' },
+      { name: 'Happy Valley Tea Estate', desc: 'An 1854 working tea garden 3km from Mall Road; pluck-and-process tour, factory shop with first-flush single-estate teas at fractions of London auction prices.' },
+      { name: 'Padmaja Naidu Himalayan Zoological Park', desc: 'One of the world\'s few high-altitude zoos; red pandas, snow leopards, Tibetan wolves; founded as a captive-breeding centre and one of the most successful red panda programs anywhere.' },
+      { name: 'Himalayan Mountaineering Institute', desc: 'Founded by Tenzing Norgay in 1954 after his Everest summit; the museum holds Tenzing\'s climbing gear, the Indian flag he planted on the summit, and Hillary\'s ice axe.' },
+    ],
+    history: [
+      'Until 1835 the area belonged to the kingdom of Sikkim; the British East India Company "leased" it as a sanatorium for soldiers recovering from the Bengal heat.',
+      'Robert Fortune\'s 1848 espionage operation — smuggling Chinese tea cuttings and tea-master knowledge into Sikkim — seeded the first plantations; Darjeeling tea now sells at the world\'s highest auction prices.',
+      'The Darjeeling Himalayan Railway was built 1879–1881 to connect the hill station to the Bengal plains; 88km, five zig-zags, six loops, and a 7,407 ft summit at Ghoom.',
+      'Tenzing Norgay grew up in nearby Toong Soong; after the 1953 Everest summit he founded the Himalayan Mountaineering Institute in Darjeeling and trained generations of Indian climbers.',
+    ],
+    bestTime: { period: 'April–June & October–November', reason: 'Apr–Jun: clearest mountain views, rhododendrons in bloom, 12–22°C. Oct–Nov: post-monsoon clarity, pleasant. Skip Jul–Sep (monsoon, leech season, the mountain hidden for weeks at a stretch).' },
+    quickFacts: { language: 'Nepali, Hindi, English, Bengali', currency: 'Indian Rupee (₹)', capital: 'Hill station in West Bengal', knownAs: 'Queen of the Hills', timezone: 'IST (UTC+5:30)' },
+    cuisine: ['Darjeeling Tea (first flush + second flush)', 'Momos (steamed/fried)', 'Thukpa', 'Aloo Dum (Tibetan-style)', 'Sel Roti', 'Churpi (yak cheese)', 'Wai Wai noodle stir-fry'],
+    eateries: [
+      { name: 'Glenary\'s', area: 'Nehru Road', rating: 4.4, reviews: 5840, type: 'Colonial bakery & restaurant (since 1885)', price: '₹₹', mustTry: 'Iced coffee + Mama\'s Beef Pie on the upper deck' },
+      { name: 'Keventer\'s', area: 'Mall Road', rating: 4.3, reviews: 8200, type: 'Iconic breakfast deck (since 1911)', price: '₹₹', mustTry: 'Big Breakfast + hot chocolate, with Kanchenjunga in the morning gap' },
+      { name: 'Kunga Restaurant', area: 'Gandhi Road', rating: 4.4, reviews: 3640, type: 'Tibetan home-style', price: '₹', mustTry: 'Pork momos + thukpa with chilli oil' },
+      { name: 'Sonam\'s Kitchen', area: 'Dr Zakir Hussain Road', rating: 4.5, reviews: 1840, type: 'Tiny breakfast joint', price: '₹', mustTry: 'French toast with marmalade + masala chai' },
+    ],
+    stays: [
+      { name: 'The Elgin Darjeeling', area: 'H.D. Lama Road', rating: 4.6, reviews: 1240, type: 'Heritage hotel (1887)', price: '₹₹₹₹', highlight: 'Maharaja-of-Cooch-Behar\'s former summer house; afternoon tea on the lawn, garden views' },
+      { name: 'Mayfair Darjeeling', area: 'The Mall', rating: 4.5, reviews: 1840, type: 'Heritage luxury', price: '₹₹₹₹', highlight: 'Manor-style on the Mall, Kanchenjunga views, library and conservatory' },
+      { name: 'Windamere Hotel', area: 'Observatory Hill', rating: 4.5, reviews: 1140, type: 'Original Raj-era hotel (since 1880s)', price: '₹₹₹', highlight: 'Quirky time-capsule of British Empire decor — fireplaces, hot water bottles in beds, and high tea at 4 sharp' },
+      { name: 'Revolver', area: 'Robertson Road', rating: 4.6, reviews: 540, type: 'Beatles-themed boutique stay', price: '₹₹', highlight: '5 rooms (each named for a Beatle), curated craft and vinyl, run by a music historian' },
+    ],
+  },
+
+  pondicherry: {
+    tagline: 'A pocket of France on the Coromandel Coast — French quarter cafés, mustard-yellow villas, and a sea wall for sunset walks.',
+    famousFor: ['French Quarter', 'Auroville', 'Sri Aurobindo Ashram', 'Promenade Beach', 'French-Tamil Cuisine', 'Bougainvillea-draped Streets', 'Boutique Hotels'],
+    attractions: [
+      { name: 'White Town (French Quarter)', desc: 'Mustard-yellow and white villas, bougainvillea trellises, and French street names ("Rue Suffren", "Rue Romain Rolland"); Bharathi Park is the colonial heart, walkable in an afternoon.' },
+      { name: 'Auroville', desc: 'An experimental township founded in 1968 by Mirra Alfassa ("The Mother"); the golden Matrimandir is a meditation chamber accessible only via a guided pass booked at the Visitor Centre 24 hours in advance.' },
+      { name: 'Promenade Beach', desc: 'A 1.5km traffic-free seafront with the Gandhi statue, the French War Memorial, and the Old Light House; sunrise walks beat the sunset crowds and you\'ll see locals doing yoga at the seawall.' },
+      { name: 'Sri Aurobindo Ashram', desc: 'A spiritual community founded in 1926; quiet courtyard, the joint samadhi (shrine) of Sri Aurobindo and The Mother, and the most peaceful five minutes you\'ll have all trip.' },
+      { name: 'Paradise Beach (Chunnambar)', desc: '8 km south of town; reach by a 20-minute backwater boat ride from Chunnambar Boathouse; pristine sand spit between river and sea, busy on weekends, near-empty on weekdays.' },
+    ],
+    history: [
+      'The French East India Company arrived in 1674; under François Martin and later Joseph François Dupleix, Pondicherry became the capital of French India and the rival to British Madras.',
+      'The British captured and destroyed Pondicherry repeatedly during the Anglo-French wars (1761, 1778, 1793); the town was rebuilt each time, with the present grid laid out in 1769.',
+      'Pondicherry remained French until 1954 — seven years after Indian independence — when its citizens voted by referendum to merge with India; older locals still hold dual French citizenship.',
+      'The 2004 tsunami struck Pondicherry directly, but the seawall built afterward saved the French quarter; the promenade has since been rebuilt and is now permanently pedestrian-only after dark.',
+    ],
+    bestTime: { period: 'October–March', reason: 'Cool, dry, 22–30°C. Avoid the cyclone window of Oct–Dec for beach plans (most years are fine, but it\'s the risk window). April–June is humid 28–38°C; the French quarter\'s shaded streets help.' },
+    quickFacts: { language: 'Tamil, French, English, Hindi', currency: 'Indian Rupee (₹)', capital: 'Union Territory capital', knownAs: 'The French Riviera of the East', timezone: 'IST (UTC+5:30)' },
+    cuisine: ['Crêpes', 'Steak Frites (French quarter)', 'Chettinad Chicken', 'Idiyappam with Kurma', 'Filter Coffee', 'Pondicherry-style Fish Curry', 'Croissants (Baker Street)'],
+    eateries: [
+      { name: 'Cafe Des Arts', area: 'Rue Suffren, French Quarter', rating: 4.4, reviews: 3840, type: 'French-quarter brunch', price: '₹₹', mustTry: 'Galette + Pondicherry frappuccino in the courtyard' },
+      { name: 'Le Dupleix', area: 'Rue de la Caserne', rating: 4.5, reviews: 1240, type: 'Colonial-villa fine dining', price: '₹₹₹₹', mustTry: 'Pondicherry fish curry + chocolate fondant on the courtyard tables' },
+      { name: 'Surguru', area: 'Mission Street, Tamil Town', rating: 4.3, reviews: 7240, type: 'Tamil veg classic (since 1976)', price: '₹', mustTry: 'Chettinad masala dosa + mini idli sambar' },
+      { name: 'Baker Street', area: 'Bussy Street', rating: 4.5, reviews: 4640, type: 'Patisserie', price: '₹₹', mustTry: 'Almond croissant + Quiche Lorraine' },
+    ],
+    stays: [
+      { name: 'Le Dupleix', area: 'Rue de la Caserne', rating: 4.6, reviews: 920, type: 'Heritage colonial villa', price: '₹₹₹₹', highlight: 'Restored 18th-century mayor\'s house; courtyard pool; in the heart of the French quarter' },
+      { name: 'Maison Perumal CGH Earth', area: 'Rangapillai Street, Tamil Quarter', rating: 4.7, reviews: 640, type: 'Heritage Tamil mansion', price: '₹₹₹₹', highlight: '130-year-old Chettiar mansion, Tamil-quarter side, traditional courtyard layout' },
+      { name: 'La Villa', area: 'Rue Suffren', rating: 4.6, reviews: 540, type: 'Boutique design hotel', price: '₹₹₹', highlight: 'Minimalist French-Tamil fusion; plunge pool; eight rooms only' },
+      { name: 'Auroville Visitor Guest Houses', area: 'Auroville (8 km)', rating: 4.2, reviews: 240, type: 'Community guest houses', price: '₹', highlight: 'Stay inside the township; simple, earnest, and within walking distance of Matrimandir viewpoints' },
+    ],
+  },
+
+  andaman: {
+    tagline: 'India\'s pristine archipelago — coral reefs, white-sand beaches, and a colonial prison where the freedom struggle was forged.',
+    famousFor: ['Radhanagar Beach (Havelock)', 'Scuba Diving', 'Cellular Jail', 'Ross Island Ruins', 'Bioluminescent Plankton', 'Indigenous Tribes', 'Limestone Caves'],
+    attractions: [
+      { name: 'Radhanagar Beach (Havelock / Swaraj Dweep)', desc: '2 km of powder-white sand and turquoise water; consistently ranked among Asia\'s top beaches; sunset is the showstopper, arrive 90 minutes early.' },
+      { name: 'Cellular Jail (Port Blair)', desc: 'The colonial-era prison ("Kala Pani") where Veer Savarkar and hundreds of Indian freedom fighters were held in solitary; the evening Light & Sound Show recounts their stories with the original cells as backdrop.' },
+      { name: 'Elephant Beach (Havelock)', desc: 'Snorkelling and diving over a healthy fringing reef; reach by 20-minute speedboat from Havelock Jetty or a forest trek; visibility 20–30m in the dry season.' },
+      { name: 'Ross Island (Netaji Subhas Chandra Bose Dweep)', desc: 'The former British administrative headquarters, ruined by the 1941 earthquake and Japanese occupation; ghostly tropical-overgrown ruins of churches, ballrooms, and bakeries; ferry from Aberdeen Jetty.' },
+      { name: 'Neil Island (Shaheed Dweep)', desc: 'The quieter sister of Havelock; Bharatpur and Laxmanpur beaches, the Natural Bridge rock formation; ideal for slow-pace travellers escaping the dive-school crowds.' },
+    ],
+    history: [
+      'The Andaman archipelago has been home to indigenous tribes — the Great Andamanese, Onge, Jarawa, and the uncontacted Sentinelese — for over 60,000 years; some of the oldest continuous human habitations on Earth.',
+      'The British established the Cellular Jail in 1906 to incarcerate political prisoners; over 700 cells, each in solitary, formed the brutal "Kala Pani" punishment that broke many but radicalized many more.',
+      'The Japanese occupied the islands 1942–1945; Subhas Chandra Bose\'s Azad Hind government symbolically renamed them Shaheed and Swaraj Dweep in 1943 — names made official by the Indian government in 2018.',
+      'The 2004 Indian Ocean tsunami devastated the southern islands and killed thousands; rebuilding has been gradual but tourism on Havelock and Neil has recovered fully, while the Nicobar group remains largely off-limits.',
+    ],
+    bestTime: { period: 'October–May', reason: 'Calm seas, clear visibility for diving, 24–30°C. Skip June–September (monsoon, rough seas, ferry cancellations). Best dive visibility December–April.' },
+    quickFacts: { language: 'Hindi, English, Bengali, Tamil', currency: 'Indian Rupee (₹)', capital: 'Union Territory; capital is Port Blair', knownAs: 'Kala Pani / Emerald Islands', timezone: 'IST (UTC+5:30) — no DST despite being far east' },
+    cuisine: ['Fish Tandoori', 'Andamanese Fish Curry (coconut + curry leaves)', 'Crab Masala', 'Rava-fried Barracuda', 'South Indian breakfasts', 'Imported Bengali sweets'],
+    eateries: [
+      { name: 'Full Moon Cafe', area: 'Govind Nagar, Havelock', rating: 4.5, reviews: 2840, type: 'Beachside seafood', price: '₹₹', mustTry: 'Grilled red snapper + key lime pie at low tide' },
+      { name: 'Annapurna Cafeteria', area: 'Beach No 5, Havelock', rating: 4.3, reviews: 4640, type: 'South Indian thali', price: '₹', mustTry: 'Veg thali + filter coffee — the dive-school staple' },
+      { name: 'Lighthouse Restaurant', area: 'Marina Park, Port Blair', rating: 4.2, reviews: 3240, type: 'Open-air seafood', price: '₹₹', mustTry: 'Live lobster (selected from the tank) grilled with garlic butter' },
+      { name: 'Anju Coco', area: 'Beach No 3, Havelock', rating: 4.4, reviews: 1840, type: 'Multi-cuisine cafe', price: '₹₹', mustTry: 'Tandoori prawns + mocktails on the swing chairs' },
+    ],
+    stays: [
+      { name: 'Taj Exotica Resort & Spa', area: 'Radhanagar Beach Road, Havelock', rating: 4.7, reviews: 1240, type: 'Luxury beach resort', price: '₹₹₹₹', highlight: 'Bel-air villas overlooking Radhanagar; Jiva Spa; private beach access' },
+      { name: 'Barefoot at Havelock', area: 'Beach No 7, Havelock', rating: 4.6, reviews: 740, type: 'Eco beach resort', price: '₹₹₹₹', highlight: 'Thatched cottages metres from Radhanagar; no televisions, no air-conditioning in some cottages by design' },
+      { name: 'Sea Shell Havelock', area: 'Beach No 5, Havelock', rating: 4.4, reviews: 1640, type: 'Mid-range resort', price: '₹₹₹', highlight: 'Beachfront, walking distance to Govind Nagar dive shops' },
+      { name: 'SeaShell Port Blair', area: 'Marine Hill, Port Blair', rating: 4.4, reviews: 2200, type: 'City hotel', price: '₹₹', highlight: 'Best base for the first/last night around the flight; harbour views' },
+    ],
+  },
 };
 
 // Destination key aliases for fuzzy matching
@@ -1092,7 +1323,28 @@ const ALIASES = {
   'zurich': 'switzerland', 'bern': 'switzerland', 'interlaken': 'switzerland',
   'alleppey': 'kerala', 'munnar': 'kerala', 'kochi': 'kerala', 'thiruvananthapuram': 'kerala',
   'coorg': 'kerala',
+  'kovalam': 'kerala', 'thekkady': 'kerala', 'periyar': 'kerala', 'alappuzha': 'kerala',
+  'kumarakom': 'kerala', 'wayanad kerala': 'kerala',
   'bengaluru': 'bangalore', 'blr': 'bangalore', 'nandi hills': 'bangalore',
+  // Newly-added Indian destinations + sub-region aliases.
+  'new delhi': 'delhi', 'old delhi': 'delhi', 'ncr': 'delhi',
+  'pink city': 'jaipur',
+  'taj mahal': 'agra',
+  'pondy': 'pondicherry', 'puducherry': 'pondicherry', 'auroville': 'pondicherry',
+  'havelock': 'andaman', 'port blair': 'andaman', 'neil island': 'andaman',
+  'swaraj dweep': 'andaman', 'shaheed dweep': 'andaman',
+  'kalimpong': 'darjeeling',
+  // Kashmir spots — these are the towns within the Kashmir Valley itinerary.
+  'srinagar': 'kashmir', 'gulmarg': 'kashmir', 'pahalgam': 'kashmir', 'sonmarg': 'kashmir',
+  // Ladakh sub-regions / lakes / valleys.
+  'kargil': 'ladakh', 'nubra': 'ladakh', 'pangong': 'ladakh', 'pangong tso': 'ladakh',
+  // Meghalaya towns reached from Shillong.
+  'cherrapunji': 'meghalaya', 'mawlynnong': 'meghalaya',
+  // Himachal hill-station cluster reached from Manali / Dharamshala.
+  'mcleod ganj': 'manali', 'mcleodganj': 'manali', 'dharamshala': 'manali',
+  'kasol': 'manali', 'kullu': 'manali',
+  // Maharashtra hill stations grouped under Mahabaleshwar.
+  'panchgani': 'mahabaleshwar',
 };
 
 export function matchDestinationInfo(destination) {
