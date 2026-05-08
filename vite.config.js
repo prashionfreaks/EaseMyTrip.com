@@ -41,6 +41,17 @@ export default defineConfig({
     }),
   ],
   build: {
-    chunkSizeWarningLimit: 1000,
+    // Carve the heavy third-party deps out of the main bundle so the entry
+    // chunk tree-shakes down. @supabase/supabase-js is ~150 KB on its own,
+    // so it dwarfs everything else if we don't isolate it.
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          supabase: ['@supabase/supabase-js'],
+          router: ['react-router-dom'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 600,
   },
 })
