@@ -22,6 +22,27 @@ async function mustSeeFor(destination) {
   return [...new Set([...fromAttractions, ...fromFamousFor])].slice(0, 6);
 }
 
+// Curated eateries from destinationInfo.js, formatted "Name (Neighborhood)"
+// so the model knows where to place the meal. Returned to the Edge Function
+// as the `mustEat` array; the fill prompt swaps the generic "use real
+// eatery names" rule for "prefer these curated picks" when the list is
+// non-empty. Empty when the destination has no entry — the prompt then
+// falls back to its previous behavior.
+async function mustEatFor(destination) {
+  const { matchDestinationInfo } = await import('../data/destinationInfo');
+  const info = matchDestinationInfo(destination);
+  if (!info) return [];
+  return (info.eateries || []).map(e => {
+    const name = String(e?.name || '').trim();
+    if (!name) return '';
+    // Take the first comma-segment of the area ("Assagao, North Goa" →
+    // "Assagao") and strip trailing parenthetical notes ("(since 1923)").
+    const area = String(e?.area || '').trim()
+      .split(',')[0].replace(/\s*\(.*\)\s*$/, '').trim();
+    return area ? `${name} (${area})` : name;
+  }).filter(Boolean).slice(0, 6);
+}
+
 // AI generation is proxied through the `generate-itinerary` Edge Function —
 // the Anthropic API key stays server-side. When Supabase isn't configured
 // (demo mode), we fall back to the built-in templates.
@@ -117,6 +138,11 @@ export async function generateItineraryDay(destination, day, opts = {}) {
   const { date, location, theme, musts = [] } = day;
   const { isFirstDay = false, isLastDay = false, currency = 'USD' } = opts;
 
+  // Curated eateries flow into every fill — the model picks 1-2 per day.
+  // The dynamic-import inside mustEatFor is module-cached, so doing this
+  // per fill is essentially free after the first call.
+  const mustEat = await mustEatFor(destination);
+
   const { data, error } = await withTimeout(
     supabase.functions.invoke('generate-itinerary', {
       body: {
@@ -125,6 +151,7 @@ export async function generateItineraryDay(destination, day, opts = {}) {
         // Only this day's pre-assigned musts — not the whole trip's
         // mustSee. The fill prompt treats these as required.
         dayMusts: musts,
+        mustEat,
       },
     }),
     AI_CALL_TIMEOUT_MS,
@@ -200,12 +227,14 @@ async function generateWithClaude(destination, startDate, endDate, numDays, star
   // can take longer than skeleton/fill — give it 2× the per-call budget.
   // Currency is forwarded so the prompt can scale costs correctly (an INR
   // trip falling back here used to return USD-shaped numbers).
+  const mustEat = await mustEatFor(destination);
   const { data, error } = await withTimeout(
     supabase.functions.invoke('generate-itinerary', {
       body: {
         destination, startDate, endDate, numDays, currency,
         // Pass the confirmed stay so the model can plan around its area.
         stay: stay ? { name: stay.name, area: stay.area, notes: stay.notes } : null,
+        mustEat,
       },
     }),
     AI_CALL_TIMEOUT_MS * 2,

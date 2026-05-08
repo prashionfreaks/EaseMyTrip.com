@@ -71,6 +71,11 @@ serve(async (req) => {
   const mustSee = rawMustSee.map(sanitizeName).filter(Boolean).slice(0, 8);
   const rawDayMusts = Array.isArray(body?.dayMusts) ? body.dayMusts : [];
   const dayMusts = rawDayMusts.map(sanitizeName).filter(Boolean).slice(0, 4);
+  // Curated eateries from destinationInfo.js — formatted "Name (Neighborhood)".
+  // Same sanitizer (allows letters / numbers / spaces / common punctuation
+  // including parentheses) and a 6-entry cap to keep the prompt small.
+  const rawMustEat = Array.isArray(body?.mustEat) ? body.mustEat : [];
+  const mustEat = rawMustEat.map(sanitizeName).filter(Boolean).slice(0, 6);
 
   const dateRe = /^\d{4}-\d{2}-\d{2}$/;
   let prompt = '';
@@ -106,7 +111,15 @@ serve(async (req) => {
     const dayMustsLine = dayMusts.length
       ? ` These iconic ${safeDest} spots are pre-assigned to this day and MUST appear as items — use the proper name in the title for each: ${dayMusts.join(', ')}. Plan around them; total items 4-6 (scale up to 6 if needed to fit all of them).`
       : '';
-    prompt = `For day ${date} in ${safeLoc}${safeTheme ? ` (theme: ${safeTheme})` : ''} of a trip to ${safeDest}, plan 4-6 timed items.${arrivalNote}${departureNote}${dayMustsLine} Return ONLY a JSON array — no markdown, no commentary. Structure: [{"time":"09:00","title":"...","type":"activity","duration":120,"notes":"tip","cost":${guide.sample}}]. Types: activity|transport|accommodation|food. time is 24h HH:MM. Realistic ${currency} costs (numeric, no currency symbol) — typical ranges: ${guide.ranges}. Use these scales, not USD-equivalent numbers. For food items include the eatery / restaurant name in the title (e.g. "Lunch at Café XYZ") and add a per-person rate in notes (e.g. "${guide.perPersonHint} per person · try the signature dish").`;
+    // When the trip's destination has curated eateries in destinationInfo.js,
+    // the client forwards them in `mustEat`. Tell the model to PREFER those
+    // for the day's food slots (1-2 per day typically) instead of inventing
+    // its own. When the list is empty, fall back to the previous generic
+    // "use real eatery names" rule.
+    const foodRule = mustEat.length
+      ? `For food items, prefer these well-loved local spots — use the exact name in the title (e.g. "Lunch at ${mustEat[0]}"): ${mustEat.join('; ')}. Add a per-person rate in notes (e.g. "${guide.perPersonHint} per person · try the signature dish").`
+      : `For food items include the eatery / restaurant name in the title (e.g. "Lunch at Café XYZ") and add a per-person rate in notes (e.g. "${guide.perPersonHint} per person · try the signature dish").`;
+    prompt = `For day ${date} in ${safeLoc}${safeTheme ? ` (theme: ${safeTheme})` : ''} of a trip to ${safeDest}, plan 4-6 timed items.${arrivalNote}${departureNote}${dayMustsLine} Return ONLY a JSON array — no markdown, no commentary. Structure: [{"time":"09:00","title":"...","type":"activity","duration":120,"notes":"tip","cost":${guide.sample}}]. Types: activity|transport|accommodation|food. time is 24h HH:MM. Realistic ${currency} costs (numeric, no currency symbol) — typical ranges: ${guide.ranges}. Use these scales, not USD-equivalent numbers. ${foodRule}`;
     maxTokens = 1024;
   } else {
     // Legacy 'full' mode — single-shot fallback. Now respects body.currency
@@ -120,7 +133,10 @@ serve(async (req) => {
       return json({ error: 'Invalid parameters' }, 400, cors);
     }
     const fullGuide = guideFor(fullCurrency);
-    prompt = `Create a day-by-day travel itinerary for ${safeDest} from ${startDate} to ${endDate} (${numDays} days). Return ONLY a valid JSON array — no markdown. Structure: [{"date":"YYYY-MM-DD","location":"area","items":[{"time":"09:00","title":"...","type":"activity","duration":120,"notes":"tip","cost":${fullGuide.sample}}]}]. Types: activity|transport|accommodation|food. 4–6 items/day. Realistic ${fullCurrency} costs (numeric, no currency symbol) — typical ranges: ${fullGuide.ranges}. time is 24h HH:MM. For food type items, include the eatery/restaurant name in the title (e.g. "Lunch at Café XYZ") and add per-person rate in notes (e.g. "${fullGuide.perPersonHint} per person · try the signature dish").`;
+    const fullFoodRule = mustEat.length
+      ? `For food items, prefer these well-loved local spots — use the exact name in the title (e.g. "Lunch at ${mustEat[0]}"): ${mustEat.join('; ')}. Add per-person rate in notes (e.g. "${fullGuide.perPersonHint} per person · try the signature dish").`
+      : `For food type items, include the eatery/restaurant name in the title (e.g. "Lunch at Café XYZ") and add per-person rate in notes (e.g. "${fullGuide.perPersonHint} per person · try the signature dish").`;
+    prompt = `Create a day-by-day travel itinerary for ${safeDest} from ${startDate} to ${endDate} (${numDays} days). Return ONLY a valid JSON array — no markdown. Structure: [{"date":"YYYY-MM-DD","location":"area","items":[{"time":"09:00","title":"...","type":"activity","duration":120,"notes":"tip","cost":${fullGuide.sample}}]}]. Types: activity|transport|accommodation|food. 4–6 items/day. Realistic ${fullCurrency} costs (numeric, no currency symbol) — typical ranges: ${fullGuide.ranges}. time is 24h HH:MM. ${fullFoodRule}`;
     maxTokens = 4096;
   }
 
