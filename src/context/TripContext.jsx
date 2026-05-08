@@ -759,56 +759,41 @@ export function TripProvider({ children }) {
     }));
   }, [updateTrip]);
 
-  const joinTripViaInvite = useCallback(async (tripId) => {
-    console.log('[join] called, tripId:', tripId, 'dbUser:', dbUser?.id);
-    if (!isSupabaseConfigured || !dbUser) { console.warn('[join] no supabase or dbUser'); return null; }
+  // Join via shareable invite code. The server-side accept_invite() RPC is
+  // SECURITY DEFINER — it validates the invite_code against trip_invites
+  // (must be 'pending' and unexpired), inserts into trip_members, and
+  // appends to data.members in one transaction. Direct trip_members
+  // self-insertion was removed in the 2026-05-06 migration because it let
+  // anyone with a trip ID join any trip.
+  //
+  // Legacy ?join=<tripId> links contain a 36-char UUID, which won't match
+  // any invite_code — accept_invite raises "Invalid or expired invite" and
+  // we surface a clear toast rather than silently failing.
+  const joinTripViaInvite = useCallback(async (inviteCode) => {
+    if (!isSupabaseConfigured || !dbUser) return null;
+    if (!inviteCode || typeof inviteCode !== 'string') return null;
     try {
-      if (!(await ensureSession())) { console.warn('[join] session check failed'); return null; }
+      if (!(await ensureSession())) return null;
 
-      // Check if already a member
-      const { data: existing } = await supabase
-        .from('trip_members')
-        .select('id')
-        .eq('trip_id', tripId)
-        .eq('user_id', dbUser.id)
-        .maybeSingle();
-
-      console.log('[join] already member?', !!existing);
-
-      if (!existing) {
-        // Add to trip_members table
-        const memberColor = colorFromId(dbUser.id);
-        const { error: memErr } = await supabase
-          .from('trip_members')
-          .insert({ trip_id: tripId, user_id: dbUser.id, role: 'member', color: memberColor });
-
-        if (memErr) { console.error('[join] member insert error:', memErr); toast.error('Failed to join trip.'); return null; }
-        console.log('[join] inserted into trip_members');
-
-        // Add user to trip's data.members JSON
-        const { data: tripRow } = await supabase.from('trips').select('data').eq('id', tripId).single();
-        if (tripRow?.data) {
-          const memberName = dbUser.user_metadata?.full_name || dbUser.email?.split('@')[0] || 'User';
-          const userEmail = dbUser.email?.toLowerCase();
-          // Remove any placeholder entry with same email
-          const cleanMembers = (tripRow.data.members || []).filter(
-            m => !(m.id?.startsWith('invited-') && m.email?.toLowerCase() === userEmail)
-          );
-          const updatedData = {
-            ...tripRow.data,
-            members: [...cleanMembers, {
-              id: dbUser.id, name: memberName, email: dbUser.email,
-              color: memberColor, role: 'member',
-            }],
-          };
-          await supabase.from('trips').update({ data: updatedData, updated_at: new Date().toISOString() }).eq('id', tripId);
-          console.log('[join] updated trip data.members');
+      const { data: tripId, error } = await supabase.rpc('accept_invite', {
+        p_invite_code: inviteCode,
+      });
+      if (error) {
+        // PostgREST surfaces our raise exception as { message: 'Invalid or expired invite' }
+        const msg = error.message || '';
+        if (msg.includes('Invalid or expired invite')) {
+          toast.error('This invite link is no longer valid. Ask the organizer for a fresh one.');
+        } else if (msg.includes('Not authenticated')) {
+          toast.error('Please sign in first, then click the invite link again.');
+        } else {
+          console.error('[join] rpc error:', error);
+          toast.error('Failed to join trip. Please try again.');
         }
+        return null;
       }
+      if (!tripId) return null;
 
-      // Reload trips so the joined trip appears
       await fetchTrips(dbUser.id);
-      console.log('[join] done, returning tripId:', tripId);
       return tripId;
     } catch (err) {
       console.error('[join] error:', err);
@@ -817,9 +802,45 @@ export function TripProvider({ children }) {
     }
   }, [dbUser, fetchTrips]);
 
+  // Change a member's role. Writes to trip_members.role first (which gates
+  // RLS) so a UI-promoted organizer actually has DB write access by the
+  // time the JSON-blob mirror lands. Refuses to demote the last organizer.
+  const setMemberRole = useCallback(async (tripId, userId, role) => {
+    if (role !== 'organizer' && role !== 'member') return;
+
+    if (role === 'member') {
+      // Read current roster from state — guard against demoting the last organizer.
+      const trip = trips.find(t => t.id === tripId);
+      const orgs = (trip?.members || []).filter(m => m.role === 'organizer');
+      if (orgs.length === 1 && orgs[0].id === userId) {
+        toast.error('At least one organizer is required.');
+        return;
+      }
+    }
+
+    if (isSupabaseConfigured) {
+      if (!(await ensureSession())) return;
+      const { error } = await supabase
+        .from('trip_members')
+        .update({ role })
+        .eq('trip_id', tripId)
+        .eq('user_id', userId);
+      if (error) {
+        console.error('[setMemberRole] DB update failed:', error);
+        toast.error('Failed to change role.');
+        return;
+      }
+    }
+
+    updateTrip(tripId, trip => ({
+      ...trip,
+      members: (trip.members || []).map(m => m.id === userId ? { ...m, role } : m),
+    }));
+  }, [trips, updateTrip]);
+
   const value = useMemo(() => ({
     trips, activeTrip, activeTripId, currentUser, tripsLoaded,
-    setActiveTripId, updateTrip, addTrip, removeTrip, removeMember, setTripPinned, setTripStay,
+    setActiveTripId, updateTrip, addTrip, removeTrip, removeMember, setMemberRole, setTripPinned, setTripStay,
     vote, addPoll,
     addExpense, updateExpense, deleteExpense,
     addItineraryItem, addContingency, markSettlementPaid,
@@ -828,7 +849,7 @@ export function TripProvider({ children }) {
     sendDueReminder, markRemindersSeen,
   }), [
     trips, activeTrip, activeTripId, currentUser, tripsLoaded,
-    updateTrip, addTrip, removeTrip, removeMember,
+    updateTrip, addTrip, removeTrip, removeMember, setMemberRole,
     vote, addPoll,
     addExpense, updateExpense, deleteExpense,
     addItineraryItem, addContingency, markSettlementPaid,

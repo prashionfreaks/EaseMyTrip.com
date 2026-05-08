@@ -246,3 +246,134 @@ $$ language plpgsql set search_path = public, pg_temp;
 
 alter publication supabase_realtime add table public.trips;
 alter publication supabase_realtime add table public.trip_members;
+
+-- ─── 2026-05-06 SECURITY MIGRATION ──────────────────────────────────────────
+-- Background: the original trip_members insert policy allowed any authenticated
+-- user to insert themselves into any trip (auth.uid() = user_id). The client's
+-- shareable invite link contained the trip ID, so anyone who saw a link could
+-- permanently join the trip — bypassing trip_invites entirely.
+--
+-- This block:
+--   1. Tightens trip_members insert: self-insertion is now allowed only for
+--      the trip creator, one-time at trip creation. All other joins must go
+--      through accept_invite() (SECURITY DEFINER).
+--   2. Adds an UPDATE policy on trip_members so organizers can change roles.
+--      Previously there was no UPDATE policy — RLS denied role changes
+--      silently, leaving the JSON blob and DB row out of sync.
+--   3. Reworks accept_invite() to be reusable until expires_at. The old
+--      version flipped status='accepted' on first use, which broke the
+--      shareable-link UX. Idempotent inserts + the existing "not exists"
+--      JSON-blob guard make repeat calls a no-op.
+--
+-- After running this migration, deploy the matching client changes:
+--   - InviteModal mints/reuses a real invite_code (not the trip ID).
+--   - joinTripViaInvite calls rpc('accept_invite', { p_invite_code }).
+--   - setMemberRole writes both trip_members.role and data.members[].role.
+
+-- 1. Tighten trip_members insert.
+drop policy if exists "Organizers can insert trip_members" on public.trip_members;
+create policy "Organizers can insert trip_members"
+  on public.trip_members for insert with check (
+    -- Trip creator self-inserts as organizer at trip creation. After that
+    -- they ARE an organizer and the second clause covers further inserts.
+    (auth.uid() = user_id and exists (
+      select 1 from public.trips
+      where id = trip_members.trip_id and created_by = auth.uid()
+    ))
+    or
+    -- Existing organizer adds someone else (back-office add; the normal
+    -- invite flow uses accept_invite which is SECURITY DEFINER and bypasses
+    -- this policy entirely).
+    exists (
+      select 1 from public.trip_members
+      where trip_id = trip_members.trip_id
+        and user_id = auth.uid()
+        and role = 'organizer'
+    )
+  );
+
+-- 2. Allow organizers to update member roles.
+drop policy if exists "Organizers can update trip_members" on public.trip_members;
+create policy "Organizers can update trip_members"
+  on public.trip_members for update using (
+    exists (
+      select 1 from public.trip_members tm
+      where tm.trip_id = trip_members.trip_id
+        and tm.user_id = auth.uid()
+        and tm.role = 'organizer'
+    )
+  );
+
+-- 3. Reusable accept_invite. Status stays 'pending' so the same shareable
+--    link works for all invitees until expires_at. To revoke a link,
+--    flip its status to 'expired' or shorten expires_at.
+create or replace function public.accept_invite(p_invite_code text)
+returns uuid as $$
+declare
+  v_trip_id   uuid;
+  v_user_id   uuid;
+  v_user_name text;
+  v_email     text;
+  v_color     text;
+  v_member    jsonb;
+begin
+  v_user_id := auth.uid();
+  if v_user_id is null then raise exception 'Not authenticated'; end if;
+
+  select trip_id into v_trip_id
+  from public.trip_invites
+  where invite_code = p_invite_code
+    and status = 'pending'
+    and expires_at > now();
+
+  if v_trip_id is null then raise exception 'Invalid or expired invite'; end if;
+
+  select
+    coalesce(raw_user_meta_data->>'full_name', split_part(email, '@', 1)),
+    email,
+    (array['#2563eb','#7c3aed','#0891b2','#059669','#d97706','#dc2626','#db2777'])[floor(random()*7)+1]
+  into v_user_name, v_email, v_color
+  from auth.users where id = v_user_id;
+
+  insert into public.trip_members (trip_id, user_id, role, color)
+  values (v_trip_id, v_user_id, 'member', v_color)
+  on conflict (trip_id, user_id) do nothing;
+
+  v_member := jsonb_build_object(
+    'id',    v_user_id::text,
+    'name',  v_user_name,
+    'email', v_email,
+    'color', v_color,
+    'role',  'member'
+  );
+  update public.trips
+  set data = jsonb_set(
+    data, '{members}',
+    coalesce(data->'members', '[]'::jsonb) || v_member
+  )
+  where id = v_trip_id
+    and not exists (
+      select 1 from jsonb_array_elements(coalesce(data->'members','[]'::jsonb)) m
+      where m->>'id' = v_user_id::text
+    );
+
+  return v_trip_id;
+end;
+$$ language plpgsql security definer set search_path = public, pg_temp;
+
+-- ─── Storage Bucket — corrected upload path convention ──────────────────────
+-- The "Uploader can delete own photos" policy expects the FIRST folder of the
+-- object name to be the uploader's auth.uid()::text. Originally the client
+-- uploaded to "${tripId}/<file>", which meant the policy never matched and
+-- deletes silently failed. The client now uploads to
+-- "${userId}/${tripId}/<file>" so the policy works as intended.
+--
+-- Existing objects under "${tripId}/<file>" cannot be deleted by anyone and
+-- must be cleaned up out of band (Supabase Dashboard → Storage → trip-photos
+-- → bulk delete) if you have legacy uploads.
+--
+-- Optional tightening — if you want the bucket to also reject INSERTs that
+-- DON'T start with the uploader's user id, change the INSERT policy to:
+--   (auth.uid() IS NOT NULL AND auth.uid()::text = (storage.foldername(name))[1])
+-- The client already enforces the convention; this just enforces it at the
+-- DB layer too.

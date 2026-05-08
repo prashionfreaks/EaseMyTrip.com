@@ -102,7 +102,11 @@ export default function Photos() {
           try {
             const blob = pf.blob;
             const safeName = pf.file.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 80);
-            const path = `${activeTrip.id}/${Date.now()}-${Math.random().toString(36).slice(2, 6)}-${safeName}`;
+            // Path MUST start with the uploader's user id — the storage
+            // DELETE policy is `auth.uid()::text = (storage.foldername(name))[1]`.
+            // An older convention used `${tripId}/...` first; that left
+            // photos un-deletable because the policy never matched.
+            const path = `${currentUser.id}/${activeTrip.id}/${Date.now()}-${Math.random().toString(36).slice(2, 6)}-${safeName}`;
             const { data: uploadData, error } = await supabase.storage
               .from('trip-photos')
               .upload(path, blob, { contentType: blob.type || 'image/jpeg', upsert: true });

@@ -1,19 +1,100 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTrips } from '../context/TripContext';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import Modal from './Modal';
 import { Copy, Users, Check, X, Link2, UserPlus, Crown, MessageCircle } from 'lucide-react';
 
 export default function InviteModal({ onClose }) {
-  const { activeTrip, updateTrip, removeMember, currentUser } = useTrips();
+  const { activeTrip, removeMember, setMemberRole, currentUser } = useTrips();
   const [copied, setCopied] = useState(false);
   const [tab, setTab] = useState('invite');
+  const [inviteCode, setInviteCode] = useState(null);
+  const [inviteLoading, setInviteLoading] = useState(true);
+  const [inviteError, setInviteError] = useState(null);
+
+  // Whether the current user is an organizer of THIS trip — required to
+  // mint invite codes (RLS) and to change other members' roles. The global
+  // currentUser.role is always 'organizer' (it describes the user's
+  // relationship to the app, not to a specific trip), so we re-check
+  // against the trip's member list.
+  const myMembership = (activeTrip?.members || []).find(m => m.id === currentUser?.id);
+  const iAmOrganizer = myMembership?.role === 'organizer';
+
+  useEffect(() => {
+    if (!activeTrip) return;
+    let cancelled = false;
+
+    async function loadOrCreateInvite() {
+      setInviteLoading(true);
+      setInviteError(null);
+
+      // Demo mode has no DB — fall back to the trip ID. There's no security
+      // implication offline (everything is in localStorage), and it keeps
+      // the modal usable in the Playwright suite.
+      if (!isSupabaseConfigured) {
+        if (!cancelled) {
+          setInviteCode(activeTrip.id);
+          setInviteLoading(false);
+        }
+        return;
+      }
+
+      // Non-organizers can SELECT invites for their trips but can't INSERT
+      // — they get whatever active code already exists, or a "ask an
+      // organizer" state if there is none.
+      try {
+        const nowIso = new Date().toISOString();
+        const { data: existing } = await supabase
+          .from('trip_invites')
+          .select('invite_code, expires_at')
+          .eq('trip_id', activeTrip.id)
+          .eq('status', 'pending')
+          .gt('expires_at', nowIso)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (cancelled) return;
+
+        if (existing?.invite_code) {
+          setInviteCode(existing.invite_code);
+        } else if (iAmOrganizer) {
+          const { data: created, error } = await supabase
+            .from('trip_invites')
+            .insert({ trip_id: activeTrip.id, invited_by: currentUser?.id })
+            .select('invite_code')
+            .single();
+          if (error) throw error;
+          if (!cancelled) setInviteCode(created.invite_code);
+        } else {
+          if (!cancelled) {
+            setInviteCode(null);
+            setInviteError('Only an organizer can create an invite link. Ask one to share it with you.');
+          }
+        }
+      } catch (err) {
+        console.error('[invite] load error:', err);
+        if (!cancelled) {
+          setInviteCode(null);
+          setInviteError('Could not load the invite link. Please try again.');
+        }
+      } finally {
+        if (!cancelled) setInviteLoading(false);
+      }
+    }
+
+    loadOrCreateInvite();
+    return () => { cancelled = true; };
+  }, [activeTrip?.id, iAmOrganizer, currentUser?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!activeTrip) return null;
 
-  // Static invite link — just uses the trip ID, no DB lookup needed
-  const inviteLink = `${window.location.origin}${window.location.pathname}?join=${activeTrip.id}`;
+  const inviteLink = inviteCode
+    ? `${window.location.origin}${window.location.pathname}?join=${inviteCode}`
+    : '';
 
   async function copyLink() {
+    if (!inviteLink) return;
     try {
       await navigator.clipboard.writeText(inviteLink);
     } catch {
@@ -35,10 +116,7 @@ export default function InviteModal({ onClose }) {
   }
 
   function setRole(memberId, role) {
-    updateTrip(activeTrip.id, trip => ({
-      ...trip,
-      members: (trip.members || []).map(m => m.id === memberId ? { ...m, role } : m),
-    }));
+    setMemberRole(activeTrip.id, memberId, role);
   }
 
   const organizers = (activeTrip.members || []).filter(m => m.role === 'organizer');
@@ -94,30 +172,46 @@ export default function InviteModal({ onClose }) {
               <Link2 size={13} style={{ display: 'inline', verticalAlign: -2, marginRight: 4 }} />
               Shareable Invite Link
             </label>
-            <div style={{
-              background: '#f8fafc', border: '1.5px solid #e2e8f0', borderRadius: 10,
-              padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 10,
-            }}>
-              <code style={{ flex: 1, fontSize: 12, color: '#475569', wordBreak: 'break-all', lineHeight: 1.4 }}>
-                {inviteLink}
-              </code>
-              <button
-                onClick={copyLink}
-                style={{
-                  padding: '6px 12px', borderRadius: 8, border: 'none', flexShrink: 0,
-                  background: copied ? '#dcfce7' : '#f1f5f9',
-                  cursor: 'pointer', fontSize: 12, fontWeight: 600,
-                  color: copied ? '#16a34a' : '#475569',
-                  display: 'flex', alignItems: 'center', gap: 5,
-                  transition: 'all 0.2s',
-                }}
-              >
-                {copied ? <Check size={13} /> : <Copy size={13} />}
-                {copied ? 'Copied!' : 'Copy'}
-              </button>
-            </div>
+            {inviteLoading ? (
+              <div style={{
+                background: '#f8fafc', border: '1.5px solid #e2e8f0', borderRadius: 10,
+                padding: '14px', fontSize: 12, color: '#94a3b8',
+              }}>
+                Generating invite link…
+              </div>
+            ) : inviteError ? (
+              <div style={{
+                background: '#fef3c7', border: '1.5px solid #fde68a', borderRadius: 10,
+                padding: '12px 14px', fontSize: 12, color: '#92400e',
+              }}>
+                {inviteError}
+              </div>
+            ) : (
+              <div style={{
+                background: '#f8fafc', border: '1.5px solid #e2e8f0', borderRadius: 10,
+                padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 10,
+              }}>
+                <code style={{ flex: 1, fontSize: 12, color: '#475569', wordBreak: 'break-all', lineHeight: 1.4 }}>
+                  {inviteLink}
+                </code>
+                <button
+                  onClick={copyLink}
+                  style={{
+                    padding: '6px 12px', borderRadius: 8, border: 'none', flexShrink: 0,
+                    background: copied ? '#dcfce7' : '#f1f5f9',
+                    cursor: 'pointer', fontSize: 12, fontWeight: 600,
+                    color: copied ? '#16a34a' : '#475569',
+                    display: 'flex', alignItems: 'center', gap: 5,
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  {copied ? <Check size={13} /> : <Copy size={13} />}
+                  {copied ? 'Copied!' : 'Copy'}
+                </button>
+              </div>
+            )}
             <p style={{ fontSize: 12, color: '#9ca3af', marginTop: 6 }}>
-              Anyone with this link can join this trip after signing in.
+              Anyone with this link can join this trip after signing in. Expires in 7 days.
             </p>
           </div>
 
@@ -128,7 +222,9 @@ export default function InviteModal({ onClose }) {
               Share via WhatsApp
             </label>
             <button
+              disabled={!inviteLink}
               onClick={() => {
+                if (!inviteLink) return;
                 const message = `Hey! Join my trip "${activeTrip.name}" on LetsWander:\n${inviteLink}`;
                 window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
               }}
@@ -136,13 +232,16 @@ export default function InviteModal({ onClose }) {
                 width: '100%', padding: '12px 16px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
                 borderRadius: 10, border: 'none',
-                background: '#25D366', color: 'white',
-                fontSize: 14, fontWeight: 600, cursor: 'pointer',
-                boxShadow: '0 2px 8px rgba(37,211,102,0.3)',
+                background: inviteLink ? '#25D366' : '#cbd5e1',
+                color: 'white',
+                fontSize: 14, fontWeight: 600,
+                cursor: inviteLink ? 'pointer' : 'not-allowed',
+                opacity: inviteLink ? 1 : 0.7,
+                boxShadow: inviteLink ? '0 2px 8px rgba(37,211,102,0.3)' : 'none',
                 transition: 'all 0.15s',
               }}
-              onMouseOver={e => { e.currentTarget.style.background = '#1fb855'; }}
-              onMouseOut={e => { e.currentTarget.style.background = '#25D366'; }}
+              onMouseOver={e => { if (inviteLink) e.currentTarget.style.background = '#1fb855'; }}
+              onMouseOut={e => { if (inviteLink) e.currentTarget.style.background = '#25D366'; }}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
                 <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
