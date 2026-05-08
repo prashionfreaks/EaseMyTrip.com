@@ -49,10 +49,11 @@ async function mustEatFor(destination) {
 export function hasAIKey() { return isSupabaseConfigured; }
 
 // Per-call ceiling on Anthropic round-trips. Without this, a stalled upstream
-// can hang a day card for minutes (Supabase Edge default is ~150 s). At 15 s
-// the fill is genuinely broken and the user is better served with a retry
-// affordance than a spinner.
-const AI_CALL_TIMEOUT_MS = 15000;
+// can hang a day card for minutes (Supabase Edge default is ~150 s). 30 s
+// covers a worst-case cold-start (~10 s) plus a slow Anthropic round-trip
+// (~15 s) plus a buffer; faster than the SDK default but loose enough that
+// a healthy first call after a redeploy doesn't time out.
+const AI_CALL_TIMEOUT_MS = 30000;
 
 function withTimeout(promise, ms, label) {
   return Promise.race([
@@ -61,6 +62,32 @@ function withTimeout(promise, ms, label) {
       setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms)
     ),
   ]);
+}
+
+// Pull the actual HTTP status + a snippet of the response body out of
+// supabase.functions.invoke()'s error object so the console warnings say
+// "HTTP 401 — {error: 'Unauthorized'}" instead of the generic "non-2xx
+// status code". Tolerant of SDK version differences in the error shape.
+async function describeInvokeError(error) {
+  if (!error) return 'unknown error';
+  let detail = error.message || 'edge function error';
+  try {
+    const ctx = error.context;
+    if (ctx && typeof ctx === 'object') {
+      if (typeof ctx.status === 'number') detail = `HTTP ${ctx.status}`;
+      // ctx.body may be a string, an object, or a ReadableStream depending
+      // on SDK version. Prefer .text() if it's a Response-like object.
+      if (typeof ctx.text === 'function') {
+        const body = await ctx.text().catch(() => '');
+        if (body) detail += ` — ${body.slice(0, 200)}`;
+      } else if (typeof ctx.body === 'string') {
+        detail += ` — ${ctx.body.slice(0, 200)}`;
+      } else if (ctx.body) {
+        try { detail += ` — ${JSON.stringify(ctx.body).slice(0, 200)}`; } catch { /* ignore */ }
+      }
+    }
+  } catch { /* never let diagnostic extraction crash the call */ }
+  return detail;
 }
 
 // Cheap no-op invoke to thaw the Edge Function's Deno isolate before the
@@ -114,7 +141,7 @@ export async function generateItinerarySkeleton(destination, startDate, endDate)
     AI_CALL_TIMEOUT_MS,
     'Skeleton generation',
   );
-  if (error) throw new Error(error.message || 'Edge function error');
+  if (error) throw new Error(await describeInvokeError(error));
   if (!Array.isArray(data?.skeleton)) throw new Error('Invalid skeleton response');
 
   const skeleton = data.skeleton.map((d, i) => ({
@@ -157,7 +184,7 @@ export async function generateItineraryDay(destination, day, opts = {}) {
     AI_CALL_TIMEOUT_MS,
     `Day fill (${date})`,
   );
-  if (error) throw new Error(error.message || 'Edge function error');
+  if (error) throw new Error(await describeInvokeError(error));
   if (!Array.isArray(data?.items)) throw new Error('Invalid fill response');
 
   return data.items.map((item, j) => ({
@@ -240,7 +267,7 @@ async function generateWithClaude(destination, startDate, endDate, numDays, star
     AI_CALL_TIMEOUT_MS * 2,
     'Full itinerary generation',
   );
-  if (error) throw new Error(error.message || 'Edge function error');
+  if (error) throw new Error(await describeInvokeError(error));
   if (!Array.isArray(data?.days)) throw new Error('Invalid response');
   return data.days.map((day, i) => ({
     id: 'day' + (Date.now() + i),
