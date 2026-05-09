@@ -1265,6 +1265,176 @@ export const DESTINATION_INFO = {
     ],
   },
 
+  lucknow: {
+    tagline: 'The City of Nawabs — where Mughal-Awadhi grace, kebabs you can fold without breaking, and the most polite Hindi in India still hold court.',
+    famousFor: ['Bara Imambara', 'Tunday Kababi', 'Chikan Embroidery', 'Awadhi Cuisine', 'Hazratganj', 'Residency Ruins', 'Nawabi Heritage'],
+    attractions: [
+      { name: 'Bara Imambara', desc: 'Built 1784 by Nawab Asaf-ud-Daula as a famine-relief project; the 50m vaulted hall is the largest unsupported chamber in the world, and the Bhul Bhulaiya labyrinth above it has 489 doorways.' },
+      { name: 'Chota Imambara', desc: 'The 1838 ornate tomb of Nawab Muhammad Ali Shah; gilded chandeliers, Belgian glass, and intricate Arabic calligraphy on every wall.' },
+      { name: 'Rumi Darwaza', desc: 'A 60-foot Turkish-style gateway built 1784, the architectural hallmark of Awadh — modeled on the Sublime Porte at Istanbul, lit dramatically at night.' },
+      { name: 'British Residency', desc: 'The 1857 Mutiny ruins where the British were besieged for 87 days; cannonball-pocked walls and the original cemetery preserved as memorial; the Residency Museum traces the siege day-by-day.' },
+      { name: 'Hazratganj', desc: 'The colonial-era main shopping street since the 1850s — chikan boutiques, Royal Cafe, Sahu Cinema; the gentlemen\'s evening promenade tradition continues.' },
+      { name: 'Aminabad', desc: 'Old Lucknow\'s chaotic bazaar — Tunday Kababi flagship, attar perfume shops, paan stalls, and chikan wholesale dens; the heart of pre-British Lucknow.' },
+    ],
+    history: [
+      'Lucknow rose to prominence as the capital of the Awadh kingdom under Nawab Asaf-ud-Daula in 1775; the Nawabs were patrons of music, poetry, dance, and the elaborate cuisine that bears their name.',
+      'The British exiled the last Nawab Wajid Ali Shah to Kolkata in 1856, dismantling Awadh; this seeded the resentment that erupted as the 1857 Indian Rebellion.',
+      'During the Rebellion, the British were besieged in the Residency for 87 days; the eventual relief by Henry Havelock and Colin Campbell became Victorian Britain\'s defining military legend.',
+      'Modern Lucknow remains the capital of Uttar Pradesh and the cultural heart of Awadhi identity — the chikan embroidery industry employs ~250,000 women across the region, and the Urdu spoken here is considered the most refined anywhere.',
+    ],
+    bestTime: { period: 'October–March', reason: '15–25°C is perfect for sightseeing and the food trail. Avoid May–June (45°C+) and the post-Diwali November smog peak. Ramadan brings the night kebab markets to life — dates shift each year.' },
+    quickFacts: { language: 'Hindi, Urdu, English', currency: 'Indian Rupee (₹)', capital: 'Capital of Uttar Pradesh', knownAs: 'City of Nawabs / Adab ki Sheher', timezone: 'IST (UTC+5:30)' },
+    cuisine: ['Galouti Kebab', 'Tunde ke Kabab', 'Lucknowi (Awadhi) Biryani', 'Sheermal', 'Nihari-Kulcha', 'Makhan Malai (winter only)', 'Paan'],
+    eateries: [
+      { name: 'Tunday Kababi', area: 'Aminabad / Naka Hindola / Kapoorthala', rating: 4.4, reviews: 18400, type: 'Awadhi kebabs (since 1905)', price: '₹', mustTry: 'Galouti Kebab + Sheermal' },
+      { name: 'Royal Cafe', area: 'Hazratganj', rating: 4.3, reviews: 5840, type: 'Awadhi + chaat (since 1948)', price: '₹₹', mustTry: 'Basket Chaat + Kheer' },
+      { name: 'Idris ki Biryani', area: 'Old Lucknow / Aminabad', rating: 4.4, reviews: 6240, type: 'Pure Awadhi biryani (since 1968)', price: '₹₹', mustTry: 'Lucknowi Mutton Biryani — slow-cooked dum style' },
+      { name: 'Naushijaan', area: 'Hazratganj', rating: 4.3, reviews: 3640, type: 'Modern Awadhi fine dining', price: '₹₹₹', mustTry: 'Galouti Kebab platter + Mutton Biryani' },
+    ],
+    stays: [
+      { name: 'Taj Mahal Lucknow', area: 'Gomti Nagar', rating: 4.6, reviews: 3240, type: 'Luxury hotel', price: '₹₹₹₹', highlight: 'Lawn-side dining at Oudhyana, suite views over the Gomti, Awadhi tasting menus' },
+      { name: 'The Lebua Lucknow', area: 'Mall Avenue', rating: 4.6, reviews: 1240, type: 'Heritage boutique (1936 building)', price: '₹₹₹₹', highlight: 'Restored colonial bungalow, library bar, walking distance to Hazratganj' },
+      { name: 'Hyatt Regency Lucknow', area: 'Vibhuti Khand', rating: 4.5, reviews: 2840, type: 'Modern luxury', price: '₹₹₹', highlight: 'Indoor pool, walking distance to Lulu Mall' },
+      { name: 'Ginger Lucknow', area: 'IT City', rating: 4.2, reviews: 1840, type: 'Budget chain', price: '₹', highlight: 'Reliable, walkable to Hazratganj via auto, decent breakfast' },
+    ],
+  },
+
+  chennai: {
+    tagline: 'India\'s southern gateway — temple-town heritage, beach-city sprawl, the home of filter coffee, and Tamil cinema\'s pulse.',
+    famousFor: ['Marina Beach', 'Filter Coffee', 'Tamil Cinema (Kollywood)', 'Carnatic Music', 'Mahabalipuram (UNESCO)', 'South Indian Breakfast', 'IT Hub'],
+    attractions: [
+      { name: 'Marina Beach', desc: 'A 13km urban beach (the second-longest in the world); sunrise crowds, sunset horse rides, the MGR Memorial, and statues commemorating every major Tamil cultural figure of the 20th century.' },
+      { name: 'Kapaleeshwarar Temple, Mylapore', desc: 'A 7th-century Pallava-era Shiva temple rebuilt in the 16th century; the 37m gopuram is encrusted with painted figures, and the surrounding Mada Streets bazaar is the spiritual heart of old Chennai.' },
+      { name: 'San Thome Basilica', desc: 'Built over the tomb of St. Thomas the Apostle — one of only three churches in the world built directly over an apostle\'s tomb; the current Neo-Gothic structure dates to 1898.' },
+      { name: 'Fort St. George', desc: 'Britain\'s first foothold in India (1644); now houses the Tamil Nadu Legislative Assembly and the Fort Museum (uniforms, weapons, and the original Union Jack from 1687).' },
+      { name: 'Government Museum, Egmore', desc: 'India\'s second-oldest museum (1851); the bronze gallery houses the finest Chola-era bronzes anywhere — including the iconic dancing Nataraja that defined the Indian art canon.' },
+      { name: 'Mahabalipuram (60 km)', desc: 'UNESCO Pallava-era rock temples (7th c.) on the Bay of Bengal coast; the Shore Temple, Five Rathas, and Arjuna\'s Penance bas-relief are unmissable; perfect day trip from Chennai.' },
+    ],
+    history: [
+      'Founded 1639 when the British East India Company built Fort St. George on a strip of beach leased from the local Naik; this was the seed of British India.',
+      'Capital of the Madras Presidency for 250 years; renamed from Madras to Chennai in 1996 (the original Tamil name predating colonial nomenclature).',
+      'The 20th-century anti-Hindi agitations (1937, 1965) cemented Tamil-language assertion as the political bedrock of the state — every chief minister since 1967 has come from Dravidian-movement parties.',
+      'Modern Chennai is India\'s second-largest IT hub after Bangalore, the world\'s largest car-manufacturing city outside Detroit (BMW, Hyundai, Ford, Renault-Nissan all build here), and the home of A.R. Rahman.',
+    ],
+    bestTime: { period: 'November–February', reason: 'Cool, dry, 22–30°C. Avoid April–June (40°C+ humidity that wraps you in sweat). Cyclones possible Oct–Dec but most years are fine — book flexibly during that window.' },
+    quickFacts: { language: 'Tamil, English', currency: 'Indian Rupee (₹)', capital: 'Capital of Tamil Nadu', knownAs: 'Detroit of South Asia / Gateway to South India', timezone: 'IST (UTC+5:30)' },
+    cuisine: ['Filter Coffee', 'Idli + Sambar + 3 chutneys', 'Masala Dosa', 'Pongal', 'Chettinad Chicken', 'Mutton Sukka', 'Kothu Parotta', 'Mysore Pak (sweet)'],
+    eateries: [
+      { name: 'Saravana Bhavan', area: 'Multiple branches across the city (since 1981)', rating: 4.4, reviews: 28400, type: 'South Indian veg', price: '₹', mustTry: 'Ghee Roast Dosa + Filter Coffee' },
+      { name: 'Murugan Idli Shop', area: 'T Nagar (since 1997)', rating: 4.5, reviews: 12200, type: 'Idli specialist', price: '₹', mustTry: 'Kanchipuram Idli + 3-chutney plate' },
+      { name: 'Dakshin', area: 'Crowne Plaza, Adyar', rating: 4.6, reviews: 3800, type: 'South Indian fine dining', price: '₹₹₹₹', mustTry: 'Chettinad Mutton Sukka + Hyderabadi Mutton Biryani' },
+      { name: 'Buhari Hotel', area: 'Anna Salai (since 1951)', rating: 4.2, reviews: 8400, type: 'Mughlai-Tamil', price: '₹₹', mustTry: 'Mutton Biryani + Chicken 65 — the dish was invented here' },
+    ],
+    stays: [
+      { name: 'The Leela Palace Chennai', area: 'MRC Nagar', rating: 4.7, reviews: 2840, type: 'Beachfront luxury', price: '₹₹₹₹', highlight: 'Bay of Bengal sunrise rooms, Spice Coast restaurant, palace-style facade' },
+      { name: 'Taj Coromandel', area: 'Nungambakkam', rating: 4.6, reviews: 4200, type: 'Luxury heritage (since 1974)', price: '₹₹₹₹', highlight: 'Iconic city-centre location, Anise continental dining, Golden Dragon Cantonese' },
+      { name: 'Park Hyatt Chennai', area: 'Velachery', rating: 4.5, reviews: 3800, type: 'Modern luxury', price: '₹₹₹', highlight: 'Walking distance to Phoenix Marketcity, infinity pool' },
+      { name: 'The Park Chennai', area: 'Anna Salai', rating: 4.4, reviews: 3240, type: 'Boutique design', price: '₹₹₹', highlight: 'In-house Leather Bar, mid-city base for both old and new Chennai' },
+    ],
+  },
+
+  kolkata: {
+    tagline: 'India\'s old capital and cultural soul — colonial echoes, Bengali sweets, the world\'s longest-surviving tram, and a love affair with adda.',
+    famousFor: ['Victoria Memorial', 'Howrah Bridge', 'Durga Puja', 'Bengali Sweets', 'Indian Coffee House', 'Tagore Heritage', 'Mother Teresa'],
+    attractions: [
+      { name: 'Victoria Memorial', desc: 'A 1921 white marble palace built for Queen Victoria\'s memory; gardens, a museum of British India relics, and an evening light-and-sound show; one of Kolkata\'s defining silhouettes.' },
+      { name: 'Howrah Bridge (Rabindra Setu)', desc: 'A 705m cantilever bridge (1943), one of the world\'s busiest — 100,000 vehicles and 150,000 pedestrians cross it daily; floodlit at night, breathtaking from a Hooghly boat ride.' },
+      { name: 'Dakshineswar Kali Temple', desc: 'An 1855 Kali shrine on the Hooghly\'s east bank; this is where Sri Ramakrishna lived and meditated, and where Swami Vivekananda first met him; deeply alive on Kali Puja nights.' },
+      { name: 'Indian Museum, Park Street', desc: 'Asia\'s oldest museum (1814); 60 galleries spanning Buddhist sculpture from Bharhut, Egyptian mummies, Indus Valley artifacts, and the world\'s largest collection of meteorites.' },
+      { name: 'College Street + Indian Coffee House', desc: 'The world\'s largest second-hand book market sprawls across College Street; the Coffee House (1942) above is where Bengali intellectual life still happens daily over chicken cutlet and adda.' },
+      { name: 'Kumartuli', desc: 'The artisan quarter that sculpts the Durga Puja idols every year; September–October is the busy season, when entire streets are lined with goddess effigies in various stages of completion.' },
+    ],
+    history: [
+      'Founded 1690 by Job Charnock of the British East India Company as a trading post on the Hooghly; the city grew to become the capital of British India 1772–1911.',
+      'The Bengali Renaissance (1820s–1920s) produced Raja Ram Mohan Roy, Tagore, Vivekananda, Subhas Chandra Bose — the intellectual flowering that shaped modern India.',
+      'The 1943 Bengal famine (3 million dead, partly engineered by wartime British food policies) and the 1947 Partition — which split Bengal in two — reshaped the city\'s demographics and politics permanently.',
+      'Rabindranath Tagore won the 1913 Nobel in Literature, the first non-European laureate; Mother Teresa worked the city\'s slums from 1948 until her death in 1997 and was canonized in 2016.',
+    ],
+    bestTime: { period: 'October–February', reason: '18–28°C. Festival season — Durga Puja (Oct), Diwali, Christmas at Park Street are all distinctive Kolkata experiences. Avoid May–July (40°C+ with brutal humidity).' },
+    quickFacts: { language: 'Bengali, Hindi, English', currency: 'Indian Rupee (₹)', capital: 'Capital of West Bengal', knownAs: 'City of Joy / Cultural Capital of India', timezone: 'IST (UTC+5:30)' },
+    cuisine: ['Mishti Doi', 'Rasgulla', 'Sandesh', 'Phuchka (Bengali pani puri)', 'Kathi Roll (invented here)', 'Kosha Mangsho', 'Macher Jhol', 'Kolkata Biryani (with potato + egg)'],
+    eateries: [
+      { name: 'Indian Coffee House', area: 'College Street (since 1942)', rating: 4.3, reviews: 12200, type: 'Bengali intellectual hangout', price: '₹', mustTry: 'Coffee + chicken cutlet + the company you\'ll find at the next table' },
+      { name: 'Peter Cat', area: 'Park Street (since 1975)', rating: 4.5, reviews: 14600, type: 'Continental + Indian', price: '₹₹', mustTry: 'Chelo Kebab — Kolkata\'s most famous restaurant dish' },
+      { name: 'Arsalan', area: 'Park Circus', rating: 4.4, reviews: 8400, type: 'Kolkata Biryani specialist', price: '₹₹', mustTry: 'Mutton Biryani with potato + egg + chaap' },
+      { name: 'Bhojohori Manna', area: 'Multiple branches (Ekdalia, Hindustan Road etc.)', rating: 4.4, reviews: 6840, type: 'Bengali home-style', price: '₹₹', mustTry: 'Daab Chingri + Kosha Mangsho + Mishti Doi' },
+    ],
+    stays: [
+      { name: 'The Oberoi Grand Kolkata', area: 'Chowringhee', rating: 4.7, reviews: 4200, type: 'Heritage luxury (since 1885)', price: '₹₹₹₹', highlight: 'Restored Edwardian palace facade, gateway location to colonial Kolkata, La Terrasse all-day dining' },
+      { name: 'Taj Bengal', area: 'Alipore', rating: 4.6, reviews: 3640, type: 'Luxury hotel', price: '₹₹₹₹', highlight: 'Atrium garden, Sonargaon Indian fine dining, walking distance to Victoria Memorial' },
+      { name: 'The Lalit Great Eastern Kolkata', area: 'Old Court House Street', rating: 4.5, reviews: 2840, type: 'Heritage colonial (1840)', price: '₹₹₹', highlight: 'Once dubbed "Jewel of the East", restored Wellesley Block, in the old administrative quarter' },
+      { name: 'Kolkata Backpackers', area: 'Sudder Street', rating: 4.3, reviews: 1840, type: 'Hostel', price: '₹', highlight: 'In the Sudder Street backpacker district, walking distance to Indian Museum and Park Street' },
+    ],
+  },
+
+  pune: {
+    tagline: 'Maharashtra\'s cultural anchor — Maratha heritage, India\'s student capital, and the gateway to the Western Ghats.',
+    famousFor: ['Shaniwar Wada', 'Aga Khan Palace', 'Misal Pav', 'Osho Ashram', 'IT Hub', 'Student City', 'Western Ghats Hill Stations'],
+    attractions: [
+      { name: 'Shaniwar Wada', desc: 'A 1732 Peshwa palace, fortress remnant of the Maratha Empire\'s seat; the daily light-and-sound show retells the Bajirao saga; the entrance gate still has the iron spikes that repelled war elephants.' },
+      { name: 'Aga Khan Palace', desc: 'An 1892 Italianate palace where Mahatma Gandhi was imprisoned 1942–44; the samadhis of Kasturba Gandhi and Mahadev Desai are in the gardens; quietly moving museum inside.' },
+      { name: 'Sinhagad Fort', desc: 'A 1340-foot hilltop fort 30km from Pune; site of Tanaji Malusare\'s heroic 1670 night assault; weekend trekkers flock at sunrise, the pithla-bhakri shacks at the top are part of the experience.' },
+      { name: 'Dagdusheth Halwai Ganpati', desc: 'One of India\'s most ornately-decorated Ganesh temples; the 11-day Ganesh Chaturthi festival (Aug/Sep) here is among the country\'s most spectacular street celebrations.' },
+      { name: 'Pune University & FC Road', desc: 'The student-life epicenter — Fergusson College, FTII (Film and Television Institute), Symbiosis; cafes, second-hand bookshops, and late-night vada pav stalls define the strip.' },
+      { name: 'Khadakwasla + Lavasa (20–60 km)', desc: 'Weekend escape into the Western Ghats — Khadakwasla Lake for sunset chai, Lavasa is India\'s first planned hill city, accessible via a scenic 90-minute drive.' },
+    ],
+    history: [
+      'Pune rose as the seat of the Peshwas (Maratha prime ministers) under Bajirao I in 1730; for nearly a century it was the political capital of India\'s most powerful indigenous empire.',
+      'The Anglo-Maratha Wars ended with the British defeat of Peshwa Bajirao II at Khadki in 1818, ending the Maratha confederacy and folding Pune into the Bombay Presidency.',
+      'Pune produced India\'s social reformers — Jyotirao Phule, Gopal Krishna Gokhale, Bal Gangadhar Tilak — and remains the intellectual hub for Marathi literature and theatre.',
+      'Modern Pune is the IT and auto-manufacturing hub of western India, home to ~700,000 students across its universities, and the Osho International Meditation Resort attracts a steady stream of international wellness pilgrims.',
+    ],
+    bestTime: { period: 'October–February', reason: 'Pleasant 12–28°C. Monsoon (Jun–Sep) is lush but old-city flooding is common. Summer (Apr–May) is mild by Indian standards (28–35°C). Ganesh Chaturthi (Aug/Sep) is worth braving the rain for.' },
+    quickFacts: { language: 'Marathi, Hindi, English', currency: 'Indian Rupee (₹)', capital: 'Cultural capital of Maharashtra', knownAs: 'Oxford of the East / Queen of the Deccan', timezone: 'IST (UTC+5:30)' },
+    cuisine: ['Misal Pav', 'Vada Pav', 'Pav Bhaji', 'Puran Poli (festival sweet)', 'Bhakri-Pithla', 'Mastani (mango/strawberry milkshake — invented here)', 'Bakarwadi', 'Chitale Bandhu sweets'],
+    eateries: [
+      { name: 'Vaishali', area: 'FC Road (since 1950)', rating: 4.5, reviews: 18400, type: 'South Indian + Maharashtrian classic', price: '₹', mustTry: 'Mysore Sada Dosa + Lassi' },
+      { name: 'Bedekar Misal', area: 'Narayan Peth (since 1948)', rating: 4.5, reviews: 9200, type: 'Misal Pav specialist', price: '₹', mustTry: 'Bedekar Special Misal + Tak (buttermilk)' },
+      { name: 'Malaka Spice', area: 'Koregaon Park', rating: 4.5, reviews: 5800, type: 'Pan-Asian', price: '₹₹₹', mustTry: 'Crystal Dumplings + Singapore Laksa, garden seating' },
+      { name: 'Shabree Restaurant', area: 'Hotel Parichay, FC Road', rating: 4.6, reviews: 4200, type: 'Maharashtrian thali', price: '₹₹', mustTry: 'Unlimited thali with 25+ items, Solkadhi to wash it down' },
+    ],
+    stays: [
+      { name: 'JW Marriott Pune', area: 'SB Road', rating: 4.7, reviews: 4800, type: 'Luxury hotel', price: '₹₹₹₹', highlight: 'Spice Kitchen all-day dining, walking distance to Westend Mall' },
+      { name: 'The Westin Pune', area: 'Koregaon Park', rating: 4.6, reviews: 3840, type: 'Modern luxury', price: '₹₹₹₹', highlight: 'Heavenly Bed signature, riverside location, near Osho Ashram' },
+      { name: 'Le Meridien Pune', area: 'RBM Road', rating: 4.5, reviews: 3240, type: 'Mid-luxury', price: '₹₹₹', highlight: 'Walking distance to MG Road, rooftop restaurant' },
+      { name: 'Hotel Sahyog', area: 'FC Road', rating: 4.2, reviews: 1840, type: 'Budget mid-range', price: '₹₹', highlight: 'Right at the heart of student Pune, walking to Vaishali, decent breakfast included' },
+    ],
+  },
+
+  jaisalmer: {
+    tagline: 'The Golden City rising from the Thar — Rajput camel-traders, fairy-tale yellow sandstone fort, and silk-route bazaars frozen in time.',
+    famousFor: ['Jaisalmer Fort', 'Sam Sand Dunes', 'Camel Safaris', 'Yellow Sandstone Architecture', 'Patwon Ki Haveli', 'Desert Festival', 'Silk Route Caravanserai'],
+    attractions: [
+      { name: 'Jaisalmer Fort (Sonar Quila)', desc: 'A 1156 living fort — one of the world\'s only inhabited forts (population ~3,000); the entire structure glows molten gold at sunset; UNESCO World Heritage; explore on foot through Jain temples, havelis, and chai shops.' },
+      { name: 'Patwon Ki Haveli', desc: 'An 1805 cluster of five havelis built by Patwa silk-trader brothers; the most ornate stone facade in Rajasthan, with 60+ jharokhas (carved bay windows) — climb to the top for a fort-and-old-city view.' },
+      { name: 'Sam Sand Dunes (40 km)', desc: 'The classic Thar desert experience; 30–100ft golden dunes; camel safari at sundown followed by an overnight desert camp under the Milky Way; book through reputable operators only (avoid touts at the city gate).' },
+      { name: 'Gadisar Lake', desc: 'A 14th-c. man-made tank, the city\'s original water source; the Tilon-ki-Pol gateway is iconic; sunrise/sunset boat rides at the golden hour reveal the chhatris reflected in still water.' },
+      { name: 'Bada Bagh (5 km)', desc: 'A 16th-c. royal cenotaph cluster in golden sandstone — possibly the most photogenic sunset spot in all of Rajasthan; row upon row of carved chhatris glowing against the desert sky.' },
+      { name: 'Lodurva (15 km)', desc: 'The original capital of the Bhati Rajputs, ruined by Mahmud of Ghazni in 1025; ornate Jain temples preserved in the desert silence; ideal half-day trip with a stop at the dunes en route.' },
+    ],
+    history: [
+      'Founded 1156 by Rawal Jaisal Singh of the Bhati Rajputs; the strategic location on the silk route between India, Egypt, Persia, and Central Asia made the city wealthy beyond its size.',
+      'The 12th–14th centuries saw repeated sieges by the Delhi Sultanate; multiple jauhars (mass self-immolation by Rajput women to avoid dishonour after a lost battle) are recorded in the fort\'s history.',
+      'The 1818 treaty with the British made Jaisalmer a princely state; the silk route\'s decline (post-1870s, with steamships and the Suez Canal) ended its prosperity for nearly a century.',
+      'The 1947 Partition closed the road links to Karachi/Sindh and isolated Jaisalmer; tourism (since the 1980s) revived it as one of Rajasthan\'s golden tourism circuit anchors alongside Jaipur, Udaipur, and Jodhpur.',
+    ],
+    bestTime: { period: 'October–March (especially February for the Desert Festival)', reason: 'Cool 8–25°C. Desert nights drop to 5°C in Dec–Jan (pack a jacket); brutal 45°C+ in May–Jun. The Jaisalmer Desert Festival (early February) is the cultural showpiece — folk dances, camel polo, turban-tying contests.' },
+    quickFacts: { language: 'Rajasthani (Marwari), Hindi, English', currency: 'Indian Rupee (₹)', capital: 'Town in Rajasthan', knownAs: 'The Golden City / Sonar Quila', timezone: 'IST (UTC+5:30)' },
+    cuisine: ['Dal Baati Churma', 'Ker Sangri', 'Pyaaz Kachori', 'Ghotua Ladoo', 'Gatte ki Sabzi', 'Mawa Kachori (sweet)', 'Camel-milk products'],
+    eateries: [
+      { name: 'Trio', area: 'Gandhi Chowk', rating: 4.4, reviews: 3840, type: 'Rooftop Rajasthani-multi', price: '₹₹', mustTry: 'Laal Maans + sunset fort views from the terrace' },
+      { name: 'Saffron Restaurant', area: 'Nachana Haveli', rating: 4.5, reviews: 2640, type: 'Heritage rooftop dining', price: '₹₹₹', mustTry: 'Royal Rajasthani Thali on the haveli roof' },
+      { name: 'Free Tibet Restaurant', area: 'Gopa Chowk', rating: 4.3, reviews: 2240, type: 'Tibetan + Israeli + Italian backpacker café', price: '₹', mustTry: 'Veg momos + chocolate balls — the post-camel-trek staple' },
+      { name: 'Desert Boy\'s Dhani', area: 'Sam Road', rating: 4.4, reviews: 1840, type: 'Rural-style folk dinner', price: '₹₹', mustTry: 'Rajasthani Thali with a live Manganiyar folk performance' },
+    ],
+    stays: [
+      { name: 'Suryagarh Jaisalmer', area: 'Sam Road', rating: 4.8, reviews: 1240, type: 'Heritage-fortress luxury hotel', price: '₹₹₹₹', highlight: 'Recreated medieval fort on a desert plateau, fire-pit dining, Rann Pravas curated experiences' },
+      { name: 'Hotel Killa Bhawan', area: 'Inside Jaisalmer Fort', rating: 4.6, reviews: 540, type: 'Heritage in-fort haveli', price: '₹₹₹', highlight: 'Stay inside the living fort, only 8 themed rooms, panoramic terrace' },
+      { name: 'Nachana Haveli', area: 'Gandhi Chowk', rating: 4.5, reviews: 1840, type: '280-year-old converted haveli', price: '₹₹₹', highlight: 'Royal-family-owned, courtyard pool, Saffron Restaurant on the roof' },
+      { name: 'Hotel Pleasant Haveli', area: 'Gandhi Chowk', rating: 4.4, reviews: 2240, type: 'Mid-range haveli', price: '₹₹', highlight: 'Rooftop view of the fort, walking distance to Patwon Ki Haveli, family-run' },
+    ],
+  },
+
   vrindavan: {
     tagline: 'Krishna\'s eternal playground — where every dawn aarti reaches up to the gopis\' favourite kunj.',
     famousFor: ['Banke Bihari Temple', 'ISKCON Krishna Balaram Mandir', 'Prem Mandir', 'Lathmar Holi at Barsana', 'Mathura Pedas', 'Nidhivan', 'Yamuna Aarti'],
@@ -1382,6 +1552,12 @@ const ALIASES = {
   // Braj region — Vrindavan covers the whole Krishna pilgrimage circuit.
   'mathura': 'vrindavan', 'barsana': 'vrindavan', 'gokul': 'vrindavan',
   'govardhan': 'vrindavan', 'braj': 'vrindavan', 'brij': 'vrindavan',
+  // Older / alternate names for the major metros.
+  'madras': 'chennai',
+  'calcutta': 'kolkata', 'howrah': 'kolkata',
+  'poona': 'pune',
+  // Jaisalmer surroundings and the Thar.
+  'thar': 'jaisalmer', 'thar desert': 'jaisalmer', 'sam dunes': 'jaisalmer', 'sam': 'jaisalmer',
 };
 
 export function matchDestinationInfo(destination) {
