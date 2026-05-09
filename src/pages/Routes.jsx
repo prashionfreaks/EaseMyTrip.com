@@ -35,6 +35,66 @@ const INDIAN_ROUTES = {
   'mumbai|vrindavan':       { dist: 1180, flight: [390, 6500, 'Mumbai → Delhi (~2h) + 3.5h drive · or limited Agra Kheria flights'], train: [1200, 1100, 'Bandra Terminus → Mathura Junction · ~20h + drive'], bus: [1320, 1200, 'Mumbai → Mathura private AC sleeper · ~22h'], car: [1140, 5500, 'NH48 + NH3 via Indore · ~19h, two-day drive'] },
   'pune|vrindavan':         { dist: 1320, flight: [420, 7000, 'Pune → Delhi (~2.5h) + 3.5h drive'], train: [1380, 1200, 'Pune → Mathura via Bhopal change · ~23h'], bus: [1740, 1500, 'Pune → Mathura private buses with change · ~29h'], car: [1320, 6500, 'NH160 + NH48 via Bhopal · ~22h, two-day drive'] },
   'bangalore|vrindavan':    { dist: 2050, flight: [390, 6500, 'Bangalore → Delhi (~3h) + 3.5h drive'], train: [2280, 1700, 'Karnataka SK Express to Mathura · ~38h'], bus: [2520, 2000, 'Multi-stop private buses · ~42h'], car: [1980, 9500, 'NH44 via Hyderabad + Nagpur · ~33h'] },
+
+  // ── Delhi corridor (cross-India arrivals — agra|delhi & delhi|jaipur exist above) ──
+  'bangalore|delhi':        { dist: 2150, flight: [165, 5500, 'IndiGo / Vistara · 2h 45m'], train: [2160, 2000, 'Karnataka SK Express · ~36h'], bus: [2400, 2200, 'Multi-stop private buses · ~40h'], car: [2100, 9500, 'NH44 via Hyderabad + Nagpur · ~35h, two-day drive'] },
+  'chennai|delhi':          { dist: 2200, flight: [165, 5500, 'IndiGo / Air India · 2h 45m'], train: [2040, 1800, 'Tamil Nadu Express · ~34h'], bus: [2520, 2300, 'Multi-stop private · ~42h'], car: [2160, 10000, 'NH44 · ~36h, two-day drive'] },
+  'delhi|hyderabad':        { dist: 1500, flight: [120, 5000, 'IndiGo / Vistara · 2h'], train: [1500, 1500, 'Telangana / AP Express · ~25h'], bus: [1800, 1700, 'Private Volvo · ~30h'], car: [1500, 7500, 'NH44 · ~25h'] },
+  'delhi|kolkata':          { dist: 1500, flight: [135, 4800, 'IndiGo / Vistara · 2h 15m'], train: [1020, 1500, 'Rajdhani Express · ~17h (fastest)'], bus: [1500, 1500, 'Multi-stop private · ~25h'], car: [1620, 7500, 'NH19 / Grand Trunk Road · ~27h'] },
+  'delhi|mumbai':           { dist: 1400, flight: [135, 5500, 'IndiGo / Vistara · 2h 15m'], train: [960, 1500, 'Rajdhani Express · ~16h (fastest)'], bus: [1500, 1500, 'Private AC sleeper · ~25h'], car: [1380, 7500, 'NH48 · ~23h'] },
+  'delhi|pune':             { dist: 1430, flight: [150, 5500, 'IndiGo / Vistara · 2h 30m'], train: [1080, 1500, 'Jhelum Express · ~18h'], bus: [1620, 1500, 'Private AC sleeper · ~27h'], car: [1410, 7500, 'NH48 · ~23h 30m'] },
+
+  // ── Jaipur corridor ──
+  'bangalore|jaipur':       { dist: 2130, flight: [180, 6000, 'IndiGo / Vistara · 3h'], train: [2100, 1900, 'Yeshwantpur–Jaipur Express · ~35h'], bus: [2400, 2300, 'Multi-stop private · ~40h'], car: [2040, 9000, 'NH44 + NH52 · ~34h, two-day'] },
+  'chennai|jaipur':         { dist: 2150, flight: [180, 6500, 'IndiGo · 3h'], train: [2100, 1800, 'Chennai–Jaipur Express · ~35h'], bus: [2520, 2300, 'Multi-stop private · ~42h'], car: [2100, 10000, 'NH44 + NH52 · ~35h'] },
+  'hyderabad|jaipur':       { dist: 1500, flight: [135, 5000, 'IndiGo / Vistara · 2h 15m'], train: [1620, 1500, 'Hyderabad–Jaipur SF · ~27h'], bus: [1800, 1700, 'Private Volvo · ~30h'], car: [1500, 7000, 'NH44 + NH52 · ~25h'] },
+  'jaipur|kolkata':         { dist: 1700, flight: [165, 5500, 'IndiGo · 2h 45m'], train: [1620, 1700, 'Howrah–Jaipur Express · ~27h'], bus: [2040, 2000, 'Multi-stop private · ~34h'], car: [1740, 8000, 'NH48 + NH19 · ~29h'] },
+  'jaipur|mumbai':          { dist: 1150, flight: [105, 4500, 'IndiGo · 1h 45m'], train: [1020, 1100, 'Jaipur–Mumbai SF · ~17h'], bus: [1320, 1300, 'Private Volvo · ~22h'], car: [1080, 5000, 'NH48 · ~18h'] },
+  'jaipur|pune':            { dist: 1180, flight: [120, 5000, 'IndiGo · 2h'], train: [1200, 1200, 'Pune–Jaipur Express · ~20h'], bus: [1380, 1500, 'Private AC sleeper · ~23h'], car: [1140, 5500, 'NH48 · ~19h'] },
+
+  // ── Agra corridor (agra|delhi and agra|vrindavan exist above) ──
+  'agra|bangalore':         { dist: 1960, flight: [180, 7000, 'Bangalore → Delhi (3h) + 3.5h drive · or limited Agra Kheria flights'], train: [2280, 1700, 'Karnataka SK Express to Tundla/Agra · ~38h'], bus: [2520, 2000, 'Multi-stop private · ~42h'], car: [1980, 9000, 'NH44 · ~33h, two-day'] },
+  'agra|chennai':           { dist: 2050, flight: [195, 7500, 'Chennai → Delhi (3h) + 3.5h drive'], train: [2280, 1800, 'Tamil Nadu Express to Agra Cantt · ~38h'], bus: [2580, 2200, 'Multi-stop private · ~43h'], car: [2040, 9500, 'NH44 · ~34h, two-day'] },
+  'agra|hyderabad':         { dist: 1320, flight: [150, 6000, 'Hyderabad → Delhi (2h) + 3.5h drive'], train: [1500, 1300, 'Hyderabad–Tundla Express · ~25h'], bus: [1800, 1500, 'Private Volvo · ~30h'], car: [1380, 6500, 'NH44 · ~23h'] },
+  'agra|kolkata':           { dist: 1300, flight: [165, 5500, 'Kolkata → Delhi (2h) + 3.5h drive'], train: [1320, 1300, 'Howrah–Agra connections · ~22h'], bus: [1680, 1500, 'Multi-stop private · ~28h'], car: [1500, 7000, 'NH19 + Yamuna Expressway · ~25h'] },
+  'agra|mumbai':            { dist: 1230, flight: [195, 6000, 'Mumbai → Delhi (~2h) + 3.5h drive · or limited Agra Kheria flights'], train: [1380, 1300, 'Punjab Mail to Agra Cantt · ~23h'], bus: [1380, 1500, 'Private Volvo · ~23h'], car: [1200, 5500, 'NH48 + Yamuna Expressway · ~20h'] },
+  'agra|pune':              { dist: 1280, flight: [240, 7000, 'Pune → Delhi (2.5h) + 3.5h drive'], train: [1440, 1300, 'Pune–Agra connections · ~24h'], bus: [1620, 1700, 'Multi-stop private · ~27h'], car: [1320, 6500, 'NH48 + Yamuna Expressway · ~22h'] },
+
+  // ── Rishikesh / Haridwar gateway corridor ──
+  'bangalore|rishikesh':    { dist: 2350, flight: [225, 6500, 'Bangalore → Delhi (3h) + 5h drive · or Bangalore → Dehradun via Delhi'], train: [2520, 2000, 'Yeshwantpur to Haridwar · ~42h'], bus: [2700, 2400, 'Multi-stop private · ~45h'], car: [2280, 10000, 'NH44 + NH334 · ~38h, two-day'] },
+  'chennai|rishikesh':      { dist: 2400, flight: [225, 7000, 'Chennai → Delhi (3h) + 5h drive'], train: [2520, 2000, 'Tamil Nadu Express + Haridwar passenger · ~42h'], bus: [2700, 2400, 'Multi-stop private · ~45h'], car: [2340, 10500, 'NH44 + NH334 · ~39h, two-day'] },
+  'delhi|rishikesh':        { dist: 250,  flight: [0, 0, 'Flight not advisable — too short'], train: [360, 400, 'Yog Nagari Vande Bharat · ~6h · or Haridwar Shatabdi 4.5h + drive'], bus: [420, 400, 'UP/HRTC AC bus to Haridwar/Rishikesh · ~7h'], car: [300, 1500, 'NH334 via Meerut · ~5h'] },
+  'hyderabad|rishikesh':    { dist: 1750, flight: [180, 6000, 'Hyderabad → Delhi (2h) + 5h drive'], train: [1860, 1700, 'Hyderabad to Haridwar via Delhi · ~31h'], bus: [2160, 2200, 'Multi-stop private · ~36h'], car: [1740, 8500, 'NH44 + NH334 · ~29h'] },
+  'kolkata|rishikesh':      { dist: 1500, flight: [195, 6000, 'Kolkata → Delhi (2h) + 5h drive · or Kolkata → Dehradun via Delhi'], train: [1620, 1500, 'Doon Express · ~27h'], bus: [1980, 2000, 'Multi-stop private · ~33h'], car: [1740, 8000, 'NH19 + NH334 · ~29h'] },
+  'mumbai|rishikesh':       { dist: 1640, flight: [180, 5500, 'Mumbai → Delhi (~2h) + 5h drive · or Mumbai → Dehradun via Delhi'], train: [1620, 1500, 'Bandra Terminus to Haridwar · ~27h'], bus: [1980, 2000, 'Multi-stop private · ~33h'], car: [1620, 8000, 'NH48 + NH334 · ~27h'] },
+  'pune|rishikesh':         { dist: 1700, flight: [240, 7000, 'Pune → Delhi (2.5h) + 5h drive'], train: [1740, 1500, 'Pune–Haridwar via Delhi · ~29h'], bus: [2160, 2200, 'Multi-stop private · ~36h'], car: [1680, 8000, 'NH48 + NH334 · ~28h'] },
+
+  // ── Darjeeling / Bagdogra / NJP corridor ──
+  'bangalore|darjeeling':   { dist: 2300, flight: [195, 7000, 'Bangalore → Bagdogra (3h direct) + 3h drive'], train: [2280, 1700, 'Yeshwantpur to NJP · ~38h'], bus: [2700, 2400, 'Multi-stop private · ~45h'], car: [2280, 10500, 'NH44 + NH27 · ~38h, two-day'] },
+  'chennai|darjeeling':     { dist: 2050, flight: [165, 6500, 'Chennai → Bagdogra (~2h 45m via Kolkata) + 3h drive'], train: [2160, 1700, 'Tamil Nadu Express + transfer to NJP · ~36h'], bus: [2580, 2300, 'Multi-stop · ~43h'], car: [2160, 10000, 'NH16 · ~36h'] },
+  'darjeeling|delhi':       { dist: 1500, flight: [195, 6500, 'Delhi → Bagdogra (2h 30m direct) + 3h drive'], train: [1320, 1300, 'Padatik Express to NJP · ~22h'], bus: [1980, 2000, 'Multi-stop private · ~33h'], car: [1620, 7500, 'NH19 + NH27 · ~27h'] },
+  'darjeeling|hyderabad':   { dist: 1800, flight: [180, 6000, 'Hyderabad → Bagdogra (~2h direct) + 3h drive'], train: [1980, 1700, 'Hyderabad–Howrah + transfer to NJP · ~33h'], bus: [2280, 2200, 'Multi-stop · ~38h'], car: [1860, 8500, 'NH16 · ~31h'] },
+  'darjeeling|kolkata':     { dist: 600,  flight: [120, 4000, 'Kolkata → Bagdogra (~1h direct) + 3h drive'], train: [600, 700, 'Darjeeling Mail / Kanchanjunga Exp to NJP · ~10h'], bus: [780, 1000, 'Volvo to NJP/Siliguri · ~13h'], car: [720, 3500, 'NH27 · ~12h'] },
+  'darjeeling|mumbai':      { dist: 2000, flight: [165, 6000, 'Mumbai → Bagdogra (~2h 45m via Kolkata) + 3h drive'], train: [2100, 1700, 'Bandra Terminus to NJP · ~35h'], bus: [2520, 2300, 'Multi-stop · ~42h'], car: [2100, 9500, 'NH27 + NH19 · ~35h'] },
+  'darjeeling|pune':        { dist: 2000, flight: [195, 6500, 'Pune → Bagdogra via Delhi/Kolkata + 3h drive'], train: [2160, 1700, 'Pune to NJP via Howrah · ~36h'], bus: [2580, 2400, 'Multi-stop · ~43h'], car: [2100, 9500, 'NH27 + NH19 · ~35h'] },
+
+  // ── Pondicherry corridor (Chennai is the gateway) ──
+  'bangalore|pondicherry':  { dist: 320,  flight: [60, 3500, 'Flight not advisable — too short. Tiny ATR flights via Pondicherry airport are limited.'], train: [420, 350, 'Yeshwantpur to Pondicherry · ~7h (limited)'], bus: [420, 600, 'KSRTC Volvo direct · ~7h'], car: [360, 1700, 'NH44 + NH77 · ~6h'] },
+  'chennai|pondicherry':    { dist: 165,  flight: [0, 0, 'Flight not advisable — too short'], train: [240, 200, 'Chennai Egmore to Villupuram + bus · ~4h'], bus: [180, 200, 'PRTC / Private Volvo · ~3h'], car: [180, 800, 'East Coast Road · ~3h scenic drive'] },
+  'delhi|pondicherry':      { dist: 2000, flight: [195, 6500, 'Delhi → Chennai (3h direct) + 3h drive'], train: [2160, 1800, 'Tamil Nadu Express to Chennai + bus · ~36h'], bus: [2580, 2300, 'Multi-stop private · ~43h'], car: [2100, 9500, 'NH44 + ECR · ~35h'] },
+  'hyderabad|pondicherry':  { dist: 600,  flight: [120, 4500, 'Hyderabad → Chennai (1h) + 3h drive'], train: [780, 700, 'Hyderabad–Chennai + bus · ~13h'], bus: [840, 1000, 'Hyderabad–Pondicherry private · ~14h'], car: [780, 4000, 'NH44 + NH16 · ~13h'] },
+  'kolkata|pondicherry':    { dist: 1700, flight: [180, 6000, 'Kolkata → Chennai (2h) + 3h drive'], train: [1500, 1500, 'Coromandel Express to Chennai + bus · ~25h'], bus: [2040, 2000, 'Multi-stop · ~34h'], car: [1740, 8000, 'NH16 + ECR · ~29h'] },
+  'mumbai|pondicherry':     { dist: 1330, flight: [165, 5000, 'Mumbai → Chennai (2h) + 3h drive'], train: [1380, 1300, 'Mumbai–Chennai + bus · ~23h'], bus: [1620, 1700, 'Multi-stop · ~27h'], car: [1380, 6500, 'NH48 + NH44 · ~23h'] },
+  'pondicherry|pune':       { dist: 1280, flight: [225, 5500, 'Pune → Chennai (1h 30m) + 3h drive'], train: [1380, 1300, 'Pune–Chennai + bus · ~23h'], bus: [1620, 1700, 'Multi-stop · ~27h'], car: [1320, 6500, 'NH48 + NH44 · ~22h'] },
+
+  // ── Andaman corridor (flight only — no road or ferry from mainland for tourism) ──
+  'andaman|bangalore':      { dist: 1670, flight: [195, 6500, 'Bangalore → Port Blair direct · 3h 15m'], train: [0, 0, 'No rail to Andaman'], bus: [0, 0, 'No road to Andaman'], car: [0, 0, 'No road to Andaman'] },
+  'andaman|chennai':        { dist: 1300, flight: [135, 5500, 'Chennai → Port Blair direct · 2h 15m (cheapest gateway)'], train: [0, 0, 'No rail to Andaman'], bus: [0, 0, 'No road to Andaman'], ferry: [4320, 5000, 'MV Swaraj Dweep cargo passenger ship · ~3 days · check Directorate of Shipping for limited schedules'] },
+  'andaman|delhi':          { dist: 2500, flight: [300, 7500, 'Delhi → Port Blair via Chennai/Kolkata · ~5h with stop'], train: [0, 0, 'No rail to Andaman'], bus: [0, 0, 'No road to Andaman'], car: [0, 0, 'No road to Andaman'] },
+  'andaman|hyderabad':      { dist: 1900, flight: [180, 6500, 'Hyderabad → Port Blair via Chennai · ~3h with stop'], train: [0, 0, 'No rail to Andaman'], bus: [0, 0, 'No road to Andaman'], car: [0, 0, 'No road to Andaman'] },
+  'andaman|kolkata':        { dist: 1300, flight: [135, 5500, 'Kolkata → Port Blair direct · 2h 15m'], train: [0, 0, 'No rail to Andaman'], bus: [0, 0, 'No road to Andaman'], ferry: [3600, 4500, 'MV Nicobar cargo passenger ship · ~3 days · limited schedules'] },
+  'andaman|mumbai':         { dist: 1900, flight: [195, 6500, 'Mumbai → Port Blair via Chennai/Bangalore · ~4h with stop'], train: [0, 0, 'No rail to Andaman'], bus: [0, 0, 'No road to Andaman'], car: [0, 0, 'No road to Andaman'] },
+  'andaman|pune':           { dist: 1900, flight: [240, 7000, 'Pune → Port Blair via Mumbai/Chennai · ~5h with stop'], train: [0, 0, 'No rail to Andaman'], bus: [0, 0, 'No road to Andaman'], car: [0, 0, 'No road to Andaman'] },
 };
 
 const MODE_CONFIG = {
