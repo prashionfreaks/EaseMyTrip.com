@@ -132,9 +132,6 @@ const NEAREST_AIRPORT = {
   // closest is Agra Kheria with limited schedules, Delhi IGI for full service.
   vrindavan:           { airport: 'Agra (Kheria)',                 drive: '~1.5h drive · or Delhi (IGI) ~3.5h' },
   mathura:             { airport: 'Agra (Kheria)',                 drive: '~1h drive · or Delhi (IGI) ~3h' },
-  // Pondicherry has a small airport with very limited service — most travellers route via Chennai.
-  pondicherry:         { airport: 'Chennai',                       drive: '~3h drive · Pondicherry airport has very limited service' },
-  puducherry:          { airport: 'Chennai',                       drive: '~3h drive · Pondicherry airport has very limited service' },
   // Eastern Himalayas — Bagdogra (IXB) is the gateway airport for Darjeeling and Sikkim.
   darjeeling:          { airport: 'Bagdogra (IXB)',                drive: '~3h drive' },
   kalimpong:           { airport: 'Bagdogra (IXB)',                drive: '~3h drive' },
