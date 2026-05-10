@@ -104,8 +104,7 @@ export function warmupItineraryAI() {
 export async function generateItinerary(destination, startDate, endDate, opts = {}) {
   const start = parseISO(startDate);
   const numDays = Math.max(1, Math.round((parseISO(endDate) - start) / 86400000) + 1);
-  const { key } = matchDestination(destination);
-  const currency = INDIAN_DEST_KEYS.has(key) ? 'INR' : 'USD';
+  const currency = getDestinationCurrency(destination);
   const stay = opts.stay && opts.stay.confirmed ? opts.stay : null;
   if (isSupabaseConfigured) {
     try {
@@ -130,8 +129,7 @@ export async function generateItinerarySkeleton(destination, startDate, endDate)
   if (!isSupabaseConfigured) throw new Error('AI not configured');
   const start = parseISO(startDate);
   const numDays = Math.max(1, Math.round((parseISO(endDate) - start) / 86400000) + 1);
-  const { key } = matchDestination(destination);
-  const currency = INDIAN_DEST_KEYS.has(key) ? 'INR' : 'USD';
+  const currency = getDestinationCurrency(destination);
 
   const mustSee = await mustSeeFor(destination);
   const { data, error } = await withTimeout(
@@ -1061,10 +1059,25 @@ const INDIAN_CITY_KEYWORDS = [
   'madhya pradesh',
 ];
 
+// Non-INR currency keywords for destinations the Edge Function's COST_GUIDE
+// can anchor (JPY/EUR/GBP/SGD/AED). Checked after the INR list — any Indian
+// destination wins first. Substring match, so keep entries unambiguous (e.g.
+// 'uk' is intentionally omitted: matches 'sukhothai', 'fluke', etc.).
+const CURRENCY_KEYWORDS = [
+  ['JPY', ['japan', 'tokyo', 'kyoto', 'osaka']],
+  ['EUR', ['paris', 'france', 'vienna', 'salzburg', 'hallstatt', 'austria']],
+  ['GBP', ['london', 'england']],
+  ['SGD', ['singapore']],
+  ['AED', ['dubai', 'uae', 'abu dhabi']],
+];
+
 export function getDestinationCurrency(destination) {
   if (!destination) return 'USD';
   const lower = destination.toLowerCase();
   if (INDIAN_CITY_KEYWORDS.some(k => lower.includes(k))) return 'INR';
+  for (const [code, keywords] of CURRENCY_KEYWORDS) {
+    if (keywords.some(k => lower.includes(k))) return code;
+  }
   return 'USD';
 }
 
