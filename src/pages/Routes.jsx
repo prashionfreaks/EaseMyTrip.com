@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { useTrips } from '../context/TripContext';
 import {
   Route, Train, Plane, Bus, Car, Ship, ArrowRight,
-  Clock, Plus, MapPin, Zap, Wallet, Ruler, Trash2, Navigation, ExternalLink,
+  Clock, Plus, MapPin, Zap, Wallet, Ruler, Trash2, Navigation, ExternalLink, Mountain,
 } from 'lucide-react';
 import { getTripCurrencySymbol, getTripCurrencyCode } from '../lib/itinerary';
+import { findTemplate } from '../data/tripTemplates';
 
 const INDIAN_ROUTES = {
   'goa|mumbai':             { dist: 600,  flight: [75, 4200, 'IndiGo / Air India · 1h 15m'], train: [480, 650, 'Konkan Kanya Express · 8h'], bus: [600, 400, 'Paulo Travels AC Sleeper · 10h'], car: [540, 2200, 'NH66 coastal highway · ~9h'] },
@@ -561,6 +562,14 @@ export default function Routes() {
   const isINR = getTripCurrencyCode(activeTrip) === 'INR';
   const sym = getTripCurrencySymbol(activeTrip);
 
+  // Templated trips (Char Dham etc.) carry a journey shape with anchor stops
+  // and curated inter-stop legs. The Routes page reads it to render a
+  // vertical multi-stop timeline. The home leg's `to` becomes the template's
+  // gateway city (Haridwar) rather than the trip's abstract destination
+  // string ("Char Dham Yatra (Uttarakhand)") so route lookups resolve.
+  const template = activeTrip?.templateId ? findTemplate(activeTrip.templateId) : null;
+  const homeCity = (routes && routes[0]?.from) || null;
+
   function fmtDuration(mins) {
     if (!mins) return '—';
     const h = Math.floor(mins / 60), m = mins % 60;
@@ -569,7 +578,12 @@ export default function Routes() {
 
   function handleAdd() {
     const from = newRoute.from.trim();
-    const to = activeTrip?.destination?.trim() || '';
+    // For templated trips, the user's starting city routes to the
+    // template's gateway (e.g. Haridwar for Char Dham), not the abstract
+    // trip destination — that's where they actually have to land.
+    const to = template?.gateway?.trim()
+      || activeTrip?.destination?.trim()
+      || '';
     if (!from || !to) return;
     const routeId = 'r' + Date.now();
     // Destination is fixed by the trip; only the user's starting city is
@@ -645,10 +659,14 @@ export default function Routes() {
 
       <div className="page-header" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
         <div>
-          <h1>Getting to {activeTrip.destination}</h1>
-          <p>{routes.length === 0
-            ? 'Tell us where you\'re starting from and we\'ll suggest the best way to reach the trip.'
-            : `${routes.length} starting point${routes.length !== 1 ? 's' : ''} for the group`}</p>
+          <h1>{template ? `Your ${template.name} journey` : `Getting to ${activeTrip.destination}`}</h1>
+          <p>{template
+            ? (homeCity
+              ? `From ${homeCity} → ${template.gatewayLabel} and onward through ${template.stops.length - 1} stops`
+              : `Tell us where you're starting from — we'll route you to ${template.gatewayLabel} and walk you through every leg of the yatra.`)
+            : routes.length === 0
+              ? 'Tell us where you\'re starting from and we\'ll suggest the best way to reach the trip.'
+              : `${routes.length} starting point${routes.length !== 1 ? 's' : ''} for the group`}</p>
         </div>
         <button className="btn btn-primary" onClick={() => setShowAdd(true)}>
           <Plus size={16} /> Add Starting City
@@ -657,8 +675,20 @@ export default function Routes() {
 
       <div className="page-body">
 
-        {/* Journey map strip */}
-        {allStops.length > 0 && (
+        {/* Multi-stop journey timeline (templated trips only) */}
+        {template && (
+          <MultiStopTimeline
+            template={template}
+            homeCity={homeCity}
+            isINR={isINR}
+            sym={sym}
+            onAddStartingCity={() => setShowAdd(true)}
+          />
+        )}
+
+        {/* Journey map strip — single-leg trips only; the multi-stop timeline
+            above replaces it for templated journeys (Char Dham etc.). */}
+        {!template && allStops.length > 0 && (
           <div className="card" style={{ marginBottom: 16, overflow: 'hidden' }}>
             <div style={{
               background: 'linear-gradient(135deg, var(--brand) 0%, var(--purple) 100%)',
@@ -728,8 +758,9 @@ export default function Routes() {
           </div>
         )}
 
-        {/* Route cards */}
-        {routes.length === 0 ? (
+        {/* Route cards. For templated trips with no routes yet, the timeline
+            above already prompts the user — skip this duplicate empty state. */}
+        {routes.length === 0 && !template ? (
           <div className="empty-state" style={{ flexDirection: 'column' }}>
             <div style={{
               width: 72, height: 72, borderRadius: '50%',
@@ -746,7 +777,7 @@ export default function Routes() {
               <Plus size={16} /> Add starting city
             </button>
           </div>
-        ) : (
+        ) : routes.length === 0 ? null : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {routes.map(route => {
               const isLoading = loadingOptions === route.id;
@@ -1260,6 +1291,260 @@ function ModeCard({ opt, isCheapest, isFastest, hasReturn, sym, fromCity, toCity
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+// Vertical stop-by-stop journey timeline for templated multi-stop trips.
+// Renders a left-rail of dots (one per stop) connected by leg cards. The
+// first leg is the user's home → template gateway and is computed live via
+// generateOptions. The remaining legs are read from the template's curated
+// `legs` array — only modes that practically exist for that leg are shown
+// (road only for inter-shrine Char Dham legs, since there's no rail/air).
+function MultiStopTimeline({ template, homeCity, isINR, sym, onAddStartingCity }) {
+  const homeLegOptions = homeCity ? generateOptions(homeCity, template.gateway, isINR) : [];
+
+  // Filter out the unavailable=true and placeholder stub options the
+  // generator emits when it can't pin down the route — those make sense
+  // on the existing single-route card UI but would clutter the timeline.
+  const homeOptionsClean = homeLegOptions.filter(o => !o.unavailable && !o.placeholder);
+
+  const stops = [
+    { name: homeCity || 'Add your starting city',
+      subtitle: homeCity ? 'Your starting point' : 'Tap to set where you\'re flying out from',
+      isHome: true,
+      isPlaceholder: !homeCity },
+    ...template.stops,
+  ];
+  const lastIdx = stops.length - 1;
+
+  return (
+    <div className="card" style={{ marginBottom: 16, overflow: 'hidden' }}>
+      <div style={{
+        background: 'linear-gradient(135deg, var(--brand) 0%, var(--purple) 100%)',
+        padding: '10px 16px',
+        display: 'flex', alignItems: 'center', gap: 8,
+      }}>
+        <Mountain size={14} style={{ color: 'rgba(255,255,255,0.95)' }} />
+        <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.95)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+          Journey Timeline · {stops.length} stops
+        </span>
+      </div>
+
+      <div style={{ padding: '14px 16px 18px' }}>
+        {stops.map((stop, i) => {
+          const isStart = i === 0;
+          const isEnd = i === lastIdx;
+          const dotColor = isStart ? 'var(--brand)' : isEnd ? 'var(--success)' : 'var(--purple)';
+          const dotBg = isStart
+            ? 'linear-gradient(135deg, var(--brand), var(--brand-dark))'
+            : isEnd
+              ? 'linear-gradient(135deg, var(--success), #34d399)'
+              : 'var(--bg-tertiary)';
+
+          // Leg appearing AFTER this stop (i.e. between stops[i] and stops[i+1])
+          const legAfter = !isEnd
+            ? (isStart ? { kind: 'home', options: homeOptionsClean } : { kind: 'template', leg: template.legs[i - 1] })
+            : null;
+
+          return (
+            <div key={i} style={{ display: 'flex', gap: 12 }}>
+              {/* Left rail — dot + connector line */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
+                <div style={{
+                  width: 30, height: 30, borderRadius: '50%',
+                  background: stop.isPlaceholder ? 'var(--bg-tertiary)' : dotBg,
+                  border: `2px solid ${stop.isPlaceholder ? 'var(--border)' : dotColor}`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: (isStart || isEnd) && !stop.isPlaceholder ? '0 3px 8px rgba(0,0,0,0.12)' : 'none',
+                }}>
+                  <MapPin size={13} style={{ color: stop.isPlaceholder ? 'var(--text-tertiary)' : (isStart || isEnd ? 'white' : 'var(--text-secondary)') }} />
+                </div>
+                {!isEnd && (
+                  <div style={{
+                    flex: 1, width: 2, minHeight: 32,
+                    background: 'var(--border)',
+                    marginTop: 4, marginBottom: 4,
+                  }} />
+                )}
+              </div>
+
+              {/* Right column — stop label + leg modes */}
+              <div style={{ flex: 1, minWidth: 0, paddingBottom: isEnd ? 0 : 14 }}>
+                <div
+                  onClick={stop.isPlaceholder && onAddStartingCity ? onAddStartingCity : undefined}
+                  style={{
+                    cursor: stop.isPlaceholder ? 'pointer' : 'default',
+                    paddingTop: 4,
+                  }}
+                >
+                  <div style={{
+                    fontSize: 13, fontWeight: 800,
+                    color: stop.isPlaceholder ? 'var(--brand)' : 'var(--text-primary)',
+                    textDecoration: stop.isPlaceholder ? 'underline' : 'none',
+                  }}>
+                    {stop.name}
+                  </div>
+                  {stop.subtitle && (
+                    <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2, lineHeight: 1.4 }}>
+                      {stop.subtitle}
+                    </div>
+                  )}
+                </div>
+
+                {legAfter && (
+                  <TimelineLeg
+                    legAfter={legAfter}
+                    sym={sym}
+                    isINR={isINR}
+                    onAddStartingCity={onAddStartingCity}
+                    homeCityKnown={!!homeCity}
+                  />
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// Renders the transit modes for a single leg. For the home leg we receive
+// generateOptions output (objects with `mode`, `duration`, `cost`/`costRange`,
+// `note`); for template legs we receive curated `{ road, rail, air }` data
+// keyed by mode with `{ hours, costRange, note, km? }`.
+function TimelineLeg({ legAfter, sym, onAddStartingCity, homeCityKnown }) {
+  if (legAfter.kind === 'home') {
+    if (!homeCityKnown) {
+      return (
+        <button
+          type="button"
+          onClick={onAddStartingCity}
+          style={{
+            marginTop: 8,
+            padding: '8px 12px',
+            border: '1.5px dashed var(--border)',
+            background: 'var(--bg-secondary)',
+            borderRadius: 8,
+            fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)',
+            cursor: 'pointer', textAlign: 'left',
+          }}
+        >
+          Add your starting city to see flight / train / road options for this leg.
+        </button>
+      );
+    }
+    if (legAfter.options.length === 0) {
+      return (
+        <div style={{ marginTop: 8, fontSize: 11, color: 'var(--text-tertiary)', fontStyle: 'italic' }}>
+          Couldn't pin a curated route — try Skyscanner / Google Flights for live fares.
+        </div>
+      );
+    }
+    return (
+      <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {legAfter.options.map((opt, i) => {
+          const cfg = MODE_CONFIG[opt.mode] || MODE_CONFIG.car;
+          const Icon = cfg.icon;
+          const hourLabel = opt.duration ? `${(opt.duration / 60).toFixed(opt.duration % 60 ? 1 : 0).replace(/\.0$/, '')}h` : '—';
+          const costLabel = opt.estimated && opt.costRange
+            ? `${sym}${opt.costRange[0].toLocaleString()}–${opt.costRange[1].toLocaleString()}`
+            : opt.cost ? `${sym}${opt.cost.toLocaleString()}` : '';
+          return (
+            <div key={i} style={{
+              display: 'flex', alignItems: 'flex-start', gap: 8,
+              padding: '6px 10px', borderRadius: 7,
+              border: `1px solid ${cfg.color}25`,
+              background: cfg.bg || 'var(--bg-secondary)',
+            }}>
+              <div style={{
+                width: 22, height: 22, borderRadius: 6,
+                background: cfg.color + '20',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1,
+              }}>
+                <Icon size={12} style={{ color: cfg.color }} />
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: cfg.color }}>{cfg.label}</span>
+                  <span style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>{hourLabel}</span>
+                  {costLabel && (
+                    <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)' }}>· {costLabel}</span>
+                  )}
+                </div>
+                {opt.note && (
+                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 1, lineHeight: 1.35 }}>
+                    {opt.note}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  // Template leg — curated `{ road?, rail?, air? }` data, render only the
+  // modes that exist for this stretch.
+  const leg = legAfter.leg || {};
+  const modeOrder = ['road', 'rail', 'air'];
+  const modeConfigKey = { road: 'car', rail: 'train', air: 'flight' };
+  const present = modeOrder.filter(m => leg[m]);
+  if (present.length === 0) {
+    return (
+      <div style={{ marginTop: 8, fontSize: 11, color: 'var(--text-tertiary)', fontStyle: 'italic' }}>
+        No standard transit on this stretch.
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
+      {present.map(modeKey => {
+        const data = leg[modeKey];
+        const cfg = MODE_CONFIG[modeConfigKey[modeKey]];
+        const Icon = cfg.icon;
+        const hourLabel = `~${data.hours}h`;
+        const costLabel = data.costRange
+          ? `${sym}${data.costRange[0].toLocaleString()}–${data.costRange[1].toLocaleString()}`
+          : '';
+        const distLabel = data.km ? `${data.km.toLocaleString()} km` : null;
+        return (
+          <div key={modeKey} style={{
+            display: 'flex', alignItems: 'flex-start', gap: 8,
+            padding: '6px 10px', borderRadius: 7,
+            border: `1px solid ${cfg.color}25`,
+            background: cfg.bg || 'var(--bg-secondary)',
+          }}>
+            <div style={{
+              width: 22, height: 22, borderRadius: 6,
+              background: cfg.color + '20',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1,
+            }}>
+              <Icon size={12} style={{ color: cfg.color }} />
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: cfg.color }}>{cfg.label}</span>
+                <span style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>{hourLabel}</span>
+                {costLabel && (
+                  <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)' }}>· {costLabel}</span>
+                )}
+                {distLabel && (
+                  <span style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600 }}>· {distLabel}</span>
+                )}
+              </div>
+              {data.note && (
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 1, lineHeight: 1.35 }}>
+                  {data.note}
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

@@ -699,6 +699,10 @@ export default function Dashboard() {
       budget: { total: newTrip.budget ? parseFloat(newTrip.budget) : 0, spent: 0, currency: newTrip.currency || 'INR' },
       polls: [],
       itinerary,
+      // Persist the template binding so multi-stop UIs (Routes timeline) can
+      // surface the template's stops/legs after page reloads. Lives in the
+      // trip's JSON blob alongside the rest — no migration.
+      templateId: template?.id || null,
       expenses: [], routes: [], activity: [], contingencies: [], messages: [], paidSettlements: [],
     });
     setCreating(false);
