@@ -22,6 +22,9 @@ dist-ssr
 /playwright-report/
 /playwright/.cache/
 
+# Supabase CLI scratch (project ref cache, latest-version probe, etc.)
+supabase/.temp/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
