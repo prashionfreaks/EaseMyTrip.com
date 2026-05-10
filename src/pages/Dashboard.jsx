@@ -15,6 +15,7 @@ import DestinationPicker from '../components/DestinationPicker';
 import { getDestinationImage } from '../lib/destinationImages';
 import { TripCardSkeleton, SkeletonStyles } from '../components/Skeleton';
 import { format, differenceInDays, parseISO, addDays } from '../lib/date';
+import { TRIP_TEMPLATES } from '../data/tripTemplates';
 
 // Build empty day-stub records spanning [startDate, endDate]. The Itinerary
 // page reads `activeTrip.itinerary.length` for "N days planned", so this
@@ -598,6 +599,7 @@ export default function Dashboard() {
   const [showInvite, setShowInvite] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [newTrip, setNewTrip] = useState({ name: '', destination: '', startDate: '', endDate: '', budget: '', currency: 'INR' });
+  const [templateId, setTemplateId] = useState(null);
   const [creating, setCreating] = useState(false);
   const [deleting, setDeleting] = useState(null);
   const dueCount = useMemo(() => countOutstandingDues(trips, currentUser?.id), [trips, currentUser?.id]);
@@ -616,12 +618,76 @@ export default function Dashboard() {
     return { count: ids.size, sample: samples };
   }, [trips, currentUser?.id]);
 
+  // Build a per-day itinerary from a template by stamping each template day
+  // (location + theme) onto consecutive dates starting at startDate. Mirrors
+  // the shape of buildEmptyItinerary so downstream code (Itinerary page,
+  // skeleton/fill flow) doesn't need to know it came from a template.
+  function buildTemplateItinerary(template, startDate) {
+    if (!startDate) return [];
+    try {
+      const start = parseISO(startDate);
+      if (Number.isNaN(start.getTime())) return [];
+      const baseId = Date.now();
+      return template.days.map((d, i) => ({
+        id: 'day' + (baseId + i),
+        date: format(addDays(start, i), 'yyyy-MM-dd'),
+        location: d.location,
+        theme: d.theme,
+        items: [],
+      }));
+    } catch { return []; }
+  }
+
+  function applyTemplate(t) {
+    const start = format(addDays(new Date(), 30), 'yyyy-MM-dd');
+    const end   = format(addDays(new Date(), 30 + t.durationDays - 1), 'yyyy-MM-dd');
+    setNewTrip(p => ({
+      ...p,
+      name: p.name.trim() || t.name,
+      destination: t.destination,
+      startDate: start,
+      endDate: end,
+      currency: getDestinationCurrency(t.destination),
+    }));
+    setTemplateId(t.id);
+  }
+
+  // When a template is active, keep endDate locked to startDate + durationDays.
+  // Otherwise this is a normal user-controlled date input.
+  function handleStartDateChange(value) {
+    setNewTrip(p => {
+      const next = { ...p, startDate: value };
+      if (templateId) {
+        const tpl = TRIP_TEMPLATES.find(x => x.id === templateId);
+        if (tpl && value) {
+          try {
+            const s = parseISO(value);
+            if (!Number.isNaN(s.getTime())) {
+              next.endDate = format(addDays(s, tpl.durationDays - 1), 'yyyy-MM-dd');
+            }
+          } catch { /* leave endDate */ }
+        }
+      }
+      return next;
+    });
+  }
+
+  function closeCreate() {
+    setShowCreate(false);
+    setTemplateId(null);
+    setNewTrip({ name: '', destination: '', startDate: '', endDate: '', budget: '', currency: 'INR' });
+  }
+
   async function handleCreate() {
     if (!newTrip.name.trim() || !newTrip.destination.trim()) return;
     setCreating(true);
     const startDate = newTrip.startDate || '2026-06-01';
     const endDate = newTrip.endDate || '2026-06-10';
     const destination = newTrip.destination.trim();
+    const template = templateId ? TRIP_TEMPLATES.find(t => t.id === templateId) : null;
+    const itinerary = template
+      ? buildTemplateItinerary(template, startDate)
+      : buildEmptyItinerary(startDate, endDate, destination);
     await addTrip({
       name: newTrip.name.trim(),
       destination,
@@ -632,10 +698,11 @@ export default function Dashboard() {
       members: [{ ...currentUser, role: 'organizer' }],
       budget: { total: newTrip.budget ? parseFloat(newTrip.budget) : 0, spent: 0, currency: newTrip.currency || 'INR' },
       polls: [],
-      itinerary: buildEmptyItinerary(startDate, endDate, destination),
+      itinerary,
       expenses: [], routes: [], activity: [], contingencies: [], messages: [], paidSettlements: [],
     });
     setCreating(false);
+    setTemplateId(null);
     setNewTrip({ name: '', destination: '', startDate: '', endDate: '', budget: '', currency: 'INR' });
     setShowCreate(false);
   }
@@ -899,10 +966,10 @@ export default function Dashboard() {
       {showCreate && (
         <Modal
           title="Create a New Trip"
-          onClose={() => setShowCreate(false)}
+          onClose={closeCreate}
           footer={
             <>
-              <button className="btn btn-secondary" onClick={() => setShowCreate(false)} disabled={creating}>Cancel</button>
+              <button className="btn btn-secondary" onClick={closeCreate} disabled={creating}>Cancel</button>
               <button
                 className="btn btn-primary"
                 onClick={handleCreate}
@@ -913,6 +980,45 @@ export default function Dashboard() {
             </>
           }
         >
+          {TRIP_TEMPLATES.length > 0 && (
+            <div className="form-group">
+              <label className="form-label" style={{ fontSize: 11, letterSpacing: '0.4px' }}>QUICK START FROM A TEMPLATE</label>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                {TRIP_TEMPLATES.map(t => {
+                  const active = templateId === t.id;
+                  return (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => applyTemplate(t)}
+                      title={`${t.subtitle} · ${t.durationDays} days · ${t.seasonHint}`}
+                      style={{
+                        padding: '8px 12px',
+                        borderRadius: 10,
+                        border: active ? '1.5px solid var(--brand)' : '1px solid var(--border-light)',
+                        background: active ? 'rgba(37, 99, 235, 0.08)' : 'var(--bg-secondary)',
+                        fontSize: 12,
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        lineHeight: 1.3,
+                      }}
+                    >
+                      <div style={{ color: 'var(--text-primary)' }}>{t.name}</div>
+                      <div style={{ color: 'var(--text-tertiary)', fontWeight: 500, fontSize: 11, marginTop: 2 }}>
+                        {t.subtitle} · {t.durationDays}d
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+              {templateId && (
+                <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 6 }}>
+                  Template applied — itinerary days, dates and destination pre-filled. Edit anything below or after creating.
+                </div>
+              )}
+            </div>
+          )}
           <div className="form-group">
             <label className="form-label">Trip Name *</label>
             <input className="form-input" placeholder="e.g. Japan Adventure" value={newTrip.name}
@@ -922,27 +1028,38 @@ export default function Dashboard() {
             <label className="form-label">Destination *</label>
             <DestinationPicker
               value={newTrip.destination}
-              onChange={val => setNewTrip(p => ({
-                ...p,
-                destination: val,
-                // Auto-pick currency from destination so Indian places land
-                // on INR and overseas places on USD without the user having
-                // to remember to change the dropdown. They can still
-                // override afterwards.
-                currency: getDestinationCurrency(val),
-              }))}
+              onChange={val => {
+                setNewTrip(p => ({
+                  ...p,
+                  destination: val,
+                  // Auto-pick currency from destination so Indian places land
+                  // on INR and overseas places on USD without the user having
+                  // to remember to change the dropdown. They can still
+                  // override afterwards.
+                  currency: getDestinationCurrency(val),
+                }));
+                // If the user replaces the template's destination, the
+                // template no longer matches what they're building — drop
+                // the template binding so handleCreate falls back to
+                // empty-itinerary stubs for the new destination.
+                if (templateId) {
+                  const tpl = TRIP_TEMPLATES.find(x => x.id === templateId);
+                  if (tpl && tpl.destination !== val) setTemplateId(null);
+                }
+              }}
             />
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div className="form-group">
               <label className="form-label">Start Date</label>
               <input className="form-input" type="date" value={newTrip.startDate}
-                onChange={e => setNewTrip(p => ({ ...p, startDate: e.target.value }))} />
+                onChange={e => handleStartDateChange(e.target.value)} />
             </div>
             <div className="form-group">
-              <label className="form-label">End Date</label>
+              <label className="form-label">End Date{templateId ? ' (auto from template)' : ''}</label>
               <input className="form-input" type="date" value={newTrip.endDate}
                 min={newTrip.startDate}
+                disabled={!!templateId}
                 onChange={e => setNewTrip(p => ({ ...p, endDate: e.target.value }))} />
             </div>
           </div>
