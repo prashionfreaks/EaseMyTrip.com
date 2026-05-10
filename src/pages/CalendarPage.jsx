@@ -7,6 +7,7 @@ import {
   eachDayOfInterval, isSameMonth, isToday, isWithinInterval,
   getDay, addDays, subDays, differenceInDays, isAfter, isSameDay,
 } from '../lib/date';
+import { toast } from '../lib/toast';
 
 const COUNTRIES = [
   { code: 'IN', name: 'India', flag: '🇮🇳' },
@@ -231,18 +232,37 @@ export default function CalendarPage() {
     : null;
 
   function handleDayClick(date) {
-    if (!activeTrip) return;
+    if (!activeTrip) {
+      toast.info('Select a trip first to update its dates');
+      return;
+    }
     if (!selectStart) {
       setSelectStart(date);
+      toast.info(`Start: ${format(date, 'MMM d')} — click another day to set the end date`);
     } else {
       const start = isAfter(date, selectStart) ? selectStart : date;
       const end   = isAfter(date, selectStart) ? date : selectStart;
-      updateTrip(activeTrip.id, {
-        startDate: format(start, 'yyyy-MM-dd'),
-        endDate:   format(end,   'yyyy-MM-dd'),
+      const startStr = format(start, 'yyyy-MM-dd');
+      const endStr   = format(end,   'yyyy-MM-dd');
+      const numDays  = differenceInDays(end, start) + 1;
+      updateTrip(activeTrip.id, trip => {
+        // Reconcile itinerary days against the new range. Keep any existing
+        // day whose date stays in range (preserves items / location / theme);
+        // drop days that fell outside; insert empty stubs for newly-covered
+        // dates. Match by date string so day-card items survive a shift.
+        const existing = new Map((trip.itinerary || []).map(d => [d.date, d]));
+        const baseId = Date.now();
+        const itinerary = Array.from({ length: numDays }, (_, i) => {
+          const dateStr = format(addDays(start, i), 'yyyy-MM-dd');
+          const prev = existing.get(dateStr);
+          if (prev) return prev;
+          return { id: 'day' + (baseId + i), date: dateStr, location: trip.destination || '', items: [] };
+        });
+        return { ...trip, startDate: startStr, endDate: endStr, itinerary };
       });
       setSelectStart(null);
       setHoverDate(null);
+      toast.success(`Trip dates updated: ${format(start, 'MMM d')} – ${format(end, 'MMM d, yyyy')} (${numDays} day${numDays === 1 ? '' : 's'})`);
     }
   }
 
