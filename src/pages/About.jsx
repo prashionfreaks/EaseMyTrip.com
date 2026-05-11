@@ -180,13 +180,39 @@ export default function About() {
         /* Hero */
         .about-hero-blob-a { animation: blobDrift 9s ease-in-out infinite; }
         .about-hero-blob-b { animation: blobDrift2 12s ease-in-out infinite; }
+        .about-hero {
+          /* Respect notch/punch-hole in landscape PWA. The hero sits outside
+             .page-body so it doesn't inherit page-body's safe-area padding. */
+          padding-left: max(28px, env(safe-area-inset-left));
+          padding-right: max(28px, env(safe-area-inset-right));
+        }
         .about-hero-title {
+          /* !important so the global mobile h1 rule in index.css (which
+             forces all h1 to 20px on max-width:768px) doesn't shrink the
+             hero to 20px on PWA. */
+          font-size: 32px !important;
           background: linear-gradient(90deg, #ffffff 0%, #e0f2fe 40%, #bae6fd 50%, #e0f2fe 60%, #ffffff 100%);
           background-size: 200% 100%;
           -webkit-background-clip: text;
           background-clip: text;
           -webkit-text-fill-color: transparent;
           animation: heroShine 8s linear infinite;
+        }
+        @media (max-width: 768px) {
+          .about-hero {
+            padding-top: 22px !important;
+            padding-bottom: 20px !important;
+            padding-left: max(18px, env(safe-area-inset-left)) !important;
+            padding-right: max(18px, env(safe-area-inset-right)) !important;
+            margin-bottom: 16px !important;
+            border-radius: 12px !important;
+          }
+          .about-hero-title { font-size: 24px !important; line-height: 1.2 !important; }
+          .about-hero-tagline { font-size: 14px !important; margin-bottom: 14px !important; }
+          .about-fact-grid {
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)) !important;
+            gap: 6px !important;
+          }
         }
 
         /* Famous-for pills */
@@ -303,9 +329,10 @@ export default function About() {
       `}</style>
 
       {/* Hero banner */}
-      <div className="about-section" style={{
+      <div className="about-section about-hero" style={{
         background: 'linear-gradient(135deg, #2a1a0d 0%, #4a1e23 55%, #0f766e 100%)',
-        borderRadius: 16, margin: '0 0 20px', padding: '32px 28px 28px',
+        borderRadius: 16, margin: '0 0 20px',
+        paddingTop: 32, paddingBottom: 28,
         position: 'relative', overflow: 'hidden',
       }}>
         <div className="about-hero-blob-a" style={{ position: 'absolute', top: -40, right: -40, width: 200, height: 200, borderRadius: '50%', background: 'rgba(184, 134, 11, 0.18)', pointerEvents: 'none' }} />
@@ -318,10 +345,10 @@ export default function About() {
               Destination Guide
             </span>
           </div>
-          <h1 className="about-hero-title" style={{ fontSize: 32, fontWeight: 900, letterSpacing: '-0.5px', marginBottom: 8, lineHeight: 1.15 }}>
+          <h1 className="about-hero-title" style={{ fontWeight: 900, letterSpacing: '-0.5px', marginBottom: 8, lineHeight: 1.15 }}>
             {activeTrip.destination}
           </h1>
-          <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.72)', fontStyle: 'italic', marginBottom: 20 }}>
+          <p className="about-hero-tagline" style={{ fontSize: 16, color: 'rgba(255,255,255,0.72)', fontStyle: 'italic', marginBottom: 20 }}>
             {info.tagline}
           </p>
 
@@ -351,7 +378,7 @@ export default function About() {
             <span style={{ fontSize: 12, fontWeight: 700, color: 'white', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Quick Facts</span>
           </div>
           <div className="card-body" style={{ padding: '14px 16px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8 }}>
+            <div className="about-fact-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8 }}>
               {[
                 { icon: Languages, label: 'Language', value: info.quickFacts.language },
                 { icon: DollarSign, label: 'Currency', value: info.quickFacts.currency },
