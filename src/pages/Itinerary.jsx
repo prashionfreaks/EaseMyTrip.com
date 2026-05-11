@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTrips } from '../context/TripContext';
 import Modal from '../components/Modal';
+import StayCard from '../components/StayCard';
 import {
   Plus, Map, MapPin, Plane, Hotel, Camera, UtensilsCrossed,
   ChevronDown, ChevronUp, StickyNote, Sparkles,
@@ -10,6 +11,7 @@ import {
   generateItinerary, generateItinerarySkeleton, generateItineraryDay,
   applyStayToDayItems, hasAIKey, getTripCurrencySymbol, warmupItineraryAI,
 } from '../lib/itinerary';
+import { matchDestinationInfo } from '../data/destinationInfo';
 
 const typeConfig = {
   transport:     { icon: Plane,           color: 'var(--brand)',  label: 'Transport',     badge: 'badge-blue' },
@@ -19,7 +21,7 @@ const typeConfig = {
 };
 
 export default function Itinerary() {
-  const { activeTrip, addItineraryItem, updateTrip } = useTrips();
+  const { activeTrip, addItineraryItem, updateTrip, setTripStay } = useTrips();
   const [collapsedDays, setCollapsedDays] = useState(new Set());
   const [showAdd, setShowAdd] = useState(null); // dayId
   const [newItem, setNewItem] = useState({ time: '09:00', title: '', type: 'activity', duration: 60, notes: '', cost: '' });
@@ -217,6 +219,14 @@ if (!activeTrip) {
       </div>
 
       <div className="page-body">
+        <div style={{ marginBottom: 16 }}>
+          <StayCard
+            trip={activeTrip}
+            stays={matchDestinationInfo(activeTrip.destination)?.stays || []}
+            onSave={(stay) => setTripStay(activeTrip.id, stay)}
+          />
+        </div>
+
         {itinerary.length === 0 ? (
           <div className="empty-state">
             <Map className="empty-icon" />
