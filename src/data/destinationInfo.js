@@ -1501,6 +1501,41 @@ export const DESTINATION_INFO = {
       { name: 'SeaShell Port Blair', area: 'Marine Hill, Port Blair', rating: 4.4, reviews: 2200, type: 'City hotel', price: '₹₹', highlight: 'Best base for the first/last night around the flight; harbour views' },
     ],
   },
+
+  'char dham yatra': {
+    tagline: 'The four sacred Himalayan shrines of Uttarakhand — Yamunotri, Gangotri, Kedarnath, Badrinath — opened only six months a year, completed clockwise as Hinduism\'s most demanding pilgrimage.',
+    famousFor: ['Yamunotri', 'Gangotri', 'Kedarnath', 'Badrinath', 'Adi Shankaracharya circuit', 'Helicopter darshan', 'Garhwal Himalayas', 'Doli yatris (palanquin pilgrims)'],
+    attractions: [
+      { name: 'Yamunotri Temple (Janki Chatti base)', desc: 'The first dham — source-shrine of the Yamuna at 3,293m. A 6 km uphill trek from Janki Chatti through pine forest; ponies and palki (palanquins) available. Pilgrims cook rice in cloth pouches in the Surya Kund hot spring as offering. Open Akshaya Tritiya (late April / early May) to Yama Dwitiya (Bhai Dooj, post-Diwali).' },
+      { name: 'Gangotri Temple', desc: 'The second dham at 3,100m on the Bhagirathi — the symbolic source of the Ganga (true source Gaumukh is a 19 km trek further). The 18th-century white granite temple was built by Gorkha General Amar Singh Thapa. Reachable by road right up to the temple — the easiest of the four dhams to access.' },
+      { name: 'Kedarnath Temple', desc: 'The third dham — Shiva shrine at 3,583m, one of the 12 Jyotirlingas. Reached by a 16 km trek from Gaurikund or by helicopter from Phata / Sersi / Guptkashi (10-min flight, ₹3,500–8,000 each way). The 8th-century stone temple, attributed to Adi Shankaracharya, miraculously survived the 2013 Kedarnath floods that destroyed the surrounding town.' },
+      { name: 'Badrinath Temple', desc: 'The fourth and final dham — Vishnu shrine at 3,133m near the Tibetan border. The Tapt Kund hot spring at the temple base is mandatory bathing before darshan. The bell-shaped temple is painted in Kalinga colours; the rawal (chief priest) is traditionally drawn from Kerala\'s Namboodiri community — a tradition set by Adi Shankaracharya himself.' },
+      { name: 'Mana Village (3 km from Badrinath)', desc: 'India\'s last village before the Tibet/China border at 3,219m. Visit Vyas Gufa (where the Mahabharata was dictated to Ganesha), Bhim Pul (a natural rock bridge across the Saraswati), and the famous "India\'s Last Tea Stall" before the international border.' },
+      { name: 'Tungnath & Chopta (en-route detour)', desc: '40 km from Sitapur — the world\'s highest Shiva temple at 3,680m, part of the Panch Kedar circuit. A 4 km moderate trek from Chopta (the "Mini Switzerland of India"); add 1.5 km more to Chandrashila summit for a 360° panorama including Nanda Devi and Trishul.' },
+    ],
+    history: [
+      'The current Char Dham circuit (Yamunotri → Gangotri → Kedarnath → Badrinath, traversed clockwise) was systematised by Adi Shankaracharya in the 8th century CE as part of his Hindu revival; he is credited with re-establishing the Badrinath idol from the Alaknanda river and appointing the first Namboodiri Brahmin rawal.',
+      'Each shrine closes for six months in winter (October/November to April/May) when snow makes the routes impassable; on closing day a symbolic utsav-murti is carried by palanquin to a "winter seat" temple lower down — Mukhba for Gangotri, Ukhimath for Kedarnath, Joshimath for Badrinath, Kharsali for Yamunotri.',
+      'The 16–17 June 2013 Kedarnath flash flood — triggered by the burst of the Chorabari glacial lake above the town — killed an estimated 6,000+ pilgrims and locals; the temple itself survived behind a shielding boulder ("Bheem Shila") that pilgrims now revere. The trek route was re-engineered post-disaster with shelters every few kilometres.',
+      'The "Chota" (Lesser) Char Dham of Uttarakhand is distinct from the "Bada" (Greater) Char Dham of India — Badrinath, Dwarka, Puri, Rameswaram — established by Shankaracharya as cardinal monasteries of the four directions. Badrinath is the only shrine that appears in both circuits.',
+      'Helicopter darshan, formalised in 2003 and now run by ~9 operators under UCADA regulation, made Kedarnath and Badrinath accessible to elderly pilgrims who could not manage the trek; it now carries roughly a third of all Kedarnath pilgrims (1.5–1.9 million per season post-2022).',
+    ],
+    bestTime: { period: 'May–June & September–October', reason: 'Shrines open after Akshaya Tritiya (late April / early May) and close around Diwali. Mid-May to mid-June: clearest mountain views, manageable crowds. July–August: monsoon brings landslides and frequent route closures — avoid. September–October: post-monsoon clarity with golden Himalayan light, but pack heavily for sub-zero nights at Kedarnath and Badrinath.' },
+    quickFacts: { language: 'Hindi, Garhwali, Sanskrit (rituals)', currency: 'Indian Rupee (₹)', capital: 'Dehradun (state); Haridwar / Rishikesh are the standard yatra gateways', knownAs: 'Chota Char Dham / Dev Bhoomi (Land of the Gods)', timezone: 'IST (UTC+5:30)' },
+    cuisine: ['Aloo ke Gutke (Garhwali spiced potatoes)', 'Mandua (ragi) roti with ghee', 'Phaanu (mixed-lentil dal)', 'Kafuli (green leafy curry)', 'Bal Mithai (Almora\'s chocolate-fudge sweet)', 'Singori (mawa-coconut wrapped in malu leaf)', 'Temple bhog (especially Badrinath khichdi prasad)', 'Chai-pakora at every roadside dhaba'],
+    eateries: [
+      { name: 'Chotiwala Restaurant', area: 'Swarg Ashram, Rishikesh', rating: 4.2, reviews: 7840, type: 'Iconic pure-veg North Indian (since 1958)', price: '₹₹', mustTry: 'Chotiwala Special Thali + jalebi-rabri' },
+      { name: 'Aamantran Restaurant', area: 'Upper Road, Haridwar', rating: 4.4, reviews: 3120, type: 'Pure-veg multi-cuisine', price: '₹₹', mustTry: 'Paneer Lababdar + Tandoori Roti' },
+      { name: 'Devi Café', area: 'Main Bazaar, Joshimath', rating: 4.3, reviews: 1280, type: 'Pahari café (Badrinath base)', price: '₹', mustTry: 'Mandua roti with aloo gutke + masala chai' },
+      { name: 'GMVN Yatri Niwas Mess', area: 'Beside Badrinath Temple', rating: 4.0, reviews: 940, type: 'Govt-run pilgrim canteen', price: '₹', mustTry: 'Khichdi prasad + hot puri-aloo at altitude' },
+    ],
+    stays: [
+      { name: 'Aloha on the Ganges', area: 'Tapovan, Rishikesh', rating: 4.5, reviews: 2840, type: 'Riverside heritage hotel (gateway base)', price: '₹₹₹₹', highlight: 'Ganga-facing pool, walk to Lakshman Jhula, ideal for the night before/after the yatra' },
+      { name: 'Haveli Hari Ganga', area: 'Pilibhit House, Haridwar', rating: 4.5, reviews: 2280, type: 'Heritage haveli on the Ganga ghat', price: '₹₹₹', highlight: 'Private bathing ghat, attended Ganga aarti from your balcony, walking distance to Har Ki Pauri' },
+      { name: 'Char Dham Camp Resort', area: 'Sitapur (Kedarnath base)', rating: 4.3, reviews: 540, type: 'Helipad-adjacent tented camp', price: '₹₹', highlight: 'Walking distance to Sitapur helipad for early-morning Kedarnath flights; packed-breakfast service' },
+      { name: 'GMVN Tourist Rest Houses', area: 'All four dham bases', rating: 3.9, reviews: 4200, type: 'Govt-run pilgrim guesthouse network', price: '₹', highlight: 'Cheapest reliable beds at every dham; book via gmvnonline.com 2–3 months ahead — they often sell out before private hotels' },
+    ],
+  },
 };
 
 // Destination key aliases for fuzzy matching
@@ -1558,6 +1593,14 @@ const ALIASES = {
   'poona': 'pune',
   // Jaisalmer surroundings and the Thar.
   'thar': 'jaisalmer', 'thar desert': 'jaisalmer', 'sam dunes': 'jaisalmer', 'sam': 'jaisalmer',
+  // Char Dham Yatra Uttarakhand circuit — exact template string + the four shrines.
+  // (Haridwar/Rishikesh deliberately omitted as gateway aliases; Rishikesh has its own entry.)
+  'char dham yatra (uttarakhand)': 'char dham yatra',
+  'chardham': 'char dham yatra', 'char dham': 'char dham yatra',
+  'chota char dham': 'char dham yatra',
+  'kedarnath': 'char dham yatra', 'badrinath': 'char dham yatra',
+  'gangotri': 'char dham yatra', 'yamunotri': 'char dham yatra',
+  'joshimath': 'char dham yatra', 'gaurikund': 'char dham yatra',
 };
 
 export function matchDestinationInfo(destination) {
