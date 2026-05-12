@@ -51,6 +51,72 @@ function PageFallback() {
   );
 }
 
+// Boot loader. Shown during the auth handshake AND while trips are still
+// being fetched after sign-in. Without the second gate, the dashboard
+// renders for one frame with trips=[] and currentUser=undefined, which
+// briefly mis-aligns the header (greeting + New Trip button reflow when
+// the real data lands).
+function BootLoader({ subtitle = 'Getting your trips ready…' }) {
+  return (
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      background: 'linear-gradient(135deg, #3a1f12 0%, #5a3a26 100%)',
+      flexDirection: 'column', gap: 24,
+      overflow: 'hidden',
+    }}>
+      <div style={{ position: 'relative', width: 90, height: 90 }}>
+        <div style={{
+          position: 'absolute', inset: 0,
+          border: '3px solid rgba(184, 134, 11, 0.15)',
+          borderRadius: '50%',
+          animation: 'loaderPulse 2s ease-in-out infinite',
+        }} />
+        <div style={{
+          position: 'absolute', inset: 8,
+          border: '3px solid transparent',
+          borderTopColor: '#f5d7a8', borderRightColor: '#e9b87a',
+          borderRadius: '50%',
+          animation: 'loaderSpin 1.2s linear infinite',
+        }} />
+        <div style={{
+          position: 'absolute', inset: 20,
+          background: 'linear-gradient(135deg, #722f37, #b8860b)',
+          borderRadius: '50%',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          boxShadow: '0 0 30px rgba(184, 134, 11, 0.45)',
+          animation: 'loaderBounce 2s ease-in-out infinite',
+        }}>
+          <Compass size={24} color="#fdf6e3" style={{ animation: 'loaderCompass 3s ease-in-out infinite' }} />
+        </div>
+      </div>
+
+      <div style={{ textAlign: 'center' }}>
+        <p style={{
+          fontSize: 18, fontWeight: 700, letterSpacing: '-0.3px',
+          background: 'linear-gradient(90deg, #f5d7a8, #fbbf24, #f5d7a8)',
+          backgroundSize: '200% 100%',
+          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+          animation: 'loaderShimmer 2s ease-in-out infinite',
+        }}>
+          LetsWander
+        </p>
+        <p style={{ color: 'rgba(245, 215, 168, 0.7)', fontSize: 13, marginTop: 6 }}>
+          {subtitle}
+        </p>
+      </div>
+
+      <style>{`
+        @keyframes loaderSpin { to { transform: rotate(360deg); } }
+        @keyframes loaderPulse { 0%, 100% { transform: scale(1); opacity: 0.3; } 50% { transform: scale(1.15); opacity: 0.6; } }
+        @keyframes loaderBounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+        @keyframes loaderCompass { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(20deg); } 75% { transform: rotate(-20deg); } }
+        @keyframes loaderShimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+      `}</style>
+    </div>
+  );
+}
+
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [accountSheetOpen, setAccountSheetOpen] = useState(false);
@@ -105,68 +171,18 @@ export default function App() {
   }, [routerNavigate, setActiveTripId]);
 
   if (loading) {
-    return (
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: 'linear-gradient(135deg, #3a1f12 0%, #5a3a26 100%)',
-        flexDirection: 'column', gap: 24,
-        overflow: 'hidden',
-      }}>
-        <div style={{ position: 'relative', width: 90, height: 90 }}>
-          <div style={{
-            position: 'absolute', inset: 0,
-            border: '3px solid rgba(184, 134, 11, 0.15)',
-            borderRadius: '50%',
-            animation: 'loaderPulse 2s ease-in-out infinite',
-          }} />
-          <div style={{
-            position: 'absolute', inset: 8,
-            border: '3px solid transparent',
-            borderTopColor: '#f5d7a8', borderRightColor: '#e9b87a',
-            borderRadius: '50%',
-            animation: 'loaderSpin 1.2s linear infinite',
-          }} />
-          <div style={{
-            position: 'absolute', inset: 20,
-            background: 'linear-gradient(135deg, #722f37, #b8860b)',
-            borderRadius: '50%',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 0 30px rgba(184, 134, 11, 0.45)',
-            animation: 'loaderBounce 2s ease-in-out infinite',
-          }}>
-            <Compass size={24} color="#fdf6e3" style={{ animation: 'loaderCompass 3s ease-in-out infinite' }} />
-          </div>
-        </div>
-
-        <div style={{ textAlign: 'center' }}>
-          <p style={{
-            fontSize: 18, fontWeight: 700, letterSpacing: '-0.3px',
-            background: 'linear-gradient(90deg, #f5d7a8, #fbbf24, #f5d7a8)',
-            backgroundSize: '200% 100%',
-            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-            animation: 'loaderShimmer 2s ease-in-out infinite',
-          }}>
-            LetsWander
-          </p>
-          <p style={{ color: 'rgba(245, 215, 168, 0.7)', fontSize: 13, marginTop: 6 }}>
-            Getting your trips ready...
-          </p>
-        </div>
-
-        <style>{`
-          @keyframes loaderSpin { to { transform: rotate(360deg); } }
-          @keyframes loaderPulse { 0%, 100% { transform: scale(1); opacity: 0.3; } 50% { transform: scale(1.15); opacity: 0.6; } }
-          @keyframes loaderBounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
-          @keyframes loaderCompass { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(20deg); } 75% { transform: rotate(-20deg); } }
-          @keyframes loaderShimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-        `}</style>
-      </div>
-    );
+    return <BootLoader subtitle="Signing you in…" />;
   }
 
   if (!user) {
     return <LandingPage />;
+  }
+
+  // Signed in but the trips fetch hasn't completed yet. This is the gap
+  // right after sign-up where the dashboard would otherwise paint with
+  // empty data and reflow once trips arrive.
+  if (!tripsLoaded) {
+    return <BootLoader subtitle="Packing your trips…" />;
   }
 
   // Bottom nav items — context-aware: show trip tabs when a trip is active
