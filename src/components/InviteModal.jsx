@@ -178,7 +178,10 @@ export default function InviteModal({ onClose }) {
         <span>✈️</span> {activeTrip.name}
       </div>
 
-      {/* Tabs */}
+      {/* Tabs — only organizers see the Invite tab. Non-organizers see a
+          one-tab strip (Members only), so we hide the strip entirely and
+          force the content to 'members'. */}
+      {iAmOrganizer && (
       <div style={{ display: 'flex', background: '#f3f4f6', borderRadius: 10, padding: 4, marginBottom: 20, gap: 4 }}>
         {[
           { id: 'invite', label: 'Invite People', icon: UserPlus },
@@ -202,8 +205,11 @@ export default function InviteModal({ onClose }) {
           </button>
         ))}
       </div>
+      )}
 
-      {tab === 'invite' && (
+      {/* Force the Members view for non-organizers — they cannot invite,
+          so the invite-link UI is hidden entirely. */}
+      {iAmOrganizer && tab === 'invite' && (
         <>
           {/* Invite link — shown first */}
           <div style={{ marginBottom: 24 }}>
@@ -305,23 +311,25 @@ export default function InviteModal({ onClose }) {
         </>
       )}
 
-      {tab === 'members' && (
+      {(tab === 'members' || !iAmOrganizer) && (
         <div>
-          <button
-            onClick={() => setTab('invite')}
-            style={{
-              width: '100%', padding: '10px 14px', marginBottom: 16,
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-              borderRadius: 10, border: '1px dashed #cbd5e1',
-              background: '#f8fafc', color: '#2563eb',
-              fontSize: 13, fontWeight: 600, cursor: 'pointer',
-              transition: 'all 0.15s',
-            }}
-            onMouseOver={e => { e.currentTarget.style.background = '#eff6ff'; e.currentTarget.style.borderColor = '#93c5fd'; }}
-            onMouseOut={e => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.borderColor = '#cbd5e1'; }}
-          >
-            <UserPlus size={14} /> Invite Members
-          </button>
+          {iAmOrganizer && (
+            <button
+              onClick={() => setTab('invite')}
+              style={{
+                width: '100%', padding: '10px 14px', marginBottom: 16,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                borderRadius: 10, border: '1px dashed #cbd5e1',
+                background: '#f8fafc', color: '#2563eb',
+                fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                transition: 'all 0.15s',
+              }}
+              onMouseOver={e => { e.currentTarget.style.background = '#eff6ff'; e.currentTarget.style.borderColor = '#93c5fd'; }}
+              onMouseOut={e => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.borderColor = '#cbd5e1'; }}
+            >
+              <UserPlus size={14} /> Invite Members
+            </button>
+          )}
 
           {organizers.length > 0 && (
             <div style={{ marginBottom: 16 }}>
@@ -346,7 +354,11 @@ export default function InviteModal({ onClose }) {
           ) : (
             <div style={{ textAlign: 'center', padding: '24px', color: '#94a3b8' }}>
               <Users size={32} style={{ margin: '0 auto 8px', opacity: 0.4 }} />
-              <p style={{ fontSize: 13 }}>No other members yet. Use the Invite Members button above to bring your crew in!</p>
+              <p style={{ fontSize: 13 }}>
+                {iAmOrganizer
+                  ? 'No other members yet. Use the Invite Members button above to bring your crew in!'
+                  : 'No other members yet. Ask the trip organizer to invite your crew.'}
+              </p>
             </div>
           )}
         </div>
