@@ -3,6 +3,7 @@ import { useTrips } from '../context/TripContext';
 import { toast } from '../lib/toast';
 import { format, parseISO } from '../lib/date';
 import { isSettlementPaid } from '../lib/settlement';
+import { getTripCurrencySymbol, getTripCurrencyCode, getCurrencySymbol } from '../lib/itinerary';
 import { X, ArrowRight, CheckCircle2, Bell, BellRing, Send, Check, AlertCircle } from 'lucide-react';
 
 /** Greedy settlement algorithm — same logic as Budget.jsx */
@@ -104,8 +105,20 @@ export default function NotificationPanel({ onClose }) {
   }, [trips, currentUser]);
 
   const total = owedByMe.length + owedToMe.length;
-  const totalOwed = owedByMe.reduce((sum, d) => sum + d.amount, 0);
-  const totalDue  = owedToMe.reduce((sum, d) => sum + d.amount, 0);
+
+  // Trips can mix currencies (e.g. an INR Goa trip + a USD SF trip), so the
+  // summary strip totals are bucketed by currency code and rendered as
+  // separate lines instead of one bogus $-prefixed sum.
+  const totalsByCurrency = (dues) => {
+    const buckets = {};
+    dues.forEach(d => {
+      const code = getTripCurrencyCode(d.trip);
+      buckets[code] = (buckets[code] || 0) + d.amount;
+    });
+    return Object.entries(buckets); // [[code, amount], ...]
+  };
+  const owedTotals = totalsByCurrency(owedByMe);
+  const dueTotals  = totalsByCurrency(owedToMe);
 
   function sendReminder(due) {
     const debtor = getMember(due.trip, due.from);
@@ -188,15 +201,11 @@ export default function NotificationPanel({ onClose }) {
           }}>
             <div style={{ padding: '14px 20px', borderRight: '1px solid #f1f5f9' }}>
               <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>You owe</p>
-              <p style={{ fontSize: 22, fontWeight: 800, color: 'var(--maroon)', marginTop: 2 }}>
-                ${totalOwed.toFixed(0)}
-              </p>
+              <CurrencyTotals totals={owedTotals} color="var(--maroon)" />
             </div>
             <div style={{ padding: '14px 20px' }}>
               <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Owed to you</p>
-              <p style={{ fontSize: 22, fontWeight: 800, color: '#16a34a', marginTop: 2 }}>
-                ${totalDue.toFixed(0)}
-              </p>
+              <CurrencyTotals totals={dueTotals} color="#16a34a" />
             </div>
           </div>
         )}
@@ -230,7 +239,7 @@ export default function NotificationPanel({ onClose }) {
                   icon={<BellRing size={14} style={{ color: '#7c3aed' }} />}
                 >
                   {incomingReminders.map(r => {
-                    const cur = r.currency || r.trip.budget?.currency || '';
+                    const sym = getCurrencySymbol(r.currency || getTripCurrencyCode(r.trip));
                     return (
                       <div key={r.id} style={{
                         background: r.seenAt ? '#f8fafc' : '#faf5ff',
@@ -251,7 +260,7 @@ export default function NotificationPanel({ onClose }) {
                             <p style={{ fontSize: 13, color: 'var(--text-primary)', lineHeight: 1.4 }}>
                               <strong>{r.fromName}</strong> reminded you:{' '}
                               <span style={{ color: 'var(--maroon)', fontWeight: 700 }}>
-                                {cur} {Number(r.amount).toFixed(0)}
+                                {sym}{Number(r.amount).toFixed(0)}
                               </span>{' '}
                               due for &ldquo;{r.trip.name}&rdquo;
                             </p>
@@ -285,6 +294,7 @@ export default function NotificationPanel({ onClose }) {
                         name={to?.name || 'Unknown'}
                         tripName={due.trip.name}
                         amount={due.amount}
+                        currencySymbol={getTripCurrencySymbol(due.trip)}
                         amountColor="#dc2626"
                         action={
                           <button
@@ -323,6 +333,7 @@ export default function NotificationPanel({ onClose }) {
                         name={from?.name || 'Unknown'}
                         tripName={due.trip.name}
                         amount={due.amount}
+                        currencySymbol={getTripCurrencySymbol(due.trip)}
                         amountColor="#16a34a"
                         label="Collect from"
                         action={
@@ -408,7 +419,22 @@ function Section({ title, count, accent, bg, icon, children }) {
   );
 }
 
-function DueCard({ avatarColor, avatarLetter, name, tripName, amount, amountColor, label, action }) {
+function CurrencyTotals({ totals, color }) {
+  if (totals.length === 0) {
+    return <p style={{ fontSize: 22, fontWeight: 800, color, marginTop: 2 }}>—</p>;
+  }
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginTop: 2 }}>
+      {totals.map(([code, amount]) => (
+        <p key={code} style={{ fontSize: totals.length > 1 ? 16 : 22, fontWeight: 800, color, lineHeight: 1.1 }}>
+          {getCurrencySymbol(code)}{amount.toFixed(0)}
+        </p>
+      ))}
+    </div>
+  );
+}
+
+function DueCard({ avatarColor, avatarLetter, name, tripName, amount, currencySymbol = '$', amountColor, label, action }) {
   return (
     <div style={{
       background: 'var(--bg-tertiary)',
@@ -429,7 +455,7 @@ function DueCard({ avatarColor, avatarLetter, name, tripName, amount, amountColo
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
             <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{name}</span>
             <ArrowRight size={11} style={{ color: 'var(--text-tertiary)', flexShrink: 0 }} />
-            <span style={{ fontSize: 20, fontWeight: 800, color: amountColor }}>${amount.toFixed(0)}</span>
+            <span style={{ fontSize: 20, fontWeight: 800, color: amountColor }}>{currencySymbol}{amount.toFixed(0)}</span>
           </div>
           <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 1 }}>
             {label} · {tripName}
