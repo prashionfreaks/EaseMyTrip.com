@@ -11,6 +11,8 @@ export default function InviteModal({ onClose }) {
   const [inviteCode, setInviteCode] = useState(null);
   const [inviteLoading, setInviteLoading] = useState(true);
   const [inviteError, setInviteError] = useState(null);
+  // Bump to force the loader effect to re-run on demand (Retry button).
+  const [retryNonce, setRetryNonce] = useState(0);
 
   // Whether the current user is an organizer of THIS trip — required to
   // mint invite codes (RLS) and to change other members' roles. The global
@@ -23,6 +25,11 @@ export default function InviteModal({ onClose }) {
   useEffect(() => {
     if (!activeTrip) return;
     let cancelled = false;
+    // 8 s ceiling so a hung Supabase call (stale auth, transient network,
+    // RLS-induced silent block) can't pin the modal at "Generating" forever.
+    // Mirrors the fetchTrips pattern in TripContext.
+    const ac = new AbortController();
+    const timer = setTimeout(() => ac.abort(), 8000);
 
     async function loadOrCreateInvite() {
       setInviteLoading(true);
@@ -44,7 +51,7 @@ export default function InviteModal({ onClose }) {
       // organizer" state if there is none.
       try {
         const nowIso = new Date().toISOString();
-        const { data: existing } = await supabase
+        const { data: existing, error: selectErr } = await supabase
           .from('trip_invites')
           .select('invite_code, expires_at')
           .eq('trip_id', activeTrip.id)
@@ -52,9 +59,14 @@ export default function InviteModal({ onClose }) {
           .gt('expires_at', nowIso)
           .order('created_at', { ascending: false })
           .limit(1)
+          .abortSignal(ac.signal)
           .maybeSingle();
 
         if (cancelled) return;
+        // Don't silently swallow a SELECT failure and then fall through to
+        // INSERT — that produces a misleading "create" error when the real
+        // issue was reading. Surface the SELECT error directly.
+        if (selectErr) throw selectErr;
 
         if (existing?.invite_code) {
           setInviteCode(existing.invite_code);
@@ -63,6 +75,7 @@ export default function InviteModal({ onClose }) {
             .from('trip_invites')
             .insert({ trip_id: activeTrip.id, invited_by: currentUser?.id })
             .select('invite_code')
+            .abortSignal(ac.signal)
             .single();
           if (error) throw error;
           if (!cancelled) setInviteCode(created.invite_code);
@@ -76,16 +89,28 @@ export default function InviteModal({ onClose }) {
         console.error('[invite] load error:', err);
         if (!cancelled) {
           setInviteCode(null);
-          setInviteError('Could not load the invite link. Please try again.');
+          const aborted = err?.name === 'AbortError' || /aborted/i.test(err?.message || '');
+          setInviteError(
+            aborted
+              ? 'Request timed out. Check your connection and try again.'
+              : err?.message
+                ? `Could not load the invite link: ${err.message}`
+                : 'Could not load the invite link. Please try again.'
+          );
         }
       } finally {
+        clearTimeout(timer);
         if (!cancelled) setInviteLoading(false);
       }
     }
 
     loadOrCreateInvite();
-    return () => { cancelled = true; };
-  }, [activeTrip?.id, iAmOrganizer, currentUser?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+      ac.abort();
+    };
+  }, [activeTrip?.id, iAmOrganizer, currentUser?.id, retryNonce]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!activeTrip) return null;
 
@@ -110,12 +135,26 @@ export default function InviteModal({ onClose }) {
   }
 
   async function handleRemove(memberId) {
+    // Defensive: only organizers can remove. The UI hides the button for
+    // non-organizers, this guards against DOM tinkering / stale React state.
+    if (!iAmOrganizer) return;
     const member = (activeTrip.members || []).find(m => m.id === memberId);
-    if (!window.confirm(`Remove ${member?.name || 'this member'} from the trip?`)) return;
+    if (!member) return;
+    // Block removing an organizer when they're the last one — leaves the
+    // trip with nobody who can mint invites or manage roles.
+    if (member.role === 'organizer') {
+      const organizerCount = (activeTrip.members || []).filter(m => m.role === 'organizer').length;
+      if (organizerCount <= 1) {
+        window.alert('Cannot remove the only organizer. Promote another member first.');
+        return;
+      }
+    }
+    if (!window.confirm(`Remove ${member.name || 'this member'} from the trip?`)) return;
     await removeMember(activeTrip.id, memberId);
   }
 
   function setRole(memberId, role) {
+    if (!iAmOrganizer) return;
     setMemberRole(activeTrip.id, memberId, role);
   }
 
@@ -183,8 +222,19 @@ export default function InviteModal({ onClose }) {
               <div style={{
                 background: '#fef3c7', border: '1.5px solid #fde68a', borderRadius: 10,
                 padding: '12px 14px', fontSize: 12, color: '#92400e',
+                display: 'flex', alignItems: 'center', gap: 10,
               }}>
-                {inviteError}
+                <span style={{ flex: 1 }}>{inviteError}</span>
+                <button
+                  onClick={() => setRetryNonce(n => n + 1)}
+                  style={{
+                    padding: '4px 10px', borderRadius: 6, border: '1px solid #fbbf24',
+                    background: 'white', color: '#92400e',
+                    fontSize: 11, fontWeight: 600, cursor: 'pointer', flexShrink: 0,
+                  }}
+                >
+                  Retry
+                </button>
               </div>
             ) : (
               <div style={{
@@ -257,13 +307,29 @@ export default function InviteModal({ onClose }) {
 
       {tab === 'members' && (
         <div>
+          <button
+            onClick={() => setTab('invite')}
+            style={{
+              width: '100%', padding: '10px 14px', marginBottom: 16,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              borderRadius: 10, border: '1px dashed #cbd5e1',
+              background: '#f8fafc', color: '#2563eb',
+              fontSize: 13, fontWeight: 600, cursor: 'pointer',
+              transition: 'all 0.15s',
+            }}
+            onMouseOver={e => { e.currentTarget.style.background = '#eff6ff'; e.currentTarget.style.borderColor = '#93c5fd'; }}
+            onMouseOut={e => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.borderColor = '#cbd5e1'; }}
+          >
+            <UserPlus size={14} /> Invite Members
+          </button>
+
           {organizers.length > 0 && (
             <div style={{ marginBottom: 16 }}>
               <p style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', letterSpacing: '0.5px', textTransform: 'uppercase', marginBottom: 8 }}>
                 Organizers
               </p>
               {organizers.map(m => (
-                <MemberRow key={m.id} member={m} onSetRole={setRole} onRemove={handleRemove} isOwner={m.id === currentUser?.id} />
+                <MemberRow key={m.id} member={m} onSetRole={setRole} onRemove={handleRemove} isOwner={m.id === currentUser?.id} canManage={iAmOrganizer} />
               ))}
             </div>
           )}
@@ -274,13 +340,13 @@ export default function InviteModal({ onClose }) {
                 Members
               </p>
               {members.map(m => (
-                <MemberRow key={m.id} member={m} onSetRole={setRole} onRemove={handleRemove} isOwner={m.id === currentUser?.id} />
+                <MemberRow key={m.id} member={m} onSetRole={setRole} onRemove={handleRemove} isOwner={m.id === currentUser?.id} canManage={iAmOrganizer} />
               ))}
             </div>
           ) : (
             <div style={{ textAlign: 'center', padding: '24px', color: '#94a3b8' }}>
               <Users size={32} style={{ margin: '0 auto 8px', opacity: 0.4 }} />
-              <p style={{ fontSize: 13 }}>No other members yet. Invite friends using the Invite tab!</p>
+              <p style={{ fontSize: 13 }}>No other members yet. Use the Invite Members button above to bring your crew in!</p>
             </div>
           )}
         </div>
@@ -289,7 +355,7 @@ export default function InviteModal({ onClose }) {
   );
 }
 
-function MemberRow({ member, onSetRole, onRemove, isOwner }) {
+function MemberRow({ member, onSetRole, onRemove, isOwner, canManage }) {
   return (
     <div style={{
       display: 'flex', alignItems: 'center', gap: 12,
@@ -317,7 +383,7 @@ function MemberRow({ member, onSetRole, onRemove, isOwner }) {
           <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 1 }}>{member.email}</div>
         )}
       </div>
-      {!isOwner && (
+      {!isOwner && canManage && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <select
             value={member.role}
