@@ -414,21 +414,34 @@ export default function About() {
                 <Clock size={14} style={{ color: 'rgba(255,255,255,0.9)' }} />
                 <span style={{ fontSize: 12, fontWeight: 700, color: 'white', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Best Time to Visit</span>
               </div>
-              <div className="card-body" style={{ padding: '14px 16px' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 12 }}>
-                  <div style={{
-                    flexShrink: 0, padding: '6px 14px', borderRadius: 10,
-                    background: 'var(--success-light)', border: '1px solid var(--success)',
-                    textAlign: 'center',
-                  }}>
-                    <span style={{ fontSize: 13.5, fontWeight: 800, color: 'var(--success)', whiteSpace: 'nowrap' }}>
-                      {info.bestTime.period}
-                    </span>
-                  </div>
-                  <p style={{ fontSize: 12.5, color: 'var(--text-secondary)', lineHeight: 1.55, flex: 1, margin: 0 }}>
-                    {info.bestTime.reason}
-                  </p>
+              <div className="card-body" style={{ padding: '16px 18px' }}>
+                {/* Hero answer first (Pareto): the period is what the user came
+                    for. Stacked vertically so the chip can be visually
+                    prominent and the reason flows full-width — the previous
+                    side-by-side layout left a wide blank gutter under the
+                    short chip on desktop. */}
+                <div style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 8,
+                  padding: '8px 16px', borderRadius: 999,
+                  background: 'var(--success-light)',
+                  border: '1px solid var(--success)',
+                  marginBottom: 10,
+                }}>
+                  <span style={{
+                    width: 6, height: 6, borderRadius: '50%',
+                    background: 'var(--success)',
+                  }} />
+                  <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--success)', letterSpacing: '0.01em' }}>
+                    {info.bestTime.period}
+                  </span>
                 </div>
+                <p style={{
+                  fontSize: 13, color: 'var(--text-secondary)',
+                  lineHeight: 1.6, margin: '0 0 14px',
+                  maxWidth: '60ch',
+                }}>
+                  {info.bestTime.reason}
+                </p>
 
                 {/* 12-month strip. Best months light up green; the current
                     month gets a subtle ring so the user can place themselves
