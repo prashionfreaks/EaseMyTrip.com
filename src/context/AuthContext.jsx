@@ -101,6 +101,11 @@ export function AuthProvider({ children }) {
 
   async function signOut() {
     setUser(null);
+    // Scroll to top so the LandingPage hero is in view on sign-out
+    // regardless of where the user was on the previous page. All three
+    // sign-out paths (mobile sheet, sidebar, inactivity timeout) funnel
+    // through here, so this is the single point of intervention.
+    if (typeof window !== 'undefined') window.scrollTo(0, 0);
     try {
       if (isSupabaseConfigured) {
         // Default (global) scope revokes the refresh token server-side so the
