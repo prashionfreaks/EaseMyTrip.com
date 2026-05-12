@@ -223,11 +223,25 @@ export function TripProvider({ children }) {
       } catch { /* ignore */ }
     })();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       const user = session?.user ?? null;
       setDbUser(user);
-      if (user) { await fetchTrips(user.id); }
-      else { setTrips([]); setActiveTripId(null); setTripsLoaded(true); localStorage.removeItem(TRIPS_CACHE_KEY); }
+      if (user) {
+        await fetchTrips(user.id);
+      } else if (event === 'SIGNED_OUT') {
+        // Explicit sign-out: wipe state and cache so the next user on this
+        // device doesn't see the previous user's trips flash on sign-in.
+        setTrips([]);
+        setActiveTripId(null);
+        setTripsLoaded(true);
+        localStorage.removeItem(TRIPS_CACHE_KEY);
+      } else {
+        // INITIAL_SESSION with no session (e.g. tab was closed and the
+        // sessionStorage-backed auth was cleared, but localStorage cache
+        // survives). Don't nuke the cache — it's keyed by userId and will
+        // re-paint instantly when the same user signs back in.
+        setTripsLoaded(true);
+      }
       initialLoadDone = true;
     });
 
