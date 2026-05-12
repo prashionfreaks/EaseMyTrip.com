@@ -116,6 +116,10 @@ export default function Itinerary() {
                 isFirstDay: i === 0,
                 isLastDay: i === skeleton.length - 1,
                 currency,
+                // Pass the confirmed stay so the model can skip the
+                // airport-arrival routine on Day 1 — the traveller is
+                // already settled at the hotel.
+                stay: i === 0 ? stay : null,
               },
             );
             if (i === 0 && stay) items = applyStayToDayItems(items, stay);

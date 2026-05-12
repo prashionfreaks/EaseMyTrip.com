@@ -161,7 +161,7 @@ export async function generateItinerarySkeleton(destination, startDate, endDate)
 export async function generateItineraryDay(destination, day, opts = {}) {
   if (!isSupabaseConfigured) throw new Error('AI not configured');
   const { date, location, theme, musts = [] } = day;
-  const { isFirstDay = false, isLastDay = false, currency = 'USD' } = opts;
+  const { isFirstDay = false, isLastDay = false, currency = 'USD', stay = null } = opts;
 
   // Curated eateries flow into every fill — the model picks 1-2 per day.
   // The dynamic-import inside mustEatFor is module-cached, so doing this
@@ -177,6 +177,10 @@ export async function generateItineraryDay(destination, day, opts = {}) {
         // mustSee. The fill prompt treats these as required.
         dayMusts: musts,
         mustEat,
+        // When the user has confirmed where they're staying, the first-day
+        // prompt should start from the hotel rather than scripting an
+        // airport-arrival sequence the traveller doesn't need.
+        stay: stay ? { name: stay.name, area: stay.area } : null,
       },
     }),
     AI_CALL_TIMEOUT_MS,

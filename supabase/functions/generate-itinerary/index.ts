@@ -77,6 +77,13 @@ serve(async (req) => {
   const rawMustEat = Array.isArray(body?.mustEat) ? body.mustEat : [];
   const mustEat = rawMustEat.map(sanitizeName).filter(Boolean).slice(0, 6);
 
+  // Confirmed stay (hotel/homestay) — when present on the first day, we
+  // tell the model to start from the accommodation rather than scripting
+  // an airport-arrival sequence the traveller has already completed.
+  const stayName = sanitizeName(body?.stay?.name);
+  const stayArea = sanitizeName(body?.stay?.area);
+  const stay = stayName ? { name: stayName, area: stayArea } : null;
+
   const dateRe = /^\d{4}-\d{2}-\d{2}$/;
   let prompt = '';
   let maxTokens = 4096;
@@ -105,7 +112,15 @@ serve(async (req) => {
     }
     const safeLoc = location.replace(/[^\p{L}\p{N}\s,.'\-]/gu, '').slice(0, 120);
     const safeTheme = theme.replace(/[^\p{L}\p{N}\s,.'\-]/gu, '').slice(0, 120);
-    const arrivalNote = isFirstDay ? ' This is the FIRST day of the trip — start with arrival/transport and check-in items.' : '';
+    // When the traveller has a confirmed stay, Day 1 starts from the hotel
+    // — skip airport-arrival and hotel-transfer items entirely. Without a
+    // confirmed stay we keep the original behaviour (arrival sequence on
+    // Day 1) so the itinerary still bootstraps for first-time planners.
+    const arrivalNote = isFirstDay
+      ? (stay
+          ? ` This is the FIRST day of the trip and the traveller is already settled at "${stay.name}"${stayArea ? ` in ${stay.area}` : ''}. Start the day's plan from the accommodation — do NOT include airport arrival, train station arrival, or hotel-transfer items. Assume the traveller is ready to begin sightseeing or activities directly.`
+          : ' This is the FIRST day of the trip — start with arrival/transport and check-in items.')
+      : '';
     const departureNote = isLastDay ? ' This is the LAST day of the trip — include a departure/transport item near the end.' : '';
     const guide = guideFor(currency);
     const dayMustsLine = dayMusts.length
