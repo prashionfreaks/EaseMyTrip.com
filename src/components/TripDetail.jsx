@@ -3,7 +3,7 @@ import { useTrips } from '../context/TripContext';
 import {
   MessageCircle, Vote, Wallet, CalendarRange, Map,
   Route, ShieldAlert, MapPin, Calendar,
-  UserPlus, Users, Clock, CheckCircle2, X, Globe, Camera, Trash2,
+  UserPlus, Users, Clock, CheckCircle2, X, Globe, Camera,
   MoreHorizontal,
 } from 'lucide-react';
 
@@ -76,9 +76,8 @@ const MORE_TABS = [
 const TABS = [...PRIMARY_TABS, ...MORE_TABS];
 
 export default function TripDetail({ onInvite, defaultTab = 'chat' }) {
-  const { activeTrip, setActiveTripId, removeTrip, currentUser } = useTrips();
+  const { activeTrip, setActiveTripId, currentUser } = useTrips();
   const [activeTab, setActiveTab] = useState(defaultTab);
-  const [deleting, setDeleting] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const moreRef = useRef(null);
 
@@ -227,11 +226,6 @@ export default function TripDetail({ onInvite, defaultTab = 'chat' }) {
               <button className="btn btn-sm" onClick={onInvite} style={{ background: 'rgba(255,255,255,0.2)', color: 'white', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.3)' }}>
                 <UserPlus size={13} /> Invite
               </button>
-              <button onClick={async () => { if (deleting) return; if (!window.confirm(`Delete "${activeTrip.name}"?`)) return; setDeleting(true); await removeTrip(activeTrip.id); setDeleting(false); }}
-                title="Delete" disabled={deleting}
-                style={{ width: 30, height: 30, borderRadius: 8, border: 'none', background: 'rgba(220,38,38,0.3)', backdropFilter: 'blur(8px)', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {deleting ? <div className="spinner spinner-sm" /> : <Trash2 size={14} />}
-              </button>
               <button onClick={() => setActiveTripId(null)} title="Close"
                 style={{ width: 30, height: 30, borderRadius: 8, border: 'none', background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(8px)', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <X size={15} />
@@ -272,14 +266,6 @@ export default function TripDetail({ onInvite, defaultTab = 'chat' }) {
           <button className="btn btn-sm" onClick={onInvite}
             style={{ background: 'rgba(184,134,11,0.28)', color: '#f5d7a8', border: '1px solid rgba(184,134,11,0.4)', flexShrink: 0, padding: '5px 10px' }}>
             <UserPlus size={13} />
-          </button>
-          {/* Delete trip */}
-          <button
-            onClick={async () => { if (deleting) return; if (!window.confirm(`Delete "${activeTrip.name}"?`)) return; setDeleting(true); await removeTrip(activeTrip.id); setDeleting(false); }}
-            disabled={deleting}
-            title="Delete trip"
-            style={{ width: 32, height: 32, borderRadius: 8, border: '1px solid rgba(248,113,113,0.3)', background: 'rgba(248,113,113,0.18)', color: '#fca5a5', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, cursor: deleting ? 'wait' : 'pointer' }}>
-            {deleting ? <div className="spinner spinner-sm" /> : <Trash2 size={14} />}
           </button>
         </div>
 
