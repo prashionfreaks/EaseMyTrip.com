@@ -3,6 +3,7 @@ import { Routes, Route, useLocation, useNavigate, Navigate } from 'react-router-
 import { useTrips } from './context/TripContext';
 import { useAuth } from './context/AuthContext';
 import Sidebar from './components/Sidebar';
+import ErrorBoundary from './components/ErrorBoundary';
 import Dashboard from './pages/Dashboard';
 import LandingPage from './pages/LandingPage';
 import {
@@ -232,22 +233,24 @@ export default function App() {
       />
 
       <main className="main-content">
-        <Suspense fallback={<PageFallback />}>
-          <Routes>
-            <Route path="/"            element={<Dashboard />} />
-            <Route path="/decisions"   element={<PlanAndPolls />} />
-            <Route path="/budget"      element={<Budget />} />
-            <Route path="/itinerary"   element={<Itinerary />} />
-            <Route path="/routes"      element={<RoutesPage />} />
-            <Route path="/contingency" element={<Contingency />} />
-            <Route path="/calendar"    element={<CalendarPage />} />
-            <Route path="/chat"        element={<ChatPage />} />
-            <Route path="/photos"      element={<Photos />} />
-            <Route path="/about"       element={<About />} />
-            <Route path="/members"     element={<Members />} />
-            <Route path="*"            element={<Navigate to="/" replace />} />
-          </Routes>
-        </Suspense>
+        <ErrorBoundary key={location.pathname}>
+          <Suspense fallback={<PageFallback />}>
+            <Routes>
+              <Route path="/"            element={<Dashboard />} />
+              <Route path="/decisions"   element={<PlanAndPolls />} />
+              <Route path="/budget"      element={<Budget />} />
+              <Route path="/itinerary"   element={<Itinerary />} />
+              <Route path="/routes"      element={<RoutesPage />} />
+              <Route path="/contingency" element={<Contingency />} />
+              <Route path="/calendar"    element={<CalendarPage />} />
+              <Route path="/chat"        element={<ChatPage />} />
+              <Route path="/photos"      element={<Photos />} />
+              <Route path="/about"       element={<About />} />
+              <Route path="/members"     element={<Members />} />
+              <Route path="*"            element={<Navigate to="/" replace />} />
+            </Routes>
+          </Suspense>
+        </ErrorBoundary>
       </main>
 
       {/* Mobile bottom navigation */}
