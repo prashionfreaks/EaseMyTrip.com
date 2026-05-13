@@ -20,14 +20,6 @@ const typeConfig = {
   food:          { icon: UtensilsCrossed, color: 'var(--orange)', label: 'Food',          badge: 'badge-orange' },
 };
 
-// Cooldown after a successful Suggest Itinerary. Keyed per trip so generating
-// Trip A doesn't lock Trip B, and persisted to localStorage so a tab reload
-// can't sidestep it. Five minutes is short enough to feel like a guardrail
-// rather than punishment, long enough to discourage button-mashing the
-// Anthropic call.
-const SUGGEST_COOLDOWN_MS = 5 * 60 * 1000;
-const suggestCooldownKey = (tripId) => `suggest-cooldown:${tripId}`;
-
 export default function Itinerary() {
   const { activeTrip, addItineraryItem, updateTrip, setTripStay } = useTrips();
   const [collapsedDays, setCollapsedDays] = useState(new Set());
@@ -36,46 +28,15 @@ export default function Itinerary() {
   const [generating, setGenerating] = useState(false);
   const [genError, setGenError] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [cooldownUntil, setCooldownUntil] = useState(0);
-  const [nowTs, setNowTs] = useState(() => Date.now());
 
   // Pre-thaw the Edge Function isolate when the user opens Itinerary so the
   // first real generation call doesn't pay the cold-start tax.
   useEffect(() => { warmupItineraryAI(); }, []);
 
-  // Hydrate the cooldown from localStorage whenever the active trip changes.
-  // A stale value (already past expiry) collapses to 0 so the button is live.
-  useEffect(() => {
-    if (!activeTrip?.id) { setCooldownUntil(0); return; }
-    try {
-      const stored = Number(localStorage.getItem(suggestCooldownKey(activeTrip.id))) || 0;
-      setCooldownUntil(stored > Date.now() ? stored : 0);
-    } catch { setCooldownUntil(0); }
-  }, [activeTrip?.id]);
-
-  // Tick once a second while cooling so the countdown label refreshes; stop
-  // the interval the moment we hit zero (and scrub the localStorage entry).
-  useEffect(() => {
-    if (cooldownUntil <= Date.now()) return;
-    const t = setInterval(() => {
-      const n = Date.now();
-      setNowTs(n);
-      if (n >= cooldownUntil) {
-        try { localStorage.removeItem(suggestCooldownKey(activeTrip?.id)); } catch { /* ignore */ }
-        setCooldownUntil(0);
-      }
-    }, 1000);
-    return () => clearInterval(t);
-  }, [cooldownUntil, activeTrip?.id]);
-
-  const cooldownRemainingMs = Math.max(0, cooldownUntil - nowTs);
-  const onCooldown = cooldownRemainingMs > 0;
-
   async function runGenerate() {
     setShowConfirm(false);
     setGenerating(true);
     setGenError(null);
-    let succeeded = false;
     try {
       // Without an AI key we have nothing to wait on — fall back to the
       // single-shot built-in generator and update once.
@@ -90,7 +51,6 @@ export default function Itinerary() {
           ...t, itinerary: days, budget: { ...t.budget, currency },
         }));
         setCollapsedDays(new Set());
-        succeeded = true;
         return;
       }
 
@@ -119,7 +79,6 @@ export default function Itinerary() {
           ...t, itinerary: days, budget: { ...t.budget, currency: legacyCurrency },
         }));
         setCollapsedDays(new Set());
-        succeeded = true;
         return;
       }
 
@@ -183,32 +142,19 @@ export default function Itinerary() {
       }
 
       await Promise.all(Array.from({ length: concurrency }, () => worker()));
-      succeeded = true;
     } catch (err) {
       setGenError(err.message || 'Failed to generate itinerary');
     } finally {
       setGenerating(false);
-      if (succeeded && activeTrip?.id) {
-        const until = Date.now() + SUGGEST_COOLDOWN_MS;
-        setCooldownUntil(until);
-        try { localStorage.setItem(suggestCooldownKey(activeTrip.id), String(until)); } catch { /* ignore quota */ }
-      }
     }
   }
 
   function handleSuggest() {
-    if (onCooldown) return;
     if (activeTrip.itinerary?.length > 0) {
       setShowConfirm(true);
     } else {
       runGenerate();
     }
-  }
-
-  // m:ss formatter for the button countdown label.
-  function formatCooldown(ms) {
-    const s = Math.ceil(ms / 1000);
-    return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
   }
 if (!activeTrip) {
     return (
@@ -267,15 +213,12 @@ if (!activeTrip) {
         <button
           className="btn btn-primary btn-sm"
           onClick={handleSuggest}
-          disabled={generating || onCooldown}
-          title={onCooldown ? `Available again in ${formatCooldown(cooldownRemainingMs)}` : undefined}
+          disabled={generating}
           style={{ display: 'flex', alignItems: 'center', gap: 6 }}
         >
           {generating
             ? <><Plane size={14} style={{ animation: 'planeFly 1.2s ease-in-out infinite' }} /> Planning your trip…</>
-            : onCooldown
-              ? <><Sparkles size={14} /> Available in {formatCooldown(cooldownRemainingMs)}</>
-              : <><Sparkles size={14} /> Suggest Itinerary</>}
+            : <><Sparkles size={14} /> Suggest Itinerary</>}
         </button>
       </div>
 
