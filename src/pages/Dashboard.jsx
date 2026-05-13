@@ -604,20 +604,6 @@ export default function Dashboard() {
   const [deleting, setDeleting] = useState(null);
   const dueCount = useMemo(() => countOutstandingDues(trips, currentUser?.id), [trips, currentUser?.id]);
 
-  // Travel-crew metrics for the slambook hero card.
-  const crewStats = useMemo(() => {
-    const ids = new Set();
-    const samples = [];
-    trips.forEach(t => (t.members || []).forEach(m => {
-      if (!m?.id || m.id === currentUser?.id) return;
-      if (!ids.has(m.id)) {
-        ids.add(m.id);
-        if (samples.length < 6) samples.push(m);
-      }
-    }));
-    return { count: ids.size, sample: samples };
-  }, [trips, currentUser?.id]);
-
   // Build a per-day itinerary from a template by stamping each template day
   // (location + theme) onto consecutive dates starting at startDate. Mirrors
   // the shape of buildEmptyItinerary so downstream code (Itinerary page,

@@ -9,7 +9,7 @@ import { findTemplate } from '../data/tripTemplates';
 
 const INDIAN_ROUTES = {
   'goa|mumbai':             { dist: 600,  flight: [75, 4200, 'IndiGo / Air India · 1h 15m'], train: [480, 650, 'Konkan Kanya Express · 8h'], bus: [600, 400, 'Paulo Travels AC Sleeper · 10h'], car: [540, 2200, 'NH66 coastal highway · ~9h'] },
-  'delhi|mumbai':           { dist: 1400, flight: [120, 5500, 'IndiGo / Vistara · 2h'], train: [960, 1400, 'Rajdhani Express · 16h'], bus: [1440, 900, 'Volvo AC · 24h'], car: [1320, 5000, 'NH48 · ~22h'] },
+  // (delhi|mumbai lives in the Delhi corridor block below with refined numbers)
   'delhi|goa':              { dist: 1900, flight: [150, 6000, 'IndiGo / Air India · 2h 30m'], train: [1920, 1200, 'Goa Express · 32h'], bus: [2100, 1000, 'Private AC Sleeper · 35h'], car: [1980, 6500, 'NH48 + NH66 · ~33h'] },
   'bangalore|goa':          { dist: 560,  flight: [65, 4500, 'IndiGo / SpiceJet · 1h 5m'], train: [720, 500, 'Poorna Express · 12h'], bus: [660, 600, 'KSRTC / Paulo Travels · 11h'], car: [600, 2800, 'NH748 · ~10h'] },
   'goa|hyderabad':          { dist: 670,  flight: [80, 4800, 'Air India / IndiGo · 1h 20m'], train: [1020, 700, 'Amaravati Express · 17h'], bus: [960, 650, 'Orange Travels AC · 16h'], car: [900, 3200, 'NH65 + NH748 · 15h'] },
@@ -949,7 +949,6 @@ export default function Routes() {
                               opt={opt}
                               isCheapest={cheapest?.mode === opt.mode}
                               isFastest={fastest?.mode === opt.mode}
-                              hasReturn={hasReturn}
                               sym={sym}
                               fromCity={route.from}
                               toCity={route.to}
@@ -1024,7 +1023,6 @@ export default function Routes() {
                                 opt={opt}
                                 isCheapest={retCheapest?.mode === opt.mode}
                                 isFastest={retFastest?.mode === opt.mode}
-                                hasReturn
                                 sym={sym}
                                 fromCity={route.to}
                                 toCity={route.returnTo}
@@ -1132,7 +1130,7 @@ export default function Routes() {
 
 
 /* ─── Compact ModeCard ───────────────────────────────────────────────── */
-function ModeCard({ opt, isCheapest, isFastest, hasReturn, sym, fromCity, toCity }) {
+function ModeCard({ opt, isCheapest, isFastest, sym, fromCity, toCity }) {
   const cfg = MODE_CONFIG[opt.mode] || MODE_CONFIG.car;
   const Icon = cfg.icon;
   const isHighlighted = isCheapest || isFastest;
