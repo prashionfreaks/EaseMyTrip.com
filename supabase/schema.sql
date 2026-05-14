@@ -361,6 +361,46 @@ begin
 end;
 $$ language plpgsql security definer set search_path = public, pg_temp;
 
+-- ─── 2026-05-14 DATA API GRANT MIGRATION ───────────────────────────────────
+-- Supabase announced that from May 30 new projects will not expose tables in
+-- the public schema to the Data API by default, and all existing projects
+-- get the same treatment from October 30. Without these GRANTs, every
+-- supabase.from('...') call from the client (and any direct hit to /rest/v1
+-- or /graphql/v1) will fail with PGRST106 / 401 / 403.
+--
+-- Run this block once via the Supabase SQL Editor before October 30. RLS
+-- policies above continue to enforce per-row authorization; these GRANTs
+-- only control whether the role can see the table through the Data API at
+-- all. Statements are idempotent — re-running is a no-op.
+--
+-- IMPORTANT: keep `authenticated` and `service_role` aligned with every new
+-- table you add to public from here on. Add a matching `grant select,
+-- insert, update, delete on public.<new_table> to authenticated;` line in
+-- the same migration that creates the table.
+
+grant usage on schema public to authenticated, service_role;
+
+grant select, insert, update, delete on public.profiles      to authenticated;
+grant select, insert, update, delete on public.trips         to authenticated;
+grant select, insert, update, delete on public.trip_members  to authenticated;
+grant select, insert, update, delete on public.trip_invites  to authenticated;
+
+grant all on public.profiles      to service_role;
+grant all on public.trips         to service_role;
+grant all on public.trip_members  to service_role;
+grant all on public.trip_invites  to service_role;
+
+-- accept_invite is called from the client via supabase.rpc(...) by a freshly
+-- signed-in user who is NOT yet a trip member, so authenticated needs
+-- EXECUTE. The function itself is SECURITY DEFINER so it can bypass the
+-- caller's RLS while still validating the invite code internally.
+grant execute on function public.accept_invite(text) to authenticated;
+
+-- Deliberately no grants for `anon` — every table read/write in this app
+-- happens behind sign-in. If you ever add a public read endpoint, add
+-- `grant select on public.<table> to anon` AND pair it with an RLS policy
+-- that returns only the public rows. Granting without RLS = open table.
+
 -- ─── Storage Bucket — corrected upload path convention ──────────────────────
 -- The "Uploader can delete own photos" policy expects the FIRST folder of the
 -- object name to be the uploader's auth.uid()::text. Originally the client
