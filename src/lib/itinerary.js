@@ -100,8 +100,12 @@ function describeData(data) {
   if (typeof data === 'string') return `text: ${data.slice(0, 160)}`;
   try {
     const keys = Object.keys(data).join(', ');
-    const errMsg = typeof data.error === 'string' ? ` — error: ${data.error.slice(0, 120)}` : '';
-    return `keys=[${keys}]${errMsg}`;
+    const errMsg = typeof data.error === 'string' ? ` — error: ${data.error.slice(0, 160)}` : '';
+    // Surface the `message` field too — Supabase platform / Anthropic / WAF
+    // errors all use { message: '...' }, and the value tells us which one.
+    const msg = typeof data.message === 'string' ? ` — message: ${data.message.slice(0, 160)}` : '';
+    const code = typeof data.code === 'string' ? ` — code: ${data.code.slice(0, 60)}` : '';
+    return `keys=[${keys}]${errMsg}${msg}${code}`;
   } catch {
     return 'unreadable body';
   }
