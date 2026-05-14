@@ -68,6 +68,23 @@ function withTimeout(promise, ms, label) {
 // supabase.functions.invoke()'s error object so the console warnings say
 // "HTTP 401 — {error: 'Unauthorized'}" instead of the generic "non-2xx
 // status code". Tolerant of SDK version differences in the error shape.
+// Supabase's platform-level JWT/auth middleware sometimes returns a 200 OK
+// with a body shaped like `{ message: "..." }` (no `error`, no `days`).
+// FunctionsClient.invoke() only treats non-2xx as errors, so these responses
+// slip past `if (error)` and look like malformed AI output to our code.
+// Detect the shape and turn it into a proper error before it confuses the
+// "Invalid response" branch.
+function platformErrorIfAny(data) {
+  if (!data || typeof data !== 'object') return null;
+  // Genuine successful payloads always have one of these
+  if (data.days || data.skeleton || data.items || data.ok) return null;
+  if (typeof data.message === 'string') {
+    const code = typeof data.code === 'string' ? ` (${data.code})` : '';
+    return `Platform error: ${data.message}${code}`;
+  }
+  return null;
+}
+
 async function describeInvokeError(error) {
   if (!error) return 'unknown error';
   let detail = error.message || 'edge function error';
@@ -168,6 +185,8 @@ export async function generateItinerarySkeleton(destination, startDate, endDate)
     'Skeleton generation',
   );
   if (error) throw new Error(await describeInvokeError(error));
+  const platformErr = platformErrorIfAny(data);
+  if (platformErr) throw new Error(platformErr);
   if (!Array.isArray(data?.skeleton)) {
     throw new Error(`Invalid skeleton response: ${describeData(data)}`);
   }
@@ -217,6 +236,8 @@ export async function generateItineraryDay(destination, day, opts = {}) {
     `Day fill (${date})`,
   );
   if (error) throw new Error(await describeInvokeError(error));
+  const platformErr = platformErrorIfAny(data);
+  if (platformErr) throw new Error(platformErr);
   if (!Array.isArray(data?.items)) {
     throw new Error(`Invalid fill response: ${describeData(data)}`);
   }
@@ -302,6 +323,8 @@ async function generateWithClaude(destination, startDate, endDate, numDays, star
     'Full itinerary generation',
   );
   if (error) throw new Error(await describeInvokeError(error));
+  const platformErr = platformErrorIfAny(data);
+  if (platformErr) throw new Error(platformErr);
   if (!Array.isArray(data?.days)) {
     throw new Error(`Invalid response: ${describeData(data)}`);
   }
