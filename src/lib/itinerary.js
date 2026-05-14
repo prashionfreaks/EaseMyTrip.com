@@ -106,15 +106,22 @@ export async function generateItinerary(destination, startDate, endDate, opts = 
   const numDays = Math.max(1, Math.round((parseISO(endDate) - start) / 86400000) + 1);
   const currency = getDestinationCurrency(destination);
   const stay = opts.stay && opts.stay.confirmed ? opts.stay : null;
+  let aiError = null;
   if (isSupabaseConfigured) {
     try {
       const days = await generateWithClaude(destination, startDate, endDate, numDays, start, stay, currency);
       return { days: applyStay(days, stay), currency };
     }
-    catch (err) { console.warn('Itinerary AI failed, using built-in:', err.message); }
+    catch (err) {
+      aiError = err.message;
+      console.warn('Itinerary AI failed, using built-in:', err.message);
+    }
   }
   const built = generateBuiltIn(destination, startDate, numDays, start);
-  return { days: applyStay(built.days, stay), currency: built.currency };
+  // aiError is non-null when AI was configured but failed — caller can
+  // surface this as a non-blocking warning so the user knows why they got a
+  // template instead of a custom AI plan.
+  return { days: applyStay(built.days, stay), currency: built.currency, aiError };
 }
 
 // ─── Staged generation: skeleton + per-day fill ──────────────────

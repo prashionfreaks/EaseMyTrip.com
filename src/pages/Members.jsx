@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTrips } from '../context/TripContext';
 import { Users, Crown, User, Mail, Copy, Check } from 'lucide-react';
+import Checklist from './Checklist';
 
 export default function Members() {
   const { activeTrip, currentUser } = useTrips();
@@ -64,6 +65,14 @@ export default function Members() {
         {members.map(m => (
           <MemberCard key={m.id} member={m} isCurrentUser={m.id === currentUser?.id} />
         ))}
+
+        {/* ── Trip checklist embedded below members ── */}
+        <div style={{ margin: '8px 0 4px' }} className="members-divider">
+          <div className="members-divider-line" />
+          <span className="members-divider-label">Trip Checklist</span>
+          <div className="members-divider-line" />
+        </div>
+        <Checklist embedded />
       </div>
     </>
   );

@@ -27,6 +27,9 @@ export default function Itinerary() {
   const [newItem, setNewItem] = useState({ time: '09:00', title: '', type: 'activity', duration: 60, notes: '', cost: '' });
   const [generating, setGenerating] = useState(false);
   const [genError, setGenError] = useState(null);
+  // Non-blocking amber warning shown when AI is unavailable and we fell
+  // back to a template itinerary — distinct from a hard error.
+  const [genWarning, setGenWarning] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
 
   // Pre-thaw the Edge Function isolate when the user opens Itinerary so the
@@ -37,6 +40,7 @@ export default function Itinerary() {
     setShowConfirm(false);
     setGenerating(true);
     setGenError(null);
+    setGenWarning(null);
     try {
       // Without an AI key we have nothing to wait on — fall back to the
       // single-shot built-in generator and update once.
@@ -63,13 +67,13 @@ export default function Itinerary() {
           activeTrip.startDate,
           activeTrip.endDate,
         ));
-      } catch (err) {
+      } catch (skeletonErr) {
         // Fallback for the deploy gap before the Edge Function ships
         // skeleton/fill modes — fall back to the legacy single-shot path
         // so the user still gets an itinerary, just without progressive
         // rendering.
-        console.warn('Skeleton mode unavailable, using legacy path:', err.message);
-        const { days, currency: legacyCurrency } = await generateItinerary(
+        console.warn('Skeleton mode unavailable, using legacy path:', skeletonErr.message);
+        const { days, currency: legacyCurrency, aiError } = await generateItinerary(
           activeTrip.destination,
           activeTrip.startDate,
           activeTrip.endDate,
@@ -79,6 +83,12 @@ export default function Itinerary() {
           ...t, itinerary: days, budget: { ...t.budget, currency: legacyCurrency },
         }));
         setCollapsedDays(new Set());
+        // Surface why AI failed so the user (and we) can see the actual error.
+        // Use the skeleton error as the primary reason; aiError shows the
+        // legacy-path failure if it also couldn't reach the model.
+        // This is a warning (not a hard error) — the user still gets an itinerary.
+        const reason = aiError || skeletonErr.message;
+        setGenWarning(`AI unavailable — showing a template itinerary instead. (${reason})`);
         return;
       }
 
@@ -223,6 +233,26 @@ if (!activeTrip) {
       </div>
 
       <div className="page-body">
+        {genError && (
+          <div style={{
+            marginBottom: 12, padding: '10px 14px', borderRadius: 'var(--radius-md)',
+            background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)',
+            color: 'var(--danger)', fontSize: 13, display: 'flex', gap: 8, alignItems: 'center',
+          }}>
+            {genError}
+            <button onClick={() => setGenError(null)} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: 'inherit' }}>✕</button>
+          </div>
+        )}
+        {genWarning && (
+          <div style={{
+            marginBottom: 12, padding: '10px 14px', borderRadius: 'var(--radius-md)',
+            background: 'rgba(234,179,8,0.1)', border: '1px solid rgba(234,179,8,0.35)',
+            color: 'var(--warning, #b45309)', fontSize: 13, display: 'flex', gap: 8, alignItems: 'flex-start',
+          }}>
+            <span style={{ flex: 1 }}>{genWarning}</span>
+            <button onClick={() => setGenWarning(null)} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', flexShrink: 0 }}>✕</button>
+          </div>
+        )}
         <div style={{ marginBottom: 16 }}>
           <StayCard
             trip={activeTrip}
@@ -383,17 +413,6 @@ if (!activeTrip) {
           </div>
         )}
       </div>
-
-      {genError && (
-        <div style={{
-          margin: '0 0 12px', padding: '10px 14px', borderRadius: 'var(--radius-md)',
-          background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)',
-          color: 'var(--danger)', fontSize: 13, display: 'flex', gap: 8, alignItems: 'center',
-        }}>
-          {genError}
-          <button onClick={() => setGenError(null)} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: 'inherit' }}>✕</button>
-        </div>
-      )}
 
       {showConfirm && (
         <Modal
