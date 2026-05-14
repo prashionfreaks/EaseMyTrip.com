@@ -90,6 +90,23 @@ async function describeInvokeError(error) {
   return detail;
 }
 
+// When the edge function returns 200 with a body that doesn't match the
+// expected shape (no `days` / `skeleton` / `items` array), include a short
+// snippet of what we got so the user-visible error tells us why. Cover the
+// common shapes: { error: '...' } (edge-function-level error returned as
+// 200 somehow), { ok: true } (warmup leakage), plain text, etc.
+function describeData(data) {
+  if (data == null) return 'empty body';
+  if (typeof data === 'string') return `text: ${data.slice(0, 160)}`;
+  try {
+    const keys = Object.keys(data).join(', ');
+    const errMsg = typeof data.error === 'string' ? ` — error: ${data.error.slice(0, 120)}` : '';
+    return `keys=[${keys}]${errMsg}`;
+  } catch {
+    return 'unreadable body';
+  }
+}
+
 // Cheap no-op invoke to thaw the Edge Function's Deno isolate before the
 // real generation calls. Cuts ~1-2 s off the first user-visible request
 // when the function has been idle. Fire-and-forget; never throws.
@@ -147,7 +164,9 @@ export async function generateItinerarySkeleton(destination, startDate, endDate)
     'Skeleton generation',
   );
   if (error) throw new Error(await describeInvokeError(error));
-  if (!Array.isArray(data?.skeleton)) throw new Error('Invalid skeleton response');
+  if (!Array.isArray(data?.skeleton)) {
+    throw new Error(`Invalid skeleton response: ${describeData(data)}`);
+  }
 
   const skeleton = data.skeleton.map((d, i) => ({
     date: d.date || format(addDays(start, i), 'yyyy-MM-dd'),
@@ -194,7 +213,9 @@ export async function generateItineraryDay(destination, day, opts = {}) {
     `Day fill (${date})`,
   );
   if (error) throw new Error(await describeInvokeError(error));
-  if (!Array.isArray(data?.items)) throw new Error('Invalid fill response');
+  if (!Array.isArray(data?.items)) {
+    throw new Error(`Invalid fill response: ${describeData(data)}`);
+  }
 
   return data.items.map((item, j) => ({
     id: 'it' + (Date.now() + j),
@@ -277,7 +298,9 @@ async function generateWithClaude(destination, startDate, endDate, numDays, star
     'Full itinerary generation',
   );
   if (error) throw new Error(await describeInvokeError(error));
-  if (!Array.isArray(data?.days)) throw new Error('Invalid response');
+  if (!Array.isArray(data?.days)) {
+    throw new Error(`Invalid response: ${describeData(data)}`);
+  }
   return data.days.map((day, i) => ({
     id: 'day' + (Date.now() + i),
     date: day.date || format(addDays(startDateObj, i), 'yyyy-MM-dd'),
