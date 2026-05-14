@@ -4,9 +4,23 @@ import { RefreshCw, AlertTriangle } from 'lucide-react';
 // Stale lazy-chunk after a deploy is the main reason this exists: the user
 // had an old bundle open, Vercel shipped new chunk filenames, and the next
 // route navigation tries to import a path that no longer exists. We detect
-// that case and reload once. The sessionStorage flag prevents an infinite
-// reload loop if a reload doesn't actually fix it (real broken deploy).
-const RELOAD_FLAG = 'tripsync-chunk-reload-attempted';
+// that case and reload once.
+//
+// The guard is a TIMESTAMP, not a boolean. Earlier we cleared a boolean flag
+// in render() on the assumption that a successful render meant the chunk
+// loaded — but render() runs while <Suspense> is still showing the fallback,
+// before the lazy import has even had a chance to fail. The cleared flag
+// then never stopped the next chunk failure from triggering another reload
+// → infinite refresh loop on every page load.
+//
+// Timestamp scheme: on chunk error, only reload if the last reload was more
+// than RELOAD_GUARD_MS ago. After a reload, if the same chunk fails again
+// within 5 s, we know the reload didn't help (genuinely broken deploy) and
+// show the error card instead of looping. The flag self-expires, so the
+// NEXT deploy's chunk failures (minutes/hours later) automatically get a
+// fresh retry budget — no explicit clear needed.
+const RELOAD_FLAG = 'tripsync-chunk-reload-ts';
+const RELOAD_GUARD_MS = 5000;
 
 function isChunkLoadError(err) {
   if (!err) return false;
@@ -30,12 +44,14 @@ export default class ErrorBoundary extends Component {
     console.error('[ErrorBoundary]', error, info?.componentStack);
 
     if (isChunkLoadError(error)) {
-      const already = sessionStorage.getItem(RELOAD_FLAG);
-      if (!already) {
-        sessionStorage.setItem(RELOAD_FLAG, '1');
+      const last = Number(sessionStorage.getItem(RELOAD_FLAG)) || 0;
+      if (Date.now() - last > RELOAD_GUARD_MS) {
+        sessionStorage.setItem(RELOAD_FLAG, String(Date.now()));
         window.location.reload();
         return;
       }
+      // Last reload was too recent — it didn't fix things. Fall through to
+      // render the error card so the user isn't stuck in an infinite loop.
     }
   }
 
@@ -47,9 +63,6 @@ export default class ErrorBoundary extends Component {
   render() {
     const { error } = this.state;
     if (!error) {
-      // Clear the one-shot reload flag on a successful render so future stale
-      // chunks (next deploy) get their own retry.
-      if (sessionStorage.getItem(RELOAD_FLAG)) sessionStorage.removeItem(RELOAD_FLAG);
       return this.props.children;
     }
 

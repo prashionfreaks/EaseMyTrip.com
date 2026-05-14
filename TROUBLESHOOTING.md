@@ -220,7 +220,58 @@ keep it enabled.
 
 ---
 
-## 7. Console noise: "A listener indicated an asynchronous response by returning true, but the message channel closed"
+## 7. Infinite refresh loop on page load / hard refresh
+
+**Symptom**
+- User refreshes the tab (F5, Ctrl+R, or PWA cold-start).
+- App immediately reloads itself, then reloads again, then again — forever.
+- Page never gets past the boot loader.
+
+**Diagnosis path**
+1. Only two `window.location.reload()` callers in the codebase, both in
+   `src/components/ErrorBoundary.jsx`: the chunk-error auto-reload and the
+   user-driven Reload button. The loop must be the first one firing on every
+   load.
+2. The boundary uses a `sessionStorage` flag to prevent loops: set the flag
+   before reloading, refuse to reload if it's already set. So the flag must
+   be getting cleared between iterations.
+3. The original `render()` method cleared the flag whenever `state.error`
+   was null, with the comment "future stale chunks (next deploy) get their
+   own retry."
+4. But `render()` of the boundary runs **before** the lazy children have a
+   chance to fail — the boundary renders `<Suspense>`, Suspense shows the
+   fallback, and only then does the lazy `import()` reject. By that point
+   the flag has already been cleared, so `componentDidCatch` sees a clean
+   slate and triggers another reload.
+
+**Root cause**
+The reload-loop guard was a boolean flag cleared in `render()`. Because the
+ErrorBoundary's own render is always "successful" while its lazy descendants
+are still loading, the flag was cleared on every page load — *before* the
+chunk failure that should have been guarded against could fire. The "only
+reload once" invariant became "reload every time."
+
+**Fix**
+`src/components/ErrorBoundary.jsx` — switch the guard from a boolean to a
+**timestamp**:
+- On chunk error, set the flag to `Date.now()` and reload.
+- On the next chunk error, only reload if the last attempt was more than
+  `RELOAD_GUARD_MS` (5 seconds) ago. Otherwise render the error card.
+- Drop the flag-clearing from `render()` entirely — the timestamp is
+  self-expiring, so a chunk failure minutes later (e.g. on the next deploy)
+  naturally gets its own retry budget.
+
+Commit (this session).
+
+**Prevention**
+When you use sessionStorage as a "did we already try X" flag, never clear it
+from `render()` or anywhere that runs *before* you'd know whether X actually
+worked. Either clear it from an effect that runs after the operation
+succeeds, or use a timestamp + guard interval so it expires on its own.
+
+---
+
+## 8. Console noise: "A listener indicated an asynchronous response by returning true, but the message channel closed"
 
 **Symptom**
 - The exact error string appears in the browser console, sometimes repeatedly.
