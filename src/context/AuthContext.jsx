@@ -38,8 +38,24 @@ export function AuthProvider({ children }) {
       setLoading(false);
     });
 
+    // Don't clear `user` on every event that has session=null. Supabase fires
+    // session=null transiently during TOKEN_REFRESHED races (especially right
+    // after sign-up, where the refresh-token write to the auth DB is still
+    // settling) and on some PWA/BFCache lifecycle events. Bouncing the
+    // signed-in user to LandingPage on those is the bug we kept seeing:
+    // signup → click Plan → app jumps to sign-in screen.
+    //
+    // Only treat SIGNED_OUT and INITIAL_SESSION-with-null as real "the user
+    // is not signed in" signals. For everything else, set user when we have
+    // a session, and otherwise leave the existing user state alone.
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
+      if (session?.user) {
+        setUser(session.user);
+      } else if (event === 'SIGNED_OUT' || event === 'INITIAL_SESSION') {
+        setUser(null);
+      }
+      // Other session-less events (TOKEN_REFRESHED with null, USER_UPDATED
+      // with null during a transient refresh blip, etc.) → keep current user.
       if (event === 'PASSWORD_RECOVERY') setIsRecovery(true);
       if (event === 'USER_UPDATED') setIsRecovery(false);
     });
