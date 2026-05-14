@@ -245,15 +245,38 @@ export function TripProvider({ children }) {
       initialLoadDone = true;
     });
 
-    // Fallback: if onAuthStateChange doesn't fire within 2s, load manually
+    // Fallback: if onAuthStateChange doesn't fire within 2s, kick the load
+    // ourselves. Use getSession() (reads local storage, only hits the network
+    // when the token needs refresh) instead of getUser() (always round-trips
+    // to /auth/v1/user and can hang indefinitely with no abort signal — that
+    // was the path keeping the boot loader on screen forever).
     const fallback = setTimeout(async () => {
       if (initialLoadDone) return;
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) { setDbUser(user); await fetchTrips(user.id); }
-      else setTripsLoaded(true);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const user = session?.user ?? null;
+        if (user) { setDbUser(user); await fetchTrips(user.id); }
+        else setTripsLoaded(true);
+      } catch {
+        setTripsLoaded(true);
+      }
     }, 2000);
 
-    return () => { cancelled = true; subscription.unsubscribe(); clearTimeout(fallback); };
+    // Hard safety net. If everything above fails to set tripsLoaded — Supabase
+    // unreachable, getSession hung, lock contention, anything — force it true
+    // after 10 s so the dashboard renders. Worst case the user sees an empty
+    // dashboard; that's recoverable. Forever-loading is not.
+    const hardTimeout = setTimeout(() => {
+      console.warn('[TripContext] hard timeout — forcing tripsLoaded=true');
+      setTripsLoaded(true);
+    }, 10000);
+
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+      clearTimeout(fallback);
+      clearTimeout(hardTimeout);
+    };
   }, [fetchTrips]);
 
   // Track which trips have pending local changes (not yet synced to DB)

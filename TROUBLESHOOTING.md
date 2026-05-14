@@ -271,7 +271,52 @@ succeeds, or use a timestamp + guard interval so it expires on its own.
 
 ---
 
-## 8. Console noise: "A listener indicated an asynchronous response by returning true, but the message channel closed"
+## 8. Boot loader shows forever, never reaches the dashboard
+
+**Symptom**
+- User refreshes the page (or opens the PWA) and the LetsWander boot loader
+  spins forever. The dashboard never appears. No error, no LandingPage.
+
+**Diagnosis path**
+1. The boot loader in `App.jsx` shows when **either** `loading` (from
+   `AuthContext`) **or** `tripsLoaded` (from `TripContext`) is still false.
+2. `loading` has a 10 s safety timeout in `AuthContext` — that path is fine.
+3. `tripsLoaded` had no global timeout. The chain was:
+   - `onAuthStateChange` fires → calls `fetchTrips` (8 s abortable) → sets
+     `tripsLoaded` in `finally`. Normal happy path.
+   - If `onAuthStateChange` doesn't fire within 2 s, a fallback calls
+     `supabase.auth.getUser()` and awaits it before setting `tripsLoaded`.
+4. `supabase.auth.getUser()` always round-trips to `/auth/v1/user` with no
+   abort signal. On a flaky network or while Supabase is degraded, that call
+   can hang indefinitely. `tripsLoaded` never gets set → boot loader forever.
+
+**Root cause**
+The 2 s fallback path used `getUser()` (network round-trip, no timeout)
+instead of `getSession()` (local-storage read with optional refresh).
+A hung `getUser()` produced an unbounded wait on the boot loader.
+
+**Fix**
+`src/context/TripContext.jsx`:
+- Replaced `getUser()` with `getSession()` in the 2 s fallback so the path
+  doesn't depend on a network round-trip that can't be aborted.
+- Wrapped the fallback in a try/catch that sets `tripsLoaded=true` on error
+  so a thrown session lookup doesn't leave the loader on screen.
+- Added a hard 10 s safety net: regardless of what's happening — Supabase
+  unreachable, locks contended, anything — force `tripsLoaded=true` after
+  10 s so the dashboard renders. Logs a `[TripContext] hard timeout` so the
+  failure is still visible.
+
+Commit (this session).
+
+**Prevention**
+Every "show this UI when a promise resolves" pattern needs a hard cap. Don't
+let the user's tab become un-recoverable because of a network call we can't
+abort. If the cap fires regularly, that's a signal to investigate — but the
+user shouldn't pay the price while we investigate.
+
+---
+
+## 9. Console noise: "A listener indicated an asynchronous response by returning true, but the message channel closed"
 
 **Symptom**
 - The exact error string appears in the browser console, sometimes repeatedly.
