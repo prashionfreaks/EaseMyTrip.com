@@ -16,7 +16,13 @@ const authStorage = typeof window !== 'undefined' ? window.sessionStorage : unde
 export const supabase = isSupabaseConfigured
   ? createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
-        lock: false,
+        // NOTE: do NOT pass `lock: false` here. The default Web Locks
+        // implementation serialises concurrent getSession() calls, which
+        // prevents a race between autoRefreshToken and an in-flight
+        // functions.invoke() call. Without the lock, getSession() can
+        // return null mid-refresh, causing fetchWithAuth to fall back to
+        // the anon key as the Bearer — which Supabase's platform JWT
+        // verification immediately 401s with "Invalid credentials".
         storage: authStorage,
         persistSession: true,
         autoRefreshToken: true,
